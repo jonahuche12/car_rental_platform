@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
         ],
 
         'api' => [
@@ -63,5 +64,11 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'superadmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
+        'school_owner' => \App\Http\Middleware\CheckSchoolOwner::class,
+        'verifyAdminPermissions' => \App\Http\Middleware\VerifyAdminPermissions::class,
+        'verifyAdmin' => \App\Http\Middleware\VerifyAdmin::class,
+        'verifyTeacher' => \App\Http\Middleware\VerifyTeacher::class,
+
     ];
 }

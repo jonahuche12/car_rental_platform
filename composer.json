@@ -8,10 +8,13 @@
         "php": "^7.3|^8.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^6.0",
+        "intervention/image": "^2.7",
         "laravel/framework": "^8.75",
         "laravel/passport": "^10.0",
         "laravel/sanctum": "^2.11",
+        "laravel/socialite": "^5.11",
         "laravel/tinker": "^2.5",
+        "laravel/ui": "^3.4",
         "socialiteproviders/apple": "^5.5",
         "socialiteproviders/facebook": "^4.1",
         "socialiteproviders/google": "^4.1"
