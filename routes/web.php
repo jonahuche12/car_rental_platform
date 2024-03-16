@@ -83,7 +83,9 @@ Route::middleware('auth')->group(function () {
     ->name('payment.activate');
     Route::get('/view_curriculum/{classId}', [HomeController::class, 'viewCurriculum'])->name('view_curriculum');
     Route::get('/student/{studentId}', [HomeController::class, 'showStudent'])->name('student');
+    Route::get('/view_section/{sectionId}', [AdminController::class, 'viewSection'])->name('view_section');
 
+    Route::post('/submit-course',  [HomeController::class, 'submitCourse'])->name('submit.course');
 
 
 });
@@ -176,7 +178,6 @@ Route::group(['middleware' => 'verifyAdminPermissions:create_class'], function (
     Route::post('/section/{id}/edit', [AdminController::class, 'editSection'])->name('section.edit');
     Route::delete('/section/{id}', [AdminController::class, 'deleteSection'])->name('section.delete');
 
-    Route::get('/view_section/{sectionId}', [AdminController::class, 'viewSection'])->name('view_section');
 
     Route::post('/make-student-section/{user}', [AdminController::class,'confirmAndAddStudentToSection'])->name('make.student-section');
 
@@ -201,6 +202,7 @@ Route::group(['middleware' => 'verifyAdminPermissions:create_course'], function 
     Route::post('/update_class_section_course', [AdminController::class, 'updateSectionTeacherCourse'])->name('update.section_teacher_course');
     
     Route::get('/fetch-class-sections/{courseId}', [AdminController::class, 'fetchClassSections']);
+    Route::post('/course/{id}/edit', [AdminController::class, 'editCourse'])->name('course.edit');
 
     
 });
@@ -211,5 +213,13 @@ Route::middleware(['auth', 'verifyTeacher'])->group(function () {
     // routes/web.php
 
     Route::post('/toggle-attendance', [TeacherController::class, 'toggleAttendance'])->name('toggleAttendance');
+    // web.php
+
+    Route::get('/assignment/{courseId}/{classSectionId}/{teacherId}', [TeacherController::class, 'assignmentPage'])->name('assignment');
+    Route::get('/assessment/{courseId}/{classSectionId}/{teacherId}', [TeacherController::class, 'assessmentPage'])->name('assessment');
+    Route::get('/exam/{courseId}/{classSectionId}/{teacherId}', [TeacherController::class, 'examPage'])->name('exam');
+
+    Route::post('/create_assignmment', [TeacherController::class, 'createAssignment'])->name('create_assignmment');
+
 
 });

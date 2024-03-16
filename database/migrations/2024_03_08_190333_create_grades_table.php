@@ -20,6 +20,7 @@ class CreateGradesTable extends Migration
             $table->unsignedBigInteger('assignment_id')->nullable();
             $table->unsignedBigInteger('assessment_id')->nullable();
             $table->unsignedBigInteger('exam_id')->nullable();
+            $table->string('academic_session');
             $table->decimal('score', 5, 2);
             $table->timestamps();
             $table->softDeletes(); // Add this line for soft delete support

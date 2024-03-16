@@ -18,4 +18,13 @@ class Attendance extends Model
         'date',
         'attendance',
     ];
+
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id');
+    }
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    }
 }

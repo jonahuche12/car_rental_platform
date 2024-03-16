@@ -219,6 +219,17 @@ class User extends Authenticatable implements MustVerifyEmail
             ->first();
     }
 
+    public function userClassSection()
+    {
+        return $this->belongsTo(SchoolClassSection::class, 'class_section_id');
+    }
+
+
+    // public function userClassSection()
+    // {
+    //     return $this->belongsTo(SchoolClassSection::class, 'school_class_section_user', 'user_id');
+    // }
+
     public function classSection()
     {
         return $this->belongsToMany(SchoolClassSection::class, 'school_class_section_user', 'user_id', 'class_section_id')
@@ -302,6 +313,19 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Assuming you have a one-to-many relationship with the Attendance model
         return $this->hasMany(Attendance::class);
+    }
+
+    public function student_courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_student', 'user_id', 'course_id')
+            ->withTimestamps();
+    }
+
+    public function teacher_courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_teacher', 'user_id')
+            ->wherePivot('user_id', $this->id) // Filter by the current user's ID
+            ->withTimestamps();
     }
 
 

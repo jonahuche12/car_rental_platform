@@ -47,16 +47,17 @@ class SchoolClass extends Model
         // Return the unique set of teachers based on the user_id
         return new Collection($studentsFromSections->unique('id')->all());
     }
+    
     public function curriculum()
-{
-    // dd($this->class_level);
-    // dd(Curriculum::where('class_level', $this->class_level)->get());
-    // Assuming there are intermediate tables: school_class_sections and curriculum_sections
-    return Curriculum::where('country', $this->school->country)
-        ->where('class_level', $this->class_level)
-        
-        ->get();
-}
+    {
+        // dd($this->class_level);
+        // dd(Curriculum::where('class_level', $this->class_level)->get());
+        // Assuming there are intermediate tables: school_class_sections and curriculum_sections
+        return Curriculum::where('country', $this->school->country)
+            ->where('class_level', $this->class_level)
+            
+            ->get();
+    }
 
 
 

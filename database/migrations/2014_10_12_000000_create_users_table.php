@@ -27,6 +27,9 @@ class CreateUsersTable extends Migration
             $table->boolean('active_package')->default(false);
             $table->datetime('expected_expiration')->nullable();
 
+            // $table->unsignedBigInteger('class_section_id')->nullable();
+            // $table->foreign('class_section_id')->references('id')->on('school_class_sections')->onDelete('set null');
+
            // Inside the users table migration
             // $table->unsignedBigInteger('user_package_id')->nullable();
             // $table->foreign('user_package_id')->references('id')->on('user_packages')->onDelete('set null');

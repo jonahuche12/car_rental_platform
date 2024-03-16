@@ -434,63 +434,40 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <strong class="float-left"><i class="fas fa-book mr-1 -left"></i> Education</strong>
-                @if(auth()->user()->qualifications->count() < 5 )
-                <strong class="float-right"><i id="plusButton" class="fas fa-plus mr-1 -left" onclick="toggleForm()"></i></strong>
+                <strong class="float-left"><i class="fas fa-book mr-1 -left"></i> Courses</strong>
+                @if(auth()->user()->userClassSection)
+                <strong class="float-right"><i id="plusButton" class="fas fa-plus mr-1 -left" onclick="toggleCoursesForm()"></i></strong>
                 @endif
-                  <ul class="list-group list-group-unbordered mt-5 ml-4">
-                    @foreach(auth()->user()->qualifications as $qualification)
-                        <li class="list-group-item">
-                             <b class="text-info">{{ $qualification->certificate . "," . $qualification->starting_year . " to ". $qualification->completion_year }}</b>
-                        </li>
-                    @endforeach
-                  </ul>
+                <ul class="list-group list-group-unbordered mt-5 ml-4">
+                </ul>
+
+                <div class="course-message alert alert-success" style="display:none"></div>
+                <div class="course-error alert alert-danger" style="display:none"></div>
+               
+
+                <div class="container mt-2  courses-form-container" style="display:none; vertical-align: middle;">
+                    <form id="qualificationForm">
+                        <div id="qualificationsContainer">
+                            <h3>Available Courses </h3>
+                            @foreach(auth()->user()->userClassSection->courses as $course)
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="course_{{ $course->id }}" name="courses[]" value="{{ $course->id }}" {{ $course->students->contains(auth()->user()->id) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="course_{{ $course->id }}">{{ $course->name }}</label>
+                                    </div>
+                                </div>
+                            @endforeach
 
 
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="submitCourse()">Submit</button>
+                    </form>
+                </div>
 
-
-                <div class="qualification-message alert alert-success" style="display:none"></div>
-                <div class="qualification-error alert alert-danger" style="display:none"></div>
-                <br>
-
-                <div class="container mt-2  qualification-form-container" style="display:none; vertical-align: middle;">
-
-                  <form id="qualificationForm">
-                      <div id="qualificationsContainer">
-                          <h3>Qualification </h3>
-                          <div class="mb-3">
-                              <div class="form-group">
-                                  <label for="certificate">Certificate:</label>
-                                  <input type="text" class="form-control" name="certificate" id="certificate" required>
-                              </div>
-                              <div class="form-group">
-                                  <label for="school_attended">School Attended:</label>
-                                  <input type="text" class="form-control" name="school_attended" id="school_attended" required>
-                              </div>
-                              <div class="form-group">
-                                  <label for="starting_year">Starting Year:</label>
-                                  <input type="number" class="form-control" name="starting_year" id="starting_year" required>
-                              </div>
-                              <div class="form-group">
-                                  <label for="completion_year">Completion Year:</label>
-                                  <input type="number" class="form-control" name="completion_year" id="completion_year" required>
-                              </div>
-                              
-                          </div>
-                      </div>
-                      
-                      <button type="button" class="btn btn-sm btn-primary" onclick="addQualification()">
-                          <i class="icon ion-md-add"></i> Add More
-                      </button>
-                      <button type="button" class="btn btn-success" onclick="submitQualification()">Submit</button>
-                  </form>
-              </div>
-
-                <span class="mb-3"></span>
 
                 <hr>
 
-                <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
+                <!-- <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
 
                 <p class="text-muted">Malibu, California</p>
 
@@ -506,7 +483,7 @@
                   <span class="tag tag-primary">Node.js</span>
                 </p>
 
-                <hr>
+                <hr> -->
 
                 <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
 
@@ -803,7 +780,35 @@
 
 @section('scripts')
 <script>
+    function toggleCoursesForm() {
+        $('.courses-form-container').toggle();
+    }
+    function submitCourse() {
+    var formData = $('#qualificationForm').serialize();
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+    
+    $.ajax({
+        type: 'POST',
+        url: '/submit-course',
+        data: formData,
+        dataType: 'json',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken
+        },
+        success: function (response) {
+            console.log('Course enrollment successful:', response);
+            // Display success message
+            $('.course-message').text('Course enrollment successful.').show().delay(3000).fadeOut();
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText)
+            console.error(error);
+            // Display error message
+            $('.course-error').text('Failed to enroll in course.').show().delay(3000).fadeOut();
+        }
+    });
+}
 
 </script>
 

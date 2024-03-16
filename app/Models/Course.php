@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
@@ -15,6 +16,7 @@ class Course extends Model
         'general_name',
         'code',
         'school_id',
+        'compulsory',
     ];
 
     /**
@@ -28,6 +30,16 @@ class Course extends Model
     {
         return Curriculum::distinct('subject')->pluck('subject');
     }
+    public function getTeacherForClassSection($classSectionId)
+    {
+        $classSection = $this->class_sections()->wherePivot('class_id', $classSectionId)->first();
+        
+        if ($classSection) {
+            return User::find($classSection->pivot->teacher_id);
+        }
+        
+        return null;
+    }
 
     /**
      * Get the teachers assigned to the course.
@@ -35,8 +47,10 @@ class Course extends Model
     public function teachers()
     {
         return $this->belongsToMany(User::class, 'course_teacher', 'course_id', 'user_id')
+            ->withPivot('class_id')
             ->withTimestamps();
     }
+
 
     /**
      * Get the students enrolled in the course.
@@ -94,4 +108,13 @@ class Course extends Model
     {
         return $this->hasMany(Grade::class, 'course_id');
     }
+
+    public function getClassForTeacher($teacherId)
+    {
+        // Retrieve the class section taught by the teacher for the course
+        return $this->class_sections()
+            ->wherePivot('teacher_id', $teacherId)
+            ->first();
+    }
+
 }

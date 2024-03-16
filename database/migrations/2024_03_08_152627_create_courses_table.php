@@ -20,6 +20,7 @@ class CreateCoursesTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('general_name');
+            $table->boolean('compulsory')->default('false');
             $table->string('code');
             $table->timestamps();
             $table->softDeletes(); // Add this line for soft delete support
@@ -29,6 +30,7 @@ class CreateCoursesTable extends Migration
         Schema::create('course_teacher', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_class_sections')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

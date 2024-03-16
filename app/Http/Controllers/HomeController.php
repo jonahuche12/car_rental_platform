@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SchoolPackage;
 use App\Models\School;
+use App\Models\User;
 use App\Models\SchoolClass;
 use App\Models\UserPackage;
 use App\Models\Qualification;
@@ -119,6 +120,57 @@ class HomeController extends Controller
             return response()->json(['error' => 'Failed to save qualification. Please try again.'], 500);
         }
     }
-    
+    public function showStudent($studentId)
+    {
+        $user = auth()->user();
+
+        // Check if the user is authenticated
+        if (!$user) {
+            
+            return redirect()->route('home')->with('error', 'Unauthorized for this action');
+        }
+
+        // Find the student
+        $student = User::find($studentId);
+        // dd($student->userClassSection->courses);
+
+        // Check if the student exists and is a student
+        if ($student && $student->profile->role == 'student') {
+            // Check if the user is an admin or a form teacher of the same class as the student
+            if ($user->profile->role == 'admin' && $user->school_id == $student->school_id) {
+                return view('school.student_page', compact('student'));
+            } elseif ($user->profile->role == 'teacher') {
+                // dd($student);
+                // Check if the user is a form teacher of any class sections that the student belongs to
+                foreach ($student->userClassSection->formTeachers as $formTeacher) {
+                   if($formTeacher->id == $user->id){
+                        return view('school.student_page', compact('student'));
+                   }
+                }
+            }elseif ($user->profile->role == "student" && $student->id == $user->id) {
+                return view('school.student_page', compact('student'));
+                
+            }
+        }
+
+        // If the user is not authorized or the student doesn't exist, return unauthorized error
+        
+        return redirect()->route('home')->with('error', 'Unauthorized for this action');
+    }
+
+    public function submitCourse(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $user->courses()->sync($request->courses);
+
+            return response()->json(['success' => true], 200);
+        } catch (\Exception $e) {
+            \Log::error($e);
+            return response()->json(['error' => 'Failed to enroll in course.'. $e->getMessage()], 500);
+        }
+    }
+
+
     
 }

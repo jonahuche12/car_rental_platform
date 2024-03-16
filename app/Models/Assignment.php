@@ -23,7 +23,10 @@ class Assignment extends Model
     {
         return $this->belongsTo(Course::class);
     }
-
+    public function classSection()
+    {
+        return $this->belongsTo(SchoolClassSection::class, 'class_section_id');
+    }
     /**
      * Get the grades associated with the assignment.
      */

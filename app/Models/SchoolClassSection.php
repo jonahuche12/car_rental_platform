@@ -21,6 +21,10 @@ class SchoolClassSection extends Model
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class, 'class_section_id');
+    }
 
     public function formTeachers()
     {
@@ -52,6 +56,13 @@ class SchoolClassSection extends Model
             // dd($this->schoolClass->id);
             return $potentialStudents;
     }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_class', 'class_id', 'course_id')
+            ->withTimestamps();
+    }
+
 
 
 }

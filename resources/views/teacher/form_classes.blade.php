@@ -77,7 +77,7 @@
                 <h3 class="card-title">Students</h3>
 
                 <div class="card-tools">
-                    <span class="badge badge-danger">{{ $school->confirmedStudents()->count(). '/'. $school->schoolPackage->max_students . ' Student(s)' }}</span>
+                    <span class="badge badge-danger">{{ $form_classes->count()  }}</span>
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                         <i class="fas fa-minus"></i>
                     </button>
@@ -160,12 +160,13 @@
                                         <!-- Inside the <div class="card-body"> loop -->
                                         <div class="student-attendance">
                                             @if ($student->attendanceForToday())
-                                                <label for="attendance"  class="attendance text-success">Today's Attendance</label>
+                                                <label for="attendance"  class="text-success">Today's Attendance</label>
                                                 <i class="attendance-icon fas fa-check text-success" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}"></i> <!-- Green check icon if attendance is true -->
                                             @else
-                                                <label for="attendance" class="attendance-icon text-secondary">Today's Attendance</label>
+                                                <label for="attendance" class="text-secondary">Today's Attendance</label>
                                                 <i class="attendance-icon fas fa-times text-secondary" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}"></i> <!-- Grey cross icon if attendance is not true -->
                                             @endif
+                                            <br>
                                             <span id="attendance-message-success-{{ $student->id }}" class="text-message text-success"></span> <!-- Placeholder for success message -->
                                             <span id="attendance-message-error-{{ $student->id }}" class="text-message text-danger"></span> <!-- Placeholder for error message -->
                                         </div>

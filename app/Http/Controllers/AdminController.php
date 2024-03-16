@@ -369,12 +369,6 @@ class AdminController extends Controller
             if (!$hasPermission && !$isSchoolOwner) {
                 return response()->json(['error' => 'You do not have permission to confirm this student in the specified class section.'], 403);
             }
-            $maxStudents = $section->schoolClass->school->schoolPackage->max_students;
-            $currentStudentsCount = $section->schoolClass->students()->count();
-
-            if ($currentStudentsCount >= $maxStudents) {
-                return response()->json(['error' => 'The maximum number of students for this school package has been reached.'. $maxStudents], 400);
-            }
     
             // Ensure that the provided user belongs to the specified section
             if ($user->profile->class_id != $section->schoolClass->id) {
@@ -387,9 +381,21 @@ class AdminController extends Controller
             $user->profile->class_confirmed = true;
             $user->profile->student_confirmed = true;
             $user->profile->save();
+
+
+            $user->class_section_id = $sectionId;
+            $user->save();
     
             // Attach the user to the class section in the pivot table
             $section->students()->attach($user->id);
+    
+            // Get compulsory courses for the class section
+            $compulsoryCourses = $section->courses()->where('compulsory', true)->get();
+    
+            // Attach the student to compulsory courses
+            foreach ($compulsoryCourses as $course) {
+                $course->students()->attach($user->id);
+            }
     
             return response()->json(['message' => 'User is now confirmed as a student in the class section']);
         } catch (\Exception $e) {
@@ -397,7 +403,7 @@ class AdminController extends Controller
             return response()->json(['error' => 'Failed to confirm this student in the class section. Please try again.', 'message' => $e->getMessage()], 500);
         }
     }
-
+    
    
     public function showTeachers($schoolId)
     {
@@ -546,6 +552,9 @@ class AdminController extends Controller
                 $student->profile->student_confirmed = false;
                 $student->profile->class_confirmed = false;
                 $student->profile->save();
+
+                $student->class_section_id = null;
+                $student->save();
     
                 // Commit the transaction
                 DB::commit();
@@ -587,7 +596,8 @@ class AdminController extends Controller
             'description' => 'nullable|string',
             'code' => 'required|string',
             'general_name' => 'required|string',
-            'school_id' => 'required|numeric'
+            'school_id' => 'required|numeric',
+            'compulsory' => 'nullable|boolean', // Added validation rule for compulsory field
         ]);
     
         // Retrieve the authenticated user
@@ -599,8 +609,11 @@ class AdminController extends Controller
     
         // Check if the user is the school owner or if the user's school_id matches the one in the request
         if (!$isSchoolOwner && ($user->school_id != $validatedData['school_id'] && !$hasPermission)) {
-            return response()->json(['error' => "You don't have permission for this action $user->school_id ". $validatedData['school_id']. $user->profile->permission_create_course  ], 403);
+            return response()->json(['error' => "You don't have permission for this action"], 403);
         }
+    
+        // Add the compulsory field to the data
+        $validatedData['compulsory'] = $request->has('compulsory') ? $request->input('compulsory') : false;
     
         // Create the course
         $course = Course::create($validatedData);
@@ -610,8 +623,56 @@ class AdminController extends Controller
             'name' => $course->name,
             'created_at' => $course->created_at,
             'description' => $course->description,
+            'compulsory' => $course->compulsory, // Include compulsory in the response
         ], 201);
     }
+    public function editCourse(Request $request, $id)
+    {
+        try {
+            // Define the fields that are expected to be in the request
+            $expectedFields = [
+                'name',
+                'code',
+                'description',
+                'general_name',
+                'compulsory',
+            ];
+    
+            // Filter the request data to include only the expected fields
+            $validatedData = $request->only($expectedFields);
+    
+            // Set compulsory to false if it's not provided or if it's null
+            $validatedData['compulsory'] = $request->has('compulsory') && $request->compulsory ? true : false;
+    
+            // Validate the request data
+            $validator = \Validator::make($validatedData, [
+                'name' => 'required|string',
+                'code' => 'required|string',
+                'description' => 'nullable|string',
+                'general_name' => 'required|string',
+                'compulsory' => 'boolean', // Update validation rule for compulsory to allow boolean values
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
+    
+            // Find the class section by ID
+            $course = Course::findOrFail($id);
+    
+            // Update the class section with the validated data
+            $course->update($validatedData);
+    
+            // Return the updated class section as a JSON response
+            return response()->json($course, 200);
+        } catch (\Exception $e) {
+            \Log::error($e);
+    
+            // Return an error response or handle accordingly
+            return response()->json(['error' => 'Failed to update the Class Section.' . $e->getMessage()], 500);
+        }
+    }
+    
     
     public function deleteCourse($courseId)
     {
@@ -681,12 +742,14 @@ class AdminController extends Controller
             'course_id' => 'required|exists:courses,id',
             'selected_classes.*' => 'sometimes|nullable|exists:school_class_sections,id',
             'teachers.*' => 'sometimes|nullable|exists:users,id',
+            'class_id.*' => 'sometimes|nullable|exists:school_class_sections,id',
         ]);
 
         // Extract the data from the request
         $courseId = $request->input('course_id');
         $selectedClasses = $request->input('selected_classes', []);
         $teachers = $request->input('teachers', []);
+        $classIds = $request->input('class_id', []);
 
         // Find the course
         $course = Course::findOrFail($courseId);
@@ -695,56 +758,68 @@ class AdminController extends Controller
         DB::beginTransaction();
 
         try {
-            // Detach existing teachers for the specified course and class sections
-            $course->class_sections()->detach();
-
-            // Filter out empty and invalid teacher IDs
-            $filteredTeachers = array_filter($teachers, function ($teacherId) {
-                return $teacherId !== '' && is_numeric($teacherId);
-            });
-
-            // Attach the teachers for the specified course and class sections
+            // Prepare data for synchronization
             $teachersData = [];
-            foreach ($selectedClasses as $index => $classSectionId) {
-                if (isset($filteredTeachers[$index])) {
-                    $teachersData[$classSectionId] = ['teacher_id' => $filteredTeachers[$index]];
-                } else {
-                    // If a checked class lacks an associated teacher, rollback the transaction
-                    DB::rollBack();
-                    return response()->json(['error' => 'Please select a valid teacher for the class: ' . SchoolClassSection::findOrFail($classSectionId)->name], 400);
+
+            // Remove teachers, class sections, and students if the corresponding checkbox is deselected
+            foreach ($course->class_sections as $classSection) {
+                if (!in_array($classSection->id, $selectedClasses)) {
+                    // If checkbox is deselected, remove from pivot tables
+                    $course->class_sections()->detach($classSection->id);
+                    $course->teachers()->detach($classSection->pivot->teacher_id);
+
+                    // Remove students of the class
+                    $students = $classSection->students()->pluck('user_id')->toArray();
+                    $course->students()->detach($students);
                 }
             }
 
-            $course->class_sections()->sync($teachersData, false);
 
-            // Sync teachers for the specified course in the course_teacher pivot table
-            $course->teachers()->sync($filteredTeachers, ['created_at' => now(), 'updated_at' => now()]);
+            // Iterate over selected classes
+            foreach ($selectedClasses as $index => $classSectionId) {
+                // Check if the class section exists
+                $classSection = SchoolClassSection::findOrFail($classSectionId);
 
-            // Detach teachers that are not selected
-            $course->teachers()->detach(array_diff($course->teachers->pluck('id')->toArray(), $filteredTeachers));
+                // Check if the teacher is selected
+                if (isset($teachers[$index]) && !empty($teachers[$index])) {
+                    $teachersData[$teachers[$index]] = [
+                        'class_id' => $classIds[$index],
+                        'user_id' => $teachers[$index] // Include user_id
+                    ];
+                }
+                // Sync teachers for the specified course in the course_teacher pivot table
+                $course->teachers()->sync($teachersData);
+
+                // Sync teachers with the class sections in the course_class pivot table
+                foreach ($teachersData as $teacherId => $teacherData) {
+                    $course->class_sections()->syncWithoutDetaching([$classSectionId => ['teacher_id' => $teacherId]]);
+                }
+            }
+
+            
+            if ($course->compulsory) {
+                foreach ($selectedClasses as $classSectionId) {
+                    $section = SchoolClassSection::findOrFail($classSectionId);
+                    $students = $section->students()->pluck('user_id')->toArray();
+                    $course->students()->syncWithoutDetaching($students);
+                }
+            }
 
             // Commit the transaction
             DB::commit();
 
-            return response()->json(['message' => 'Classes have been updated.']);
+            return response()->json(['message' => 'Teachers and class sections have been updated successfully.']);
         } catch (\Exception $e) {
-            // Log the exception
-            \Log::error('Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
-
             // Rollback the transaction on failure
             DB::rollBack();
-
-            return response()->json(['error' => 'Failed to add teachers for the selected class sections. ' . $e->getMessage()], 500);
+            \Log::error('Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
+            return response()->json(['error' => 'Failed to update teachers and class sections. ' . $e->getMessage()], 500);
         }
     } catch (\Exception $e) {
-        // Log the exception
         \Log::error('Validation Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
-
         return response()->json(['error' => 'Validation failed. ' . $e->getMessage()], 400);
     }
 }
 
-    
-        
     
 }

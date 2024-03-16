@@ -106,27 +106,29 @@
                 </div>
             @endif
 
+            @if($admin->teacher_confirmed)
+            
+                <!-- right col -->
+                <div class="col-lg-4 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ $admin->user->formClasses->count() }}</h3>
+                            <b>Form Class(es)</b>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-bag"></i>
+                        </div>
+                        <a class="small-box-footer" href="{{ route('manage-form_classes', ['teacherId' => $admin->id]) }}" class="text-decoration-none">Manage Class(es) <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            
+            @endif
+
         </div>
         @endif
         <!-- /.row -->
-        @if($admin->teacher_confirmed)
-        <div class="row">
-            <!-- right col -->
-            <div class="col-lg-4 col-6">
-                <!-- small box -->
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>{{ $admin->user->formClasses->count() }}</h3>
-                        <b>Form Class(es)</b>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-bag"></i>
-                    </div>
-                    <a class="small-box-footer" href="{{ route('manage-form_classes', ['teacherId' => $admin->id]) }}" class="text-decoration-none">Manage Class(es) <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-        </div>
-        @endif
+        
         <!-- /.row (main row) -->
     </div><!-- /.container-fluid -->
    
