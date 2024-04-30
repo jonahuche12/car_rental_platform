@@ -50,32 +50,51 @@
     }
 
     .details-heading {
-        font-size: 18px;
+        font-size: 16px;
         margin-bottom: 10px;
     }
 
+      /* Background overlay for expanded details */
+      .collapsed-details {
+        height: 100%; /* Adjust the maximum height for scrollable area */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #fff; /* Text color for details */
+    }
+
+    /* Toggle button style */
+    .toggle-details-btn {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background-color: #17a2b8; /* Your desired button color */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .toggle-details-btn i {
+        margin-left: 5px;
+    }
+
+    /* Styling for detail labels and values */
     .detail-item {
-        display: flex;
         margin-bottom: 8px;
     }
 
     .detail-label {
         font-weight: bold;
-        margin-right: 8px;
     }
 
     .detail-value {
-        color: #6c757d;
+        color: #fff; /* Text color for detail values */
     }
-    
     .toggle-icon {
         transition: transform 0.3s ease; /* Adjust the duration and easing function as needed */
     }
-
-    .collapsed-details {
-        display: none;
-    }
-
 
 
 
@@ -200,26 +219,29 @@
                                     <span class="users-list-date">{{ \Carbon\Carbon::parse($teacher->created_at)->diffForHumans() }}</span>
 
                                     <div class="user-permissions">
-                                        <h5 style="cursor:pointer;" class="details-heading toggle-details-btn" data-target="user-details-{{ $teacher->id }}">
+                                        <h5 style="cursor:pointer;" class="details-heading  small-text toggle-details-btn" data-target="user-details-{{ $teacher->id }}">
                                             Details <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
                                         <div id="user-details-{{ $teacher->id }}" class="collapsed-details">
+                                        <h5 style="cursor:pointer;" class="details-heading  small-text toggle-details-btn" data-target="user-details-{{ $teacher->id }}">
+                                            Details <i class="toggle-icon fas fa-chevron-down"></i>
+                                        </h5>
                                             <!-- Your existing details content here -->
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Email:</strong></span>
-                                                <span class="detail-value">{{ $teacher->email }}</span>
+                                                <span class="detail-label small-text"><strong>Email:</strong></span>
+                                                <p class="detail-value small-text">{{ $teacher->email }}</p>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Phone:</strong></span>
-                                                <span class="detail-value">{{ $teacher->profile->phone_number ?? 'N/A' }}</span>
+                                                <span class="detail-label small-text"><strong>Phone:</strong></span>
+                                                <p class="detail-value small-text">{{ $teacher->profile->phone_number ?? 'N/A' }}</p>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Gender:</strong></span>
-                                                <span class="detail-value">{{ $teacher->profile->gender }}</span>
+                                                <span class="detail-labe small-textl"><strong>Gender:</strong></span>
+                                                <p class="detail-value small-text">{{ $teacher->profile->gender }}</p>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Date of Birth:</strong></span>
-                                                <span class="detail-value">{{ $teacher->profile->date_of_birth ?? 'N/A' }}</span>
+                                                <span class="detail-label small-text"><strong>Date of Birth:</strong></span>
+                                                <p class="detail-value small-text">{{ $teacher->profile->date_of_birth ?? 'N/A' }}</p>
                                             </div>
                                         </div>
                                     </div>

@@ -23,7 +23,7 @@
       <!-- small box -->
       <div class="small-box bg-info">
         <div class="inner">
-          <h3>150</h3>
+          <h3>{{ $totalCurriculumCount }}</h3>
 
           <b>Curriculums</b>
         </div>
@@ -45,7 +45,7 @@
         <div class="icon">
           <i class="ion ion-stats-bars"></i>
         </div>
-        <a href="#" class="small-box-footer">Manage Schools <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{route('manage_all_schools')}}" class="small-box-footer">Manage Schools <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -68,14 +68,14 @@
       <!-- small box -->
       <div class="small-box bg-warning">
         <div class="inner">
-          <h3>65</h3>
+          <h3>{{$totalAcademicSessionCount}}</h3>
 
-          <b>Courses</b>
+          <b>Academic Sessions</b>
         </div>
         <div class="icon">
           <i class="ion ion-pie-graph"></i>
         </div>
-        <a href="#" class="small-box-footer">Manage Courses <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{route('manage_academic_sessions')}}" class="small-box-footer">Manage Academic Session <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
 

@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SchoolPackage;
+use App\Models\AcademicSession;
+use App\Models\Term;
 use App\Models\School;
+use App\Models\SchoolClass;
+use App\Models\Course;
 use App\Models\User;
+use App\Models\Grade; // Import the Grade model at the top of your controller
 use App\Models\Profile;
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class SchoolController extends Controller
 {
@@ -15,10 +22,82 @@ class SchoolController extends Controller
     public function manageSchools()
     {
         $user = auth()->user();
-        $schools= $user->ownedSchools;
-        // dd($schools);
-        return view('school_owner.manage_schools', compact('schools'));
+        
+        // Retrieve the latest academic session
+        $latest_academic_session = AcademicSession::latest()->first();
+        
+        // Retrieve the latest term
+        $latest_term = Term::latest()->first();
+        
+        $schools = $user->ownedSchools;
+
+        return view('school_owner.manage_schools', compact('schools', 'latest_academic_session', 'latest_term'));
     }
+    public function updateAcademicSession(Request $request)
+    {
+        try {
+            // Validate the request data if needed
+            $request->validate([
+                'school_id' => 'required|exists:schools,id',
+            ]);
+    
+            // Retrieve the school based on the provided school ID
+            $school = School::findOrFail($request->school_id);
+    
+            // Archive all assignments, assessments, and exams associated with the school
+            $school->assignments()->update(['archived' => true]);
+            $school->assessments()->update(['archived' => true]);
+            $school->exams()->update(['archived' => true]);
+    
+            // Perform the update operation for academic session
+            // Update the school's academic session to the latest one
+            $latestAcademicSession = AcademicSession::latest()->first();
+            $school->academicSession()->associate($latestAcademicSession);
+    
+            // Save the changes
+            $school->save();
+    
+            // Return a success response
+            return response()->json(['message' => 'Academic session updated successfully']);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    
+    public function updateTerm(Request $request)
+    {
+        try {
+            // Validate the request data if needed
+            $request->validate([
+                'school_id' => 'required|exists:schools,id',
+            ]);
+    
+            // Retrieve the school based on the provided school ID
+            $school = School::findOrFail($request->school_id);
+    
+            // Archive all assignments, assessments, and exams associated with the school
+            $school->assignments()->update(['archived' => true]);
+            $school->assessments()->update(['archived' => true]);
+            $school->exams()->update(['archived' => true]);
+    
+            // Perform the update operation for term
+            // Update the school's term to the latest one
+            $latestTerm = Term::latest()->first();
+            $school->term()->associate($latestTerm);
+    
+            // Save the changes
+            $school->save();
+    
+            // Return a success response
+            return response()->json(['message' => 'Term updated successfully']);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
 
     public function createSchool()
     {
@@ -46,17 +125,18 @@ class SchoolController extends Controller
 
     public function storeSchool(Request $request)
     {
+        // Check if the authenticated user already owns three or more schools
+        $userSchoolCount = School::where('school_owner_id', auth()->user()->id)->count();
+    
+        if ($userSchoolCount >= 3) {
+            return response()->json(['error' => 'You Cannot Create Another School.'], 422);
+        }
+    
         $data = $request->all();
-        // dd($data['current_fieldset']);
-        // $request->session()->forget('validated_data');
-        // $request->session()->forget('currentFieldset');
-
-        // $request->session()->forget('nextFieldset');
     
         try {
             switch ($data['current_fieldset']) {
                 case 'school_information':
-                    
                     return $this->validateAndSaveSchoolInformation($request, $data);
     
                 case 'location':
@@ -66,7 +146,6 @@ class SchoolController extends Controller
                     return $this->validateAndSaveContactInformation($request, $data);
     
                 case 'social_media':
-                    // break;
                     return $this->validateAndSaveSocialMedia($request, $data);
     
                 default:
@@ -76,9 +155,10 @@ class SchoolController extends Controller
             return response()->json(['error' => 'Validation error', 'errors' => $e->errors()]);
         } catch (\Exception $e) {
             \Log::error($e);
-            return response()->json(['error' => 'Server eerror: ' . $e->getMessage()]);
+            return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
+    
     
     private function validateAndSaveSchoolInformation(Request $request, array $data)
     {
@@ -286,27 +366,32 @@ class SchoolController extends Controller
                 'total_staff' => 'nullable|integer',
                 'is_active' => 'nullable|boolean',
                 'school_package_id' => 'nullable|exists:school_packages,id',
-                // Add validation rules for other fields as needed
             ]);
-
+    
             // Find the school by ID
             $school = School::findOrFail($schoolId);
-
+    
             // Update the school with the validated data
             $school->update($validatedData);
-
+    
             if ($request->hasFile('logo')) {
                 // Delete the old picture from the server
                 Storage::disk('public')->delete($school->logo);
     
-                // Upload the new picture
+                // Resize and upload the new picture
                 $file = $request->file('logo');
                 $filename = 'logo_picture' . time() . '.' . $file->getClientOriginalExtension();
-                $imagePath = $file->storeAs('logos_picture', $filename, 'public');
-                $school->logo = $imagePath;
+    
+                // Resize the image
+                $resizedImage = Image::make($file)->resize(500, 500)->encode();
+    
+                // Store the resized image
+                Storage::disk('public')->put('logos_picture/' . $filename, $resizedImage);
+    
+                $school->logo = 'logos_picture/' . $filename;
                 $school->save();
             }
-
+    
             return response()->json(['message' => 'School updated successfully', 'school' => $school]);
         } catch (ValidationException $e) {
             // Handle validation errors
@@ -317,25 +402,47 @@ class SchoolController extends Controller
         }
     }
 
-
     public function deleteSchool($id)
     {
         try {
-            // Find the package by ID
+            // Find the school by ID
             $school = School::findOrFail($id);
 
-            // Delete the package picture from storage
-            Storage::disk('public')->delete($school->logo);
+            // Get the authenticated user
+            $user = Auth::user();
 
-            // Delete the package from the database
-            $school->delete();
+            // Check if the authenticated user is authorized to delete the school
+            if ($user->id === $school->school_owner_id || $user->profile->role === 'super_admin') {
+                // Check if the school is active
+                if ($school->is_active) {
+                    // Return an error response if the school is active
+                    return response()->json(['error' => 'Cannot delete an active school.'], 422);
+                }
 
-            // Return a success response
-            return response()->json(['message' => 'School deleted successfully'], 200);
+                // Check if the school has associated students or teachers
+                if ($school->students()->exists() || $school->teachers()->exists()) {
+                    // Return an error response if the school has associated students or teachers
+                    return response()->json(['error' => 'Cannot delete school with associated students or teachers.'], 422);
+                }
+
+                // Delete the school's logo from storage if it exists
+                if ($school->logo) {
+                    Storage::disk('public')->delete($school->logo);
+                }
+
+                // Delete the school from the database
+                $school->delete();
+
+                // Return a success response
+                return response()->json(['message' => 'School deleted successfully'], 200);
+            } else {
+                // Return an error response if the user is not authorized
+                return response()->json(['error' => 'Unauthorized to delete the School.'], 403);
+            }
         } catch (\Exception $e) {
             \Log::error($e);
 
-            // Return an error response or handle accordingly
+            // Return an error response if an exception occurs
             return response()->json(['error' => 'Failed to delete the School.'], 500);
         }
     }
@@ -362,6 +469,8 @@ class SchoolController extends Controller
     {
         // Find the school by ID
         $school = School::find($id);
+        $academicSessions = AcademicSession::all();
+        
 
         // Check if the school is not found
         if (!$school) {
@@ -378,7 +487,7 @@ class SchoolController extends Controller
             $eventsCount = $school->events()->count();
 
             // Pass the necessary data to the view
-            return view('school_owner.show_owner', compact('school', 'totalStudents', 'totalTeachers', 'eventsCount'));
+            return view('school_owner.show_owner', compact('school', 'totalStudents', 'totalTeachers', 'eventsCount', 'academicSessions'));
         } else {
             // dd($user->school()->id);
             // If the authenticated user is not the owner or an admin, handle it as needed
@@ -392,9 +501,14 @@ class SchoolController extends Controller
         $school = School::findOrFail($schoolId);
         $user = auth()->user();
         // dd($school->getAdmins());
+        $studentsByClass = [];
+    
+        foreach ($school->classes as $class) {
+            $studentsByClass[$class->name] = $class->students();
+        }
     
         if ($user->id === $school->school_owner_id){
-            return view("school.show_$view", compact('school'));
+            return view("school.show_$view", compact('school', 'studentsByClass'));
            
         }
     
@@ -514,5 +628,124 @@ class SchoolController extends Controller
         }
     }
 
+    public function getTermsByAcademicSession(Request $request, $academicSessionId)
+    {
+        try {
+            // Retrieve terms for the specified academic session
+            $terms = Term::where('academic_session_id', $academicSessionId)->get();
+
+            // Return the list of terms as JSON response
+            return response()->json($terms);
+        } catch (\Exception $e) {
+            // Handle any exceptions (e.g., academic session not found)
+            return response()->json(['error' => 'Failed to retrieve terms.'], 500);
+        }
+    }
+    public function getGradeDistribution(Request $request, $courseCode)
+    {
+        $classId = $request->get('classId');
+        $assessmentType = $request->get('assessmentType');
+        $academicSessionId = $request->get('academicSessionId');
+        $termId = $request->get('termId');
+        $label = "Grade Distribution ". $courseCode;
+    
+        // Find the course by code
+        $course = Course::where('code', $courseCode)->firstOrFail();
+    
+        // Start with the base query to fetch grades associated with the course
+        $gradesQuery = $course->grades();
+    
+        if ($assessmentType) {
+            // Dynamically apply the appropriate column filter on the grades query
+          // Assuming assessmentType corresponds to a column name
+        
+            // Split the assessmentType at underscores and take the first part
+            $assessmentTypeParts = explode('_', $assessmentType);
+            $firstPart = ucwords($assessmentTypeParts[0]);
+        
+            $label .= " " . $firstPart;
+        } else {
+            $assessmentType = 'exam_id';
+            $label .= " Exam";
+        }
+        $gradesQuery->whereNotNull($assessmentType);
+        
+        
+    
+        // Filter grades based on classId (if specified)
+        if ($classId) {
+            // Retrieve students associated with the specified school class
+            $schoolClass = SchoolClass::findOrFail($classId);
+            $studentIds = $schoolClass->students()->pluck('id')->toArray();
+    
+            // Filter grades for students in the specified class
+            $gradesQuery->whereIn('user_id', $studentIds);
+            $label .= " " . $schoolClass->code;
+        }else {
+            $label .= " All Classes";
+        }
+    
+        // Filter grades based on academic session (if specified)
+        if ($academicSessionId) {
+            $academicSession = AcademicSession::findOrFail($academicSessionId);
+            $gradesQuery->where('academic_session_id', $academicSessionId);
+            $label .= " " . $academicSession->name;
+    
+            // Filter grades based on term (if specified)
+            if ($termId) {
+                $term = Term::findOrFail($termId);
+                $gradesQuery->where('term_id', $termId);
+                $label .= " " . $term->name;
+            }
+        } else {
+            $label .= " All Sessions";
+        }
+    
+        // Retrieve grades from the filtered grades query
+        $grades = $gradesQuery->get();
+    
+        // Instantiate a Grade model to access the calculateGradeDistribution method
+        $gradeModel = new Grade();
+    
+        // Calculate average complete scores for the retrieved grades based on the assessment type
+        $percentage = $gradeModel->getAverageCompleteScore($grades, $assessmentType);
+    
+        // Calculate grade distribution using the determined percentage
+        $gradeDistribution = $gradeModel->calculateGradeDistribution($grades->pluck('score')->toArray(), $percentage);
+
+         // Calculate grade distribution
+    $gradeDistributionInsightData = $grades->groupBy('grade')->map->count();
+
+    // Calculate the total number of students who took the course
+    $totalStudents = $grades->pluck('user_id')->unique()->count();
+
+     // Labels for different grades
+     $gradeLabels = ['A+', 'A', 'B', 'C', 'D', 'E', 'F'];
+
+     // Calculate grade distribution counts for each grade label
+     $gradeCounts = [];
+     foreach ($gradeLabels as $glabel) {
+         $gradeCounts[$glabel] = isset($gradeDistribution[$glabel]) ? $gradeDistribution[$glabel] : 0;
+     }
+
+    // Construct insights string
+        $insights = "Total Students: $totalStudents\n";
+        foreach ($gradeCounts as $grade => $count) {
+            $insights .= "$grade Count: $count\n";
+        }
+
+        // Return both grade distribution and grades data as JSON response
+        return response()->json([
+            'gradeDistribution' => $gradeDistribution,
+            'grades' => $grades->toArray(),
+            'assessmentType' => $assessmentType,
+            'percentage' => $percentage,
+            'label' => $label,
+            'totalStudents'=> $totalStudents,
+            'gradeCounts' => $gradeCounts,
+            'insights' => $insights, // Include insights in the response
+        ]);
+
+    }
     
 }

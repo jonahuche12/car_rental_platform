@@ -19,10 +19,10 @@ class CreateProfilesTable extends Migration
 
             // Common Fields
             $table->string('role');
-            $table->string('full_name');
-            $table->string('country');
-            $table->string('state');
-            $table->string('city');
+            $table->string('full_name')->nullable();
+            $table->string('country')->nullable();
+            $table->string('state')->nullable();
+            $table->string('city')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->string('gender')->nullable();
             $table->string('profile_picture')->nullable();
@@ -72,6 +72,9 @@ class CreateProfilesTable extends Migration
             $table->unsignedBigInteger('class_id')->nullable();
             $table->foreign('class_id')->references('id')->on('school_classes')->onDelete('set null');
 
+
+            $table->integer('school_connects')->nullable();
+            $table->date('last_credited_at')->nullable();
 
             // $table->boolean('permission_confirm_student')->default(false);
             // $table->boolean('permission_confirm_admin')->default(false);

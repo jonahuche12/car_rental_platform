@@ -40,6 +40,18 @@ class Course extends Model
         
         return null;
     }
+    public function curricula()
+    {
+        // Retrieve the school's country and course's general_name
+        $schoolCountry = $this->school->country;
+        $courseGeneralName = $this->general_name;
+        // dd($courseGeneralName);
+
+        // Retrieve curricula related to this course
+        return Curriculum::where('country', $schoolCountry)
+            ->where('subject', $courseGeneralName)
+            ->get();
+    }
 
     /**
      * Get the teachers assigned to the course.
@@ -70,6 +82,30 @@ class Course extends Model
             ->withPivot('teacher_id')
             ->withTimestamps();
     }
+    public function classes()
+    {
+        $classIds = [];
+    
+        // Iterate through each schoolClassSection related to the course
+        foreach ($this->class_sections as $section) {
+            // Check if schoolClass relationship exists and is not null
+            if ($section->schoolClass) {
+                // If schoolClass is a single instance (belongsTo relationship)
+                $class = $section->schoolClass;
+                
+                // Ensure $class is an object before accessing its properties
+                if ($class && !in_array($class->id, $classIds)) {
+                    $classIds[] = $class->id;
+                }
+            }
+        }
+    
+        // Retrieve unique SchoolClass instances based on collected class IDs
+        return SchoolClass::whereIn('id', $classIds)->get();
+    }
+    
+
+    
     
     public function getAllSections()
     {

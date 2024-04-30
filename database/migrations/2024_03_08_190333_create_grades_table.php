@@ -20,10 +20,15 @@ class CreateGradesTable extends Migration
             $table->unsignedBigInteger('assignment_id')->nullable();
             $table->unsignedBigInteger('assessment_id')->nullable();
             $table->unsignedBigInteger('exam_id')->nullable();
-            $table->string('academic_session');
             $table->decimal('score', 5, 2);
+            $table->decimal('complete_score', 5, 2);
             $table->timestamps();
             $table->softDeletes(); // Add this line for soft delete support
+
+            $table->unsignedBigInteger('academic_session_id')->nullable();
+            $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
+            $table->unsignedBigInteger('term_id')->nullable();
+            $table->foreign('term_id')->references('id')->on('terms')->onDelete('cascade');
 
             // Foreign key constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

@@ -38,21 +38,10 @@
                     <div class="card-header"><h5>User Package Activation</h5> <b></b></div>
                     <div class="card-body">
                         
-                        <p class='text-sm'>Click the button below to proceed with the payment:</p>
-                        <form method="POST" action="#">
-                            @csrf
-                            <input type="hidden" name="package_id" value="{{ $package->id }}">
-                            <input type="hidden" name="amount" value="{{$package->price}}">
-                            <input type="hidden" name="paid_for" value="user_activation">
-                            <small class="text-success">₦ {{number_format($package->price, 2)}}</small><br>
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                Pay with Paystack
-                            </button>
-                        </form><br>
 
 
                     <!-- Button to Toggle Bank Transfer Section -->
-                    <button id="toggleBankTransfer" class="btn btn-info btn-sm mb-3">
+                    <button id="toggleBankTransfer" class="btn btn-purple btn-sm mb-3">
                         {{ __('Pay Via Transfer') }}
                     </button>
 

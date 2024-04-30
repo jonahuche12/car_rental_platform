@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Profile;
 use App\Models\School;
+use App\Models\Course;
 use App\Models\SchoolClass;
 use App\Models\UserPackage;
 use Illuminate\Support\Facades\Auth;
@@ -79,28 +80,70 @@ class ProfileController extends Controller
 
         return response()->json(['hasProfile' => $hasProfile]);
     }
-
     public function profile()
     {
         $user = auth()->user();
-        // dd($user->school);
-       
-        if ($user) {
-            $profile = $user->profile;
-            if ($profile) {
-                $role = $profile->role;
-                $profilepage = "profiles.create_$role"."_profile";
-                // dd($profilepage);
-                return view($profilepage, compact('profile'));
-            }
-    
-            return redirect('home');
-            
-        }
-        return redirect('login');
 
-        
+        if (!$user) {
+            return redirect('login');
+        }
+
+        $profile = $user->profile;
+
+        if (!$profile) {
+            return redirect('home');
+        }
+
+        $role = $profile->role;
+        $profilepage = "profiles.create_$role"."_profile";
+
+        $uniqueSubjectNames = Course::getAllUniqueSubjects(); // Retrieve unique subject names
+
+        if ($role === 'teacher') {
+            $lessons = $user->lessons()->withCount('enrolledUsers')->get();
+
+            $lessonAnalyticsData = $lessons->map(function ($lesson) use ($user) {
+                $schoolConnectsHistory = $lesson->schoolConnectsHistory();
+
+                $lessonEarnings = 0;
+
+                foreach ($schoolConnectsHistory as $index => $change) {
+                    if ($index > 0) {
+                        $previousRequired = $schoolConnectsHistory[$index - 1]['school_connects_required'];
+                        $currentRequired = $change['school_connects_required'];
+
+                        $earnedSchoolConnects = $currentRequired - $previousRequired;
+                        $lessonEarnings += $earnedSchoolConnects * 9; // Each school_connect is worth 9 units
+                    }
+                }
+
+                $teacherEarnings = 0;
+                $schoolEarnings = $lessonEarnings * 0.20; // School earns 20%
+
+                if ($user->wallet) {
+                    $teacherEarnings = $lessonEarnings * 0.40; // Teacher earns 40%
+                }
+
+                return [
+                    'title' => $lesson->title,
+                    'views' => $lesson->enrolled_users_count,
+                    'lesson_earnings' => $lessonEarnings,
+                    'teacher_earnings' => $teacherEarnings,
+                    'school_earnings' => $schoolEarnings,
+                ];
+            });
+
+            $school = $user->school;
+
+            return view($profilepage, compact('profile', 'school', 'lessonAnalyticsData', 'uniqueSubjectNames'));
+        }
+
+        // For roles other than 'teacher', pass the profile, school (if exists), and uniqueSubjectNames to the view
+        $school = $user->school;
+
+        return view($profilepage, compact('profile', 'school', 'uniqueSubjectNames'));
     }
+
 
     public function updateProfile(Request $request)
     {

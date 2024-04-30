@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_id',
         'facebook_id',
         'school_id',
+        'active_package',
         'user_package_id',
         'expected_expiration'
     ];
@@ -115,9 +116,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     'state',
                     'city',
                     'address',
-                    'qualifications',
-                    'certifications',
-                    'years_of_experience',
+                    
                 ]);
             case 'super_admin':
                     return $this->checkProfileFields([
@@ -147,12 +146,6 @@ class User extends Authenticatable implements MustVerifyEmail
                     'state',
                     'city',
                     'address',
-                    'qualifications',
-                    'certifications',
-                    'years_of_experience',
-                    'teacher_id',
-                    'subjects_taught',
-                    'classes_assigned',
                 ]);
             case 'staff':
                 return $this->checkProfileFields([
@@ -167,15 +160,6 @@ class User extends Authenticatable implements MustVerifyEmail
                     'state',
                     'city',
                     'address',
-                    'qualifications',
-                    'certifications',
-                    'years_of_experience',
-                    'staff_id',
-                    'department',
-                    'position',
-                    'staff_qualifications',
-                    'staff_certifications',
-                    'years_of_service',
                 ]);
             case 'guardian':
                 return $this->checkProfileFields([
@@ -187,10 +171,6 @@ class User extends Authenticatable implements MustVerifyEmail
                     'email',
                     'phone_number',
                     'address',
-                    'qualifications',
-                    'certifications',
-                    'ward_name',
-                    'ward_class',
                 ]);
             case 'student':
                 return $this->checkProfileFields([
@@ -328,6 +308,89 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 
+    public function getGradeForAssignment($assignmentId)
+    {
+        // Retrieve the grade for the specified assignment ID
+        return $this->grades()->where('assignment_id', $assignmentId)->first();
+    }
 
+
+    public function getGradeForAssessment($assessmentId)
+    {
+        // Retrieve the grade for the specified assignment ID
+        return $this->grades()->where('assessment_id', $assessmentId)->first();
+    }
+    public function getGradeForExam($examId)
+    {
+        // Retrieve the grade for the specified assignment ID
+        return $this->grades()->where('exam_id', $examId)->first();
+    }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class, 'user_id');
+    }
+    
+    /**
+     * Get the available courses for the student based on their class section.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Models\Course[]
+     */
+    public function availableCourses()
+    {
+        // Retrieve the class section of the student
+        $classSection = $this->userClassSection;
+    
+        // Check if the class section exists
+        if ($classSection) {
+            // Retrieve the IDs of courses already enrolled by the student
+            $enrolledCourseIds = $this->student_courses->pluck('id')->toArray();
+    
+            // Retrieve the courses available for the class section excluding those already enrolled
+            return $classSection->courses()
+                ->whereNotIn('courses.id', $enrolledCourseIds) // Specify the table name to avoid ambiguity
+                ->get();
+        }
+    
+        // If the class section does not exist, return an empty collection
+        return collect();
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
+    }
+
+    public function enrolledLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_user', 'user_id', 'lesson_id')
+                    ->withPivot('role') // Include the 'role' column from the pivot table if needed
+                    ->withTimestamps(); // Include timestamps for pivot table
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function favoriteLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_favorite')
+                    ->withTimestamps(); // Include if you have timestamps in the pivot table
+    }
+    public function likedLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_likes')->withTimestamps();
+    }
+
+    public function scopeSearch($query, $term)
+    {
+        return $query->where(function ($query) use ($term) {
+            $query->where('first_name', 'like', "%$term%")
+                  ->orWhere('last_name', 'like', "%$term%")
+                  ->orWhere('email', 'like', "%$term%");
+        });
+    }
+    
     
 }

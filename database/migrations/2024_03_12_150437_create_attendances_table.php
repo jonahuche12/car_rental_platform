@@ -21,6 +21,12 @@ class CreateAttendancesTable extends Migration
             $table->date('date');
             $table->boolean('attendance')->default(false);
             $table->timestamps();
+
+
+            $table->unsignedBigInteger('academic_session_id')->nullable();
+            $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
+            $table->unsignedBigInteger('term_id')->nullable();
+            $table->foreign('term_id')->references('id')->on('terms')->onDelete('cascade');
         
             $table->foreign('school_id')->references('id')->on('schools')->onDelete('cascade');
             $table->foreign('teacher_id')->references('id')->on('users')->onDelete('cascade');

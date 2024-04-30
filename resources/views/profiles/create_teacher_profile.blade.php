@@ -18,6 +18,7 @@
       padding: 10px;
       margin-bottom: 10px;
   }
+ 
 
 </style>
 @endsection
@@ -41,7 +42,7 @@
           <div class="col-md-4">
 
             <!-- Profile Image -->
-            <div class="card card-primary card-outline">
+            <div class="card card-purple card-outline">
               <div class="card-body box-profile">
                 <div class="text-center position-relative">
                     @if(auth()->user()->profile->profile_picture)
@@ -87,7 +88,7 @@
                             <i class="ion ion-edit text-info float-right" id="phone_number-icon" style="vertical-align: middle;"><span style="vertical-align: middle; margin-right: 5px;"></span></i>
                                 <span class="edit-field" id="" style="display:none; vertical-align: middle;">
                                     <input type="text" style="width:100%" class='form-control' id="phone_number_input" placeholder="Enter phone number">
-                                    <button class="btn btn-small bg-primary" id="phone_number-button" onclick="saveData('phone_number')">Save</button>
+                                    <button class="btn btn-small bg-purple" id="phone_number-button" onclick="saveData('phone_number')">Save</button>
                                 </span>
                             @endif
                             <div class="alert alert-danger phone_number-error" style="display:none; float:clear; margin:0"></div>
@@ -107,7 +108,7 @@
                                     <option>Male</option>
                                     <option>Female</option>
                                 </select>
-                                <button class="btn btn-small bg-primary gender-button" id="gender-button" onclick="saveData('gender')">Save</button>
+                                <button class="btn btn-small bg-purple gender-button" id="gender-button" onclick="saveData('gender')">Save</button>
                             </span>
                             
                             <div class="alert alert-danger gender-error" style="display:none"></div>
@@ -156,7 +157,7 @@
                                 </select>
                             </div>
                             <input type="text" class='form-control' id="address_field_input" value="{{auth()->user()->profile->address}}" placeholder="Enter Your Address">
-                            <button class="btn btn-small bg-primary" id="address-button" onclick="saveData('address')">Save</button>
+                            <button class="btn btn-small bg-purple" id="address-button" onclick="saveData('address')">Save</button>
                         </span>
                         
                         <div class="alert alert-danger address-error" style="display:none"></div>
@@ -174,7 +175,7 @@
                           @if(auth()->user()->profile->date_of_birth == null)
                               <span class="edit-field" style="display:none; vertical-align: middle;">
                                   <input type="date" class='form-control' id="date_of_birth_input" placeholder="Enter Your Date Of Birth">
-                                  <button class="btn btn-sm bg-primary" id="date_of_birth-button" onclick="saveData('date_of_birth')">Save</button>
+                                  <button class="btn btn-sm bg-purple" id="date_of_birth-button" onclick="saveData('date_of_birth')">Save</button>
                               </span>
                           @endif
                           <div class="alert alert-danger date_of_birth-error" style="display:none"></div>
@@ -191,18 +192,18 @@
 
                               @if (auth()->user()->profile->teacher_confirmed)
                                 
-                                  <a href="#" class="badge badge-success badge-sm">Teacher Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-purple badge-sm">Teacher Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
 
                               @if (auth()->user()->profile->student_confirmed)
                                   
-                                  <a href="#" class="badge badge-success badge-sm">Student Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-purple badge-sm">Student Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
 
 
                               @if (auth()->user()->profile->admin_confirmed)
                                   
-                                  <a href="#" class="badge badge-success badge-sm">Admin Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-purple badge-sm">Admin Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
                           </div>
                         </a>
@@ -233,7 +234,7 @@
                           <input type="text" class="form-control" id="school_search" placeholder="Search for a School" data-type="school">
                           <input type="text" class="form-control" id="school_input" style="display:none" name="school_input">
 
-                              <button class="btn btn-small bg-primary gender-button" id="school-button" onclick="saveData('school')">Save</button>
+                              <button class="btn btn-small bg-purple gender-button" id="school-button" onclick="saveData('school')">Save</button>
                           </span>
                           
                           <div class="alert alert-danger school-error" style="display:none"></div>
@@ -252,7 +253,7 @@
                               <span class="class-display">{{ auth()->user()->schoolClass()->name }}</span>
                               @if (auth()->user()->profile->class_confirmed)
                                 
-                                  <a href="#" class="badge badge-success badge-sm">Class Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-purple badge-sm">Class Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
                               
                           </div>
@@ -281,7 +282,7 @@
                             <!-- Hide the input field -->
                             <input type="text" class="form-control" id="class_search" style="display:none;" placeholder="Search for a Class">
 
-                              <button class="btn btn-small bg-primary gender-button" id="school-button" onclick="saveData('class')">Save</button>
+                              <button class="btn btn-small bg-purple gender-button" id="school-button" onclick="saveData('class')">Save</button>
                           </span>
                           
                           <div class="alert alert-danger class-error" style="display:none"></div>
@@ -319,9 +320,9 @@
                                 <span class="user-package-display badge {{ $badgeColor }}">{{ $package->name }}</span>
 
                                 @if (!$user->active_package)
-                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge badge-success badge-sm">Activate</a>
+                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge bg-purple badge-sm">Activate</a>
                                 @elseif ($expired)
-                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge badge-success badge-sm">Renew</a>
+                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge bg-purple badge-sm">Renew</a>
                                 @endif
                             </div>
                         @else
@@ -345,7 +346,7 @@
                                   </option>
                               @endforeach
                             </select>
-                              <button class="btn btn-small bg-primary user_package-button" id="user_package-button" onclick="saveData('user_package')">Save</button>
+                              <button class="btn btn-small bg-purple user_package-button" id="user_package-button" onclick="saveData('user_package')">Save</button>
                           </span>
                           
                           <div class="alert alert-danger user_package-error" style="display:none"></div>
@@ -359,7 +360,7 @@
                 </ul>
 
 
-                <!-- <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a> -->
+                <!-- <a href="#" class="btn bg-purple btn-block"><b>Follow</b></a> -->
               </div>
               <!-- /.card-body -->
             </div>
@@ -378,7 +379,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="proceedWithUserPackage()">Continue</button>
+                    <button type="button" class="btn bg-purple" onclick="proceedWithUserPackage()">Continue</button>
                   </div>
                 </div>
               </div>
@@ -398,7 +399,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="proceedWithSchoolUpdate()">Continue</button>
+                    <button type="button" class="btn bg-purple" onclick="proceedWithSchoolUpdate()">Continue</button>
                   </div>
                 </div>
               </div>
@@ -420,7 +421,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="proceedWithClassUpdate()">Continue</button>
+                    <button type="button" class="btn bg-purple" onclick="proceedWithClassUpdate()">Continue</button>
                   </div>
                 </div>
               </div>
@@ -428,7 +429,7 @@
 
 
             <!-- About Me Box -->
-            <div class="card card-primary">
+            <div class="card card-purple">
               <div class="card-header">
                 <h3 class="card-title">About You</h3>
               </div>
@@ -479,7 +480,7 @@
                           </div>
                       </div>
                       
-                      <button type="button" class="btn btn-sm btn-primary" onclick="addQualification()">
+                      <button type="button" class="btn btn-sm bg-purple" onclick="addQualification()">
                           <i class="icon ion-md-add"></i> Add More
                       </button>
                       <button type="button" class="btn btn-success" onclick="submitQualification()">Submit</button>
@@ -521,43 +522,42 @@
             <div class="card">
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#courses" data-toggle="tab">Courses</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#analytics" data-toggle="tab">Analytics</a></li>
+                  <li class="nav-item small-text"><a class="nav-link " href="#courses" data-toggle="tab">Courses</a></li>
+                  <li class="nav-item small-text"><a class="nav-link" href="#lessons" data-toggle="tab">lessons</a></li>
+                  <li class="nav-item small-text"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
+                  <li class="nav-item small-text"><a class="nav-link active" href="#analytics" data-toggle="tab">Analytics</a></li>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
                 <div class="tab-content">
-                  <div class="active tab-pane" id="courses">
+                  <div class=" tab-pane" id="courses">
                     <!-- Post -->
                     <div class="post">
-                    <div class="row">
-                      <div class="col-12">
-                        <div class="card">
-                          <div class="card-header">
-                            <h3 class="card-title">Courses You handle </h3>
-                          </div>
-                          <!-- ./card-header -->
-                          <div class="card-body">
-                            <table class="table table-bordered table-hover">
-                              <thead>
-                                <tr >
-                                  <th>#</th>
-                                  <th>Course</th>
-                                  <!-- <th>Class</th> -->
-                                  <!-- <th>No of Students</th> -->
-                                  <th>Compulsory</th>
-                                  <th>Description</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              @foreach(auth()->user()->teacher_courses()->get() as $course)
-                                <tr data-widget="expandable-table" class="bg-info" aria-expanded="false">
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="card">
+                            <div class="card-header">
+                              <h3 class="card-title">Courses You handle </h3>
+                            </div>
+                            <!-- ./card-header -->
+                            <div class="card-body table-responsive">
+                              <table class="table table-bordered table-hover">
+                                <thead>
+                                  <tr class="bg-dark" >
+                                    <th>#</th>
+                                    <th>Course</th>
+                                    <!-- <th>Class</th> -->
+                                    <!-- <th>No of Students</th> -->
+                                    <th>Compulsory</th>
+                                    <th>Description</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                @foreach(auth()->user()->teacher_courses()->get() as $course)
+                                <tr data-widget="expandable-table"  aria-expanded="false">
                                     <td>{{$loop->iteration }}</td>
-                                    <td>{{$course->name}}</td>
-                                    <!-- <td>{{$course->students->count()}}</td>   -->
-                                    <td class="text-light">
+                                    <td><a class="text-purple"> {{$course->name}}</a></td>
+                                    <td class="text-success">
                                         @if($course->compulsory)
                                             <span class=""><i class="fa fa-check"></i>compulsory</span>
                                         @else
@@ -582,10 +582,18 @@
                                                         <td>{{$class->name}}</td>
                                                         <td>{{$class->students->count()}}</td>
                                                         <td>
-                                                        <a href="{{ route('assignment', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-primary">Assignment</a>
-                                                        <a href="{{ route('assessment', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-primary">Assessment</a>
-                                                        <a href="{{ route('exam', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-primary">Exam</a>
-                                                    </td>
+                                                            <div class="btn-group">
+                                                                <a href="{{ route('assignment', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-sm bg-purple">
+                                                                    <i class="fas fa-file"></i><span class="d-none d-sm-inline"> Assignment</span>
+                                                                </a>
+                                                                <a href="{{ route('assessment', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-sm bg-purple">
+                                                                    <i class="fas fa-tasks"></i><span class="d-none d-sm-inline"> Assessment</span>
+                                                                </a>
+                                                                <a href="{{ route('exam', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-sm bg-purple">
+                                                                    <i class="fas fa-book"></i><span class="d-none d-sm-inline"> Exam</span>
+                                                                </a>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -594,164 +602,216 @@
                                 </tr>
                             @endforeach
 
-                              </tbody>
-                            </table>
+
+                                </tbody>
+                              </table>
+                            </div>
+                            <!-- /.card-body -->
                           </div>
-                          <!-- /.card-body -->
+                          <!-- /.card -->
                         </div>
-                        <!-- /.card -->
                       </div>
-                    </div>
                     </div>
                     <!-- /.post -->
                   </div>
                   <!-- /.tab-pane -->
-                  <div class="tab-pane" id="timeline">
-                    <!-- The timeline -->
-                    <div class="timeline timeline-inverse">
-                      <!-- timeline time label -->
-                      <div class="time-label">
-                        <span class="bg-danger">
-                          10 Feb. 2014
-                        </span>
+                  <div class="tab-pane" id="lessons">
+                    @include('partials.create_lesson')
+                    <div class="lessons-container">
+                      <div class="row">
+                          @php
+                              // Retrieve lessons associated with the authenticated user, ordered by creation date in descending order
+                              $lessons = auth()->user()->lessons()->orderBy('created_at', 'desc')->get();
+                          @endphp
+
+                          @foreach ($lessons as $lesson)
+                              <div class="col-md-4">
+                                  <div class="card lesson-card">
+                                  <div class="dropdown">
+                                    <button class="btn btn-sm btn-clear dropdown-toggle" type="button" id="lessonActionsDropdown{{ $lesson->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="lessonActionsDropdown{{ $lesson->id }}">
+                                        <!-- Button to trigger Edit Lesson Modal -->
+                                        <!-- Button to trigger Edit Lesson Modal -->
+                                        <a class="dropdown-item edit-lesson-btn" href="#" data-lesson-id="{{ $lesson->id }}">Edit</a>
+
+
+                                        @if ($lesson->user_id == auth()->id())
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#removelessonModal{{ $lesson->id }}">Remove lesson</a>
+
+                                        @endif
+                                    </div>
+                                </div><br>
+
+                                     
+                                      <!-- Display lesson thumbnail if available -->
+                                      <div class="thumbnail-container">
+                                        <a href="{{ route('lessons.show', $lesson) }}">
+                                            @if ($lesson->thumbnail)
+                                                <!-- Display the lesson thumbnail with play icon overlay -->
+                                                <div class="thumbnail-with-play">
+                                                    <img src="{{ asset($lesson->thumbnail) }}" alt="{{ $lesson->title }}" class="img-fluid lesson-thumbnail">
+                                                    <div class="play-icon-overlay">
+                                                        <i class="fas fa-play"></i>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <!-- Display default thumbnail with play icon -->
+                                                <div class="no-thumbnail">
+                                                    <div class="video-icon">
+                                                        <i class="fas fa-video"></i>
+                                                    </div>
+                                                    <div class="overlay"></div>
+                                                    <img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">
+                                                </div>
+                                            @endif
+                                        </a>
+                                     </div>
+                                     <h5><small>{{ \Illuminate\Support\Str::limit($lesson->title, 15) }}</small></h5>
+
+                                      <p><small>{{ \Illuminate\Support\Str::limit($lesson->description, 200) }}</small></p>
+                                      <!-- Add more details as needed -->
+                                  </div>
+                              </div>
+
+                              <!-- Remove lesson Modal -->
+                              <div class="modal fade" id="removelessonModal{{ $lesson->id }}" tabindex="-1" role="dialog" aria-labelledby="removelessonModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="removelessonModalLabel">Remove lesson</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="alert alert-success lesson-message"  style="display:none;"></div>
+                                          <div class="alert alert-danger" id="lesson-error" style="display:none;"></div>
+                                        <div class="modal-body">
+                                          
+                                            Are you sure you want to Delete <b>{{ $lesson->title }} </b> ?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-danger" id="removeLessonBtn" onclick="removelesson({{ $lesson->id }})">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          @endforeach
                       </div>
-                      <!-- /.timeline-label -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-envelope bg-primary"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 12:05</span>
-
-                          <h3 class="timeline-header"><a href="#">Support Team</a> sent you an email</h3>
-
-                          <div class="timeline-body">
-                            Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
-                            weebly ning heekya handango imeem plugg dopplr jibjab, movity
-                            jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
-                            quora plaxo ideeli hulu weebly balihoo...
-                          </div>
-                          <div class="timeline-footer">
-                            <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                            <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-user bg-info"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
-
-                          <h3 class="timeline-header border-0"><a href="#">Sarah Young</a> accepted your friend request
-                          </h3>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-comments bg-warning"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
-
-                          <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-
-                          <div class="timeline-body">
-                            Take me to your leader!
-                            Switzerland is small and neutral!
-                            We are more like Germany, ambitious and misunderstood!
-                          </div>
-                          <div class="timeline-footer">
-                            <a href="#" class="btn btn-warning btn-flat btn-sm">View comment</a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline time label -->
-                      <div class="time-label">
-                        <span class="bg-success">
-                          3 Jan. 2014
-                        </span>
-                      </div>
-                      <!-- /.timeline-label -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-camera bg-purple"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 2 days ago</span>
-
-                          <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded new photos</h3>
-
-                          <div class="timeline-body">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <div>
-                        <i class="far fa-clock bg-gray"></i>
-                      </div>
-                    </div>
+                  </div>
                   </div>
                   <!-- /.tab-pane -->
+                  <div class="active tab-pane" id="analytics">
+                      <canvas id="lessonAnalyticsChart" style="height: 400px; width: 100%;"></canvas>
 
-                  <div class="tab-pane" id="analytics">
-                    <form class="form-horizontal">
-                      <div class="form-group row">
-                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputName" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputName2" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
-                        <div class="col-sm-10">
-                          <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <div class="checkbox">
-                            <label>
-                              <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-danger">Submit</button>
-                        </div>
-                      </div>
-                    </form>
+                      <div id="lessonSummary" class="table-responsive">
+    <h5 class="mb-4">
+        Lesson Analytics
+        <button class="btn btn-sm btn-link text-decoration-none" type="button" data-toggle="collapse" data-target="#lessonTableCollapse" aria-expanded="false" aria-controls="lessonTableCollapse" onclick="toggleCollapseIcon(this)">
+            <i id="collapseIcon" class="fas fa-chevron-down text-purple"></i> <!-- Icon for collapse -->
+        </button>
+    </h5>
+    <div class="collapse" id="lessonTableCollapse">
+        @if ($lessonAnalyticsData->isEmpty())
+            <p>No lessons found.</p>
+        @else
+            <table class="table table-striped">
+                <thead class="bg-purple">
+                    <tr>
+                        <th class="small-text" scope="col">Lesson Title</th>
+                        <th class="small-text" scope="col">Views</th>
+                        <th class="small-text" scope="col">Lesson Earnings</th>
+                        <th class="small-text" scope="col">Teacher Earnings</th>
+                        <th class="small-text" scope="col">School Earnings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($lessonAnalyticsData as $lesson)
+                        <tr>
+                            <td class="small-text">{{ $lesson['title'] }}</td>
+                            <td class="small-text">{{ $lesson['views'] }}</td>
+                            <td class="small-text">${{ number_format($lesson['lesson_earnings'], 2) }}</td>
+                            <td class="small-text">${{ number_format($lesson['teacher_earnings'], 2) }}</td>
+                            <td class="small-text">${{ number_format($lesson['school_earnings'], 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+</div>
+
+
+
                   </div>
+
                   <!-- /.tab-pane -->
                 </div>
+
+
+
+
+                  <!-- Edit Lesson Modal -->
+                  <div class="modal fade" id="editLessonModal" tabindex="-1" role="dialog" aria-labelledby="editLessonModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editLessonModalLabel">Edit Lesson</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                <form id="editLessonForm" enctype="multipart/form-data">
+                                          <div class="alert alert-success" id="success-edit-message" style="display:none;"></div>
+                                          <div class="alert alert-danger" id="error-edit-message" style="display:none;"></div>
+                                  <div class="form-group">
+                                      <label for="editLessonTitle">Title</label>
+                                      <input type="text" class="form-control" id="editLessonTitle" name="edit_title">
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="editLessonSubject">Subject</label>
+                                      <select name="edit_subject" class="form-control" id="editLessonSubject"></select>
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="editLessonClassLevel">Class Level</label>
+                                      <select name="edit_class_level" class="form-control" id="editLessonClassLevel"></select>
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="editLessonDescription">Description</label>
+                                      <textarea class="form-control" id="editLessonDescription" name="edit_description"></textarea>
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="lessonEditThumbnail" class="file-label">
+                                          <i class="fas fa-image"></i> Thumbnail
+                                      </label>
+                                      <input type="file" class="form-control-file" id="lessonEditThumbnail" name="edit_thumbnail" onchange="previewEditThumbnail('lessonEditThumbnail', 'thumbnailEditPreview')" accept="image/*">
+                                      <span class="file-info">Upload a thumbnail (Max size: 2MB)</span>
+                                      <div id="thumbnailEditPreviewContainer">
+                                          <img id="thumbnailEditPreview" src="#" alt="Thumbnail Preview" style="max-width: 100%; max-height: 100%; display: none;">
+                                          <button type="button" class="btn btn-link" onclick="$('#lessonEditThumbnail').click();">
+                                              <i class="fas fa-edit"></i> Change Thumbnail
+                                          </button>
+                                      </div>
+                                  </div>
+                                  <!-- Hidden field to store lesson ID -->
+                                  <input type="hidden" id="editLessonId" name="lesson_id">
+                              </form>
+
+
+
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn bg-purple" id="saveLessonChangesBtn">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 <!-- /.tab-content -->
               </div><!-- /.card-body -->
             </div>
@@ -767,13 +827,114 @@
 
 @section('scripts')
 <script>
+  var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
+
 
 
 </script>
+
 
 <script>
- 
-    
+    function toggleCollapseIcon(button) {
+        var icon = button.querySelector('i');
+        if (icon.classList.contains('fa-chevron-down')) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    }
 </script>
+<script>
+     $(document).ready(function () {
+            // Retrieve analytics data for lessons (assuming lessonAnalyticsData is passed from the controller)
+            var lessonAnalyticsData = {!! json_encode($lessonAnalyticsData) !!};
+
+            // Extract data for the chart
+            var lessonTitles = lessonAnalyticsData.map(function (lesson) {
+                return lesson.title;
+            });
+
+            var lessonViews = lessonAnalyticsData.map(function (lesson) {
+                return lesson.views;
+            });
+
+            var teacherEarnings = lessonAnalyticsData.map(function (lesson) {
+                return lesson.teacher_earnings;
+            });
+
+            var schoolEarnings = lessonAnalyticsData.map(function (lesson) {
+                return lesson.school_earnings;
+            });
+
+            // Chart.js configuration
+            var ctx = document.getElementById('lessonAnalyticsChart').getContext('2d');
+
+            var lessonAnalyticsChart = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: {
+                    labels: lessonTitles,
+                    datasets: [{
+                        label: 'Views',
+                        data: lessonViews,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Lesson Views'
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                var lessonIndex = tooltipItem.index;
+                                var lesson = lessonAnalyticsData[lessonIndex];
+                                var views = lesson.views;
+                                var teacherEarnings = lesson.teacher_earnings;
+                                var schoolEarnings = lesson.school_earnings;
+
+                                // Format tooltip label with views and earnings information
+                                return 'Views: ' + views + ' | Teacher: $' + teacherEarnings.toFixed(2) + ' | School: $' + schoolEarnings.toFixed(2);
+                            }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: lessonAnalyticsData.map(function (lesson, index) {
+                                return {
+                                    type: 'line',
+                                    mode: 'horizontal',
+                                    scaleID: 'y-axis-0',
+                                    value: index,
+                                    borderColor: 'black',
+                                    borderWidth: 1,
+                                    label: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        content: 'Teacher: $' + lesson.teacher_earnings.toFixed(2) + ' | School: $' + lesson.school_earnings.toFixed(2),
+                                        enabled: true
+                                    }
+                                };
+                            })
+                        }
+                    }
+                }
+            });
+        });
+</script>
+
 
 @endsection

@@ -11,9 +11,15 @@ class Assessment extends Model
     use HasFactory, SoftDeletes;
     protected $fillable = [
         'course_id',
+        'school_id',
+        'class_section_id',
         'name',
         'description',
-        'date',
+        'complete_score',
+        'due_date',
+        'academic_session_id',
+        'term_id',
+        'use_in_final_result',
     ];
 
     /**
@@ -23,6 +29,20 @@ class Assessment extends Model
     {
         return $this->belongsTo(Course::class);
     }
+    public function getMaxScore()
+    {
+        return $this->complete_score;
+    }
+
+
+    public function class_section()
+    {
+        return $this->belongsTo(SchoolClassSection::class, 'class_section_id');
+    }
+    public function classSection()
+    {
+        return $this->belongsTo(SchoolClassSection::class, 'class_section_id');
+    }
 
     /**
      * Get the grades associated with the assessment.
@@ -30,5 +50,35 @@ class Assessment extends Model
     public function grades()
     {
         return $this->hasMany(Grade::class, 'assessment_id');
+    }
+
+    public function getAverageCompleteScore()
+    {
+        $grades = $this->grades;
+
+        if ($grades->isEmpty()) {
+            return 0; // Return 0 if no grades are associated with this assignment
+        }
+
+        // Calculate the average complete score for this assignment
+        $totalCompleteScore = $grades->sum('complete_score');
+        $count = $grades->count();
+        $averageCompleteScore = $count > 0 ? ($totalCompleteScore / $count) : 0;
+
+        return $averageCompleteScore;
+    }
+
+    public function academicSession()
+    {
+        return $this->belongsTo(AcademicSession::class);
+    }
+
+    public function term()
+    {
+        return $this->belongsTo(Term::class);
+    }
+    public function archive()
+    {
+        $this->update(['archived' => true]);
     }
 }

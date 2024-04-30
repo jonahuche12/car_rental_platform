@@ -43,31 +43,46 @@
         margin-top: 10px;
     }
 
-    .details-heading {
-        font-size: 18px;
-        margin-bottom: 10px;
+     /* Background overlay for expanded details */
+     .collapsed-details {
+        height: 100%; /* Adjust the maximum height for scrollable area */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #fff; /* Text color for details */
     }
 
+    /* Toggle button style */
+    .toggle-details-btn {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background-color: #17a2b8; /* Your desired button color */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .toggle-details-btn i {
+        margin-left: 5px;
+    }
+
+    /* Styling for detail labels and values */
     .detail-item {
-        display: flex;
         margin-bottom: 8px;
     }
 
     .detail-label {
         font-weight: bold;
-        margin-right: 8px;
     }
 
     .detail-value {
-        color: #6c757d;
+        color: #fff; /* Text color for detail values */
     }
-    
     .toggle-icon {
         transition: transform 0.3s ease; /* Adjust the duration and easing function as needed */
-    }
-
-    .collapsed-details {
-        display: none;
     }
 
 
@@ -188,57 +203,60 @@
                                     <!-- Add permission checkboxes -->
                                     @if ($admin->id !== auth()->id())
                                     <div class="user-permissions">
-                                        <h5 style="cursor:pointer;" class="details-heading toggle-details-btn" data-target="user-details-{{ $admin->id }}">
+                                        <h5 style="cursor:pointer;" class="details-heading btn bg-purple toggle-details-btn" data-target="user-details-{{ $admin->id }}">
                                             Permissions <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
                                         <div id="user-details-{{ $admin->id }}" class="collapsed-details">
                                         <!-- Add your permission checkboxes here as you have already done -->
+                                        <h5 style="cursor:pointer;" class="details-heading  btn bg-purple toggle-details-btn" data-target="user-details-{{ $admin->id }}">
+                                            Permissions <i class="toggle-icon fas fa-chevron-down"></i>
+                                        </h5>
                                         <div class="form-group mb-2">
-                                            <label for="confirm-student" >Confirm Student</label>
-                                            <input type="checkbox" data-permission="permission_confirm_student" {{ $admin->profile->permission_confirm_student ? 'checked' : '' }}>
+                                            <label for="confirm-student" class="small-text" >Confirm Student</label>
+                                            <input type="checkbox"  class="small-text" data-permission="permission_confirm_student" {{ $admin->profile->permission_confirm_student ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Confirm Admin </label>
+                                        <label for="confirm-admin" class="small-text" >Confirm Admin </label>
                                         
                                         <input type="checkbox" data-permission="permission_confirm_admin" {{ $admin->profile->permission_confirm_admin ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Confirm Teachers </label>
+                                        <label for="confirm-admin" class="small-text" >Confirm Teachers </label>
                                         
                                         <input type="checkbox" data-permission="permission_confirm_teacher" {{ $admin->profile->permission_confirm_teacher ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Confirm Staff</label>
+                                        <label for="confirm-admin" class="small-text" >Confirm Staff</label>
                                         <input type="checkbox" data-permission="permission_confirm_staff" {{ $admin->profile->permission_confirm_staff ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Create Course</label>
+                                        <label for="confirm-admin" class="small-text" >Create Course</label>
                                         <input type="checkbox" data-permission="permission_create_course" {{ $admin->profile->permission_create_course ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Create Events</label>
+                                        <label for="confirm-admin" class="small-text" >Create Events</label>
                                         <input type="checkbox" data-permission="permission_create_event" {{ $admin->profile->permission_create_event ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Create Lesson</label>
+                                        <label for="confirm-admin" class="small-text" >Create Lesson</label>
                                         <input type="checkbox" data-permission="permission_create_lesson" {{ $admin->profile->permission_create_lesson ? 'checked' : '' }}>
     
                                         </div>
                                         <div class="form-group mb-2">
 
-                                        <label for="confirm-admin">Create Class</label>
+                                        <label for="confirm-admin" class="small-text" >Create Class</label>
                                         <input type="checkbox" data-permission="permission_create_class" {{ $admin->profile->permission_create_class ? 'checked' : '' }}>
     
                                         </div>

@@ -22,8 +22,11 @@ class CreateEventsTable extends Migration
             $table->string('location')->nullable();
             $table->string('banner_picture')->nullable(); // New field for banner picture
             $table->unsignedBigInteger('school_id');
+            $table->unsignedBigInteger('academic_session_id');
+            $table->unsignedBigInteger('term_id');
+            $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
+            $table->foreign('term_id')->references('id')->on('terms')->onDelete('cascade');
             $table->timestamps();
-
             // Foreign key constraint to associate events with a school
             $table->foreign('school_id')->references('id')->on('schools')->onDelete('cascade');
         });

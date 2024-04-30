@@ -125,7 +125,7 @@
                   <li class="nav-item"><a class="nav-link" href="#courses" data-toggle="tab">Courses
                     
                   </a></li>
-                  <li class="nav-item"><a class="nav-link" href="#analytics" data-toggle="tab">Analytics</a></li>
+                  <!-- <li class="nav-item"><a class="nav-link" href="#analytics" data-toggle="tab">Analytics</a></li> -->
                 </ul> 
               </div><!-- /.card-header -->
               <div class="card-body">
@@ -291,6 +291,13 @@
                           <div class="card-header">
                             <h3 class="card-title">Courses Offered By <b>{{$student->profile->full_name}}</b></h3>
                           </div>
+                          @php
+                          
+                                  $school = $student->school;
+                                  $school_session = $school->academicSession;
+                                  $school_term = $school->term;
+
+                                  @endphp
                           <!-- ./card-header -->
                           <div class="card-body">
                             <table class="table table-bordered table-hover">
@@ -304,30 +311,232 @@
                                 </tr>
                               </thead>
                               <tbody>
+                              <div class="card-body table-responsive">
+                              <table class="table table-bordered table-hover">
+                                  <thead class="thead-dark">
+                                      <tr>
+                                          <th>#</th>
+                                          <th>Course</th>
+                                          <th>Teacher</th>
+                                          <th>Compulsory</th>
+                                          <th>Description</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
                                 @foreach($student->student_courses as $course)
-                                <tr data-widget="expandable-table" aria-expanded="false">
-                                  <td>{{$loop->iteration }}</td>
-                                  <td>{{$course->name}}</td>
-                                  <td>{{$course->getTeacherForClassSection($student->userClassSection->id)->profile->full_name}}</td>
-                                  <td>
-                                    @if($course->compulsory)
-                                    <span class="text-success"><i class="fa fa-check"></i>compulsory</span>
-                                    @else
-                                    <span class="text-secondary"><i class="fa fa-check"></i>elective</span>
-                                    @endif
-                                  </td>
-                                  <td>{{$course->description}}</td>
-                                </tr>
-                                <tr class="expandable-body">
-                                  <td colspan="5">
-                                    <p>
-                                    
-                                    </p>
-                                  </td>
-                                </tr>
-                                @endforeach
-                              </tbody>
-                            </table>
+                                          <tr>
+                                              <td>{{$loop->iteration}}</td>
+                                              <td>
+                                                  <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_{{$course->id}}" aria-expanded="false" aria-controls="collapse_{{$course->id}}">
+                                                      {{$course->name}}
+                                                  </button>
+                                              </td>
+                                              <td>
+                                                  @if($teacher = $course->getTeacherForClassSection($student->class_section_id))
+                                                      {{$teacher->profile->full_name}}
+                                                  @endif
+                                              </td>
+                                              <td>
+                                                  @if($course->compulsory)
+                                                      <span class="badge badge-success">Compulsory</span>
+                                                  @else
+                                                      <span class="badge badge-warning">Elective</span>
+                                                  @endif
+                                              </td>
+                                              <td>{{$course->description}}</td>
+                                          </tr>
+                                          <tr>
+                                              <td colspan="5">
+                                                  <div id="collapse_{{$course->id}}" class="collapse" aria-labelledby="heading_{{$course->id}}" data-parent="#accordion_{{$course->id}}">
+                                                      <div id="accordion_{{$course->id}}">
+    @foreach($school_session->terms->sortByDesc('created_at') as $term)
+    @if($term->name == $school_term->name)
+        <div class="card">
+            <div class="card-header" id="heading_{{$term->id}}_{{$course->id}}">
+                <h2 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_{{$term->id}}_{{$course->id}}" aria-expanded="true" aria-controls="collapse_{{$term->id}}_{{$course->id}}">
+                        {{$course->name}}
+                       <span class="badge badge-warning"> <b> <span class="">{{$school_session->name ?? ''}}</b>
+                        <b class="">{{$term->name}}</b></span>
+                        
+                    </button>
+                </h2>
+            </div>
+            <div id="collapse_{{$term->id}}_{{$course->id}}" class="collapse" aria-labelledby="heading_{{$term->id}}_{{$course->id}}" data-parent="#accordion_{{$course->id}}">
+                <div class="card-body">
+                    <h6 class="badge badge-warning">Assignments</h6>
+                    @include('partials.assignment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
+                </div>
+                <div class="card-body">
+                    <h6 class="badge badge-info">Assessments</h6>
+                    @include('partials.assessment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
+                </div>
+                <div class="card-body">
+                    <h6 class="badge badge-primary">Exams</h6>
+                    @include('partials.exam_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
+                </div>
+            </div>
+            @php
+            $total_assignment_score = 0;
+            $num_assignments = 0;
+            $total_assessment_score = 0;
+            $num_assessments = 0;
+            $total_exam_score = 0;
+            $num_exams = 0;
+
+            foreach($student->grades->where('course_id', $course->id) as $grade){
+                if($grade->assignment && $grade->assignment->academicSession->id == $school_session->id && $grade->assignment->term->name == $term->name){
+                    $total_assignment_score += $grade->score;
+                    $num_assignments++;
+                }
+                if($grade->assessment && $grade->assessment->academicSession->id == $school_session->id && $grade->assessment->term->name == $term->name){
+                    $total_assessment_score += $grade->score;
+                    $num_assessments++;
+                }
+                if($grade->exam && $grade->exam->academicSession->id == $school_session->id && $grade->exam->term->name == $term->name){
+                    $total_exam_score += $grade->score;
+                    $num_exams++;
+                }
+            }
+
+            $average_assignment_score = ($num_assignments > 0) ? $total_assignment_score / $num_assignments : 0;
+            $average_assessment_score = ($num_assessments > 0) ? $total_assessment_score / $num_assessments : 0;
+            $average_exam_score = ($num_exams > 0) ? $total_exam_score / $num_exams : 0;
+            @endphp
+
+            <div class="card mb-3">
+              <div class="card-body">
+                  <h6 class="card-title">Summary</h6>
+
+                  <div class="row">
+                      <div class="col-md-4 col-sm-12">
+                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
+                              <h6 class="mb-3">Assignments</h6>
+                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_assignment_score }}</p>
+                              <p class="mb-1"><span class="badge badge-info">Average Score: </span>  {{ number_format($average_assignment_score, 2) }}</p>
+                          </div>
+                      </div>
+
+                      <div class="col-md-4 col-sm-12">
+                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
+                              <h6 class="mb-3">Assessments</h6>
+                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_assessment_score }}</p>
+                              <p class="mb-1"><span class="badge badge-info">Average Score: </span> {{ number_format($average_assessment_score, 2) }}</p>
+                          </div>
+                      </div>
+
+                      <div class="col-md-4 col-sm-12">
+                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
+                              <h6 class="mb-3">Exams</h6>
+                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_exam_score }}</p>
+                              <p class="mb-1"><span class="badge badge-info">Average Score: </span>  {{ number_format($average_exam_score, 2) }}</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+
+
+          </div>
+       
+    @else
+        <div class="card">
+            <div class="card-header" id="heading_{{$term->id}}_{{$course->id}}">
+                <h2 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_{{$term->id}}_{{$course->id}}" aria-expanded="false" aria-controls="collapse_{{$term->id}}_{{$course->id}}">
+                        {{$course->name}}
+                        <span class="badge badge-warning"> <b> <span class="">{{$school_session->name ?? ''}}</b>
+                        <b class="">{{$term->name}}</b></span>
+                    </button>
+                </h2>
+            </div>
+            <div id="collapse_{{$term->id}}_{{$course->id}}" class="collapse" aria-labelledby="heading_{{$term->id}}_{{$course->id}}" data-parent="#accordion_{{$course->id}}">
+                <div class="card-body">
+                    <h6 class="badge badge-warning">Assignments</h6>
+                    @include('partials.assignment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
+                </div>
+                <div class="card-body">
+                    <h6 class="badge badge-info">Assessments</h6>
+                    @include('partials.assessment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
+                </div>
+                <div class="card-body">
+                    <h6 class="badge badge-primary">Exams</h6>
+                    @include('partials.exam_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
+                </div>
+            </div>
+            @php
+              $total_assignment_score = 0;
+              $num_assignments = 0;
+              $total_assessment_score = 0;
+              $num_assessments = 0;
+              $total_exam_score = 0;
+              $num_exams = 0;
+
+              foreach($student->grades->where('course_id', $course->id) as $grade){
+                  if($grade->assignment && $grade->assignment->academicSession->id == $school_session->id && $grade->assignment->term->name == $term->name){
+                      $total_assignment_score += $grade->score;
+                      $num_assignments++;
+                  }
+                  if($grade->assessment && $grade->assessment->academicSession->id == $school_session->id && $grade->assessment->term->name == $term->name){
+                      $total_assessment_score += $grade->score;
+                      $num_assessments++;
+                  }
+                  if($grade->exam && $grade->exam->academicSession->id == $school_session->id && $grade->exam->term->name == $term->name){
+                      $total_exam_score += $grade->score;
+                      $num_exams++;
+                  }
+              }
+
+              $average_assignment_score = ($num_assignments > 0) ? $total_assignment_score / $num_assignments : 0;
+              $average_assessment_score = ($num_assessments > 0) ? $total_assessment_score / $num_assessments : 0;
+              $average_exam_score = ($num_exams > 0) ? $total_exam_score / $num_exams : 0;
+            @endphp
+
+              <div class="card mb-3">
+              <div class="card-body">
+                  <h6 class="card-title">Summary</h6>
+
+                  <div class="row">
+                      <div class="col-md-4 col-sm-12">
+                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
+                              <h6 class="mb-3">Assignments</h6>
+                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span> {{ $total_assignment_score }}</p>
+                              <p class="mb-1"><span class="badge badge-info">Average Score: </span>  {{ number_format($average_assignment_score, 2) }}</p>
+                          </div>
+                      </div>
+
+                      <div class="col-md-4 col-sm-12">
+                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
+                              <h6 class="mb-3">Assessments</h6>
+                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_assessment_score }}</p>
+                              <p class="mb-1"><span class="badge badge-info">Total Score: </span>  {{ number_format($average_assessment_score, 2) }}</p>
+                          </div>
+                      </div>
+
+                      <div class="col-md-4 col-sm-12">
+                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
+                              <h6 class="mb-3">Exams</h6>
+                              <p class="mb-1"> <span class="badge badge-primary">Total Score: </span> {{ $total_exam_score }}</p>
+                              <p class="mb-1"><span class="badge badge-info">Average Score: </span>{{ number_format($average_exam_score, 2) }}</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+
+        </div>
+    @endif
+@endforeach
+
+                                                      </div>
+                                                  </div>
+                                              </td>
+                                          </tr>
+                                      @endforeach
+                                  </tbody>
+                              </table>
                           </div>
                           <!-- /.card-body -->
                         </div>
@@ -340,52 +549,9 @@
 
 
                   <div class="tab-pane" id="analytics">
-                    <form class="form-horizontal">
-                      <div class="form-group row">
-                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputName" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputName2" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
-                        <div class="col-sm-10">
-                          <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <div class="checkbox">
-                            <label>
-                              <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-danger">Submit</button>
-                        </div>
-                      </div>
-                    </form>
+                    @include('partials.chart_table')
+
+
                   </div>
                   <!-- /.tab-pane -->
                 </div>
@@ -404,8 +570,97 @@
 
 @section('scripts')
 <script>
- 
-    
-</script>
+// Retrieve the data for assignments, assessments, and exams (replace with your actual data)
+var assignmentData = {
+        labels: ['A', 'B', 'C', 'D', 'F'],
+        datasets: [{
+            label: 'Assignment Grades',
+            data: [20, 30, 25, 15, 10], // Sample data (replace with your actual data)
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.5)',
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)'
+            ]
+        }]
+    };
+
+    var assessmentData = {
+        labels: ['A', 'B', 'C', 'D', 'F'],
+        datasets: [{
+            label: 'Assessment Grades',
+            data: [15, 25, 20, 30, 10], // Sample data (replace with your actual data)
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.5)',
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)'
+            ]
+        }]
+    };
+
+    var examData = {
+        labels: ['A', 'B', 'C', 'D', 'F'],
+        datasets: [{
+            label: 'Exam Grades',
+            data: [10, 20, 15, 25, 30], // Sample data (replace with your actual data)
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.5)',
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)'
+            ]
+        }]
+    };
+
+    // Create charts for assignments, assessments, and exams
+    var assignmentChart = new Chart(document.getElementById('assignmentGradeChart'), {
+        type: 'bar',
+        data: assignmentData,
+        options: {
+            responsive: true,
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Assignment Grade Distribution'
+            }
+        }
+    });
+
+    var assessmentChart = new Chart(document.getElementById('assessmentGradeChart'), {
+        type: 'bar',
+        data: assessmentData,
+        options: {
+            responsive: true,
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Assessment Grade Distribution'
+            }
+        }
+    });
+
+    var examChart = new Chart(document.getElementById('examGradeChart'), {
+        type: 'bar',
+        data: examData,
+        options: {
+            responsive: true,
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Exam Grade Distribution'
+            }
+        }
+    });
+</script>>
 
 @endsection

@@ -38,6 +38,62 @@ Central School System - {{$section->name }}- Class Section
         padding: 15px;
     }
 
+    .user-permissions {
+        display: flex;
+        flex-direction: column;
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    .details-heading {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+      /* Background overlay for expanded details */
+      .collapsed-details {
+        height: 100%; /* Adjust the maximum height for scrollable area */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #fff; /* Text color for details */
+    }
+
+    /* Toggle button style */
+    .toggle-details-btn {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background-color: #17a2b8; /* Your desired button color */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .toggle-details-btn i {
+        margin-left: 5px;
+    }
+
+    /* Styling for detail labels and values */
+    .detail-item {
+        margin-bottom: 8px;
+    }
+
+    .detail-label {
+        font-weight: bold;
+    }
+
+    .detail-value {
+        color: #fff; /* Text color for detail values */
+    }
+    .toggle-icon {
+        transition: transform 0.3s ease; /* Adjust the duration and easing function as needed */
+    }
+
 
 
 
@@ -141,34 +197,51 @@ Central School System - {{$section->name }}- Class Section
                                     @endif
                                     <a class="users-list-name" href="#" data-admin-name="{{ $student->profile->full_name }}">
                                         {{ $student->profile->full_name }} <br>
-                                        <span class="text-success">{{ $student->profile->role }}</span>
+                                        <span class="text-success">{{ $student->userClassSection->code }}</span>
                                     </a>
                                 </div>
                                 <span class="users-list-date">{{ \Carbon\Carbon::parse($student->created_at)->diffForHumans() }}</span>
 
                                 @if ($student->id !== auth()->id())
                                     <div class="user-permissions">
-                                        <h5 style="cursor:pointer;" class="details-heading toggle-details-btn" data-target="user-details-{{ $student->id }}">
+                                    <style>
+                                    #student-details-{{ $student->id }} {
+                                        /* display: none; */
+                                        margin-top: 10px;
+                                        position: absolute;
+                                        /* background-color: #f9f9c6; */
+                                        border: 1px solid #ccc;
+                                        padding: 10px;
+                                        z-index: 1000;
+                                        width: 100%;
+                                        height: 100%;
+                                        max-width: calc(100% - 20px);
+                                    }
+                                </style>
+                                        <h5 style="cursor:pointer;" class="details-heading toggle-details-btn" data-target="student-details-{{ $student->id }}">
                                             Details <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
-                                        <div id="user-details-{{ $student->id }}" class="collapsed-details">
+                                        <div id="student-details-{{ $student->id }}" class="collapsed-details">
+                                        <h5 style="cursor:pointer;" class="details-heading toggle-details-btn" data-target="student-details-{{ $student->id }}">
+                                        Details <i class="toggle-icon fas fa-chevron-down"></i>
+                                        </h5>
                                             <!-- Your existing details content here -->
                                             <div class="detail-item">
                                                 <span class="detail-label"><strong>Email:</strong></span>
-                                                <span class="detail-value">{{ $student->email }}</span>
+                                                <p class="detail-value small-text">{{ $student->email }}</p>
                                             </div>
                                             <div class="detail-item">
                                                 <span class="detail-label"><strong>Phone:</strong></span>
-                                                <span class="detail-value">{{ $student->profile->phone_number ?? 'N/A' }}</span>
-                                            </div>
+                                                <p class="detail-value small-text">{{ $student->profile->phone_number ?? 'N/A' }}</span>
+                                </p>
                                             <div class="detail-item">
                                                 <span class="detail-label"><strong>Gender:</strong></span>
-                                                <span class="detail-value">{{ $student->profile->gender }}</span>
+                                                <p class="detail-value small-text">{{ $student->profile->gender }}</p>
                                             </div>
                                             <div class="detail-item">
                                                 <span class="detail-label"><strong>Date of Birth:</strong></span>
-                                                <span class="detail-value">{{ $student->profile->date_of_birth ?? 'N/A' }}</span>
-                                            </div>
+                                                <p class="detail-value small-text">{{ $student->profile->date_of_birth ?? 'N/A' }}</span>
+                                </p>
                                         </div>
 
                                         <!-- Action icons with improved styling -->

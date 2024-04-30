@@ -166,5 +166,44 @@ class School extends Model
         return $this->hasMany(Course::class);
     }
 
+    public function academicSession()
+    {
+        return $this->belongsTo(AcademicSession::class);
+    }
+
+    // Define the relationship with Term
+    public function term()
+    {
+        return $this->belongsTo(Term::class);
+    }
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public static function manageAllSchools()
+    {
+        // Retrieve all schools ordered alphabetically by name
+        $schools = School::orderBy('name')->get();
+
+        return $schools;
+    }
+
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+    public function assessments()
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    public function exams()
+    {
+        return $this->hasMany(Exam::class);
+    }
+
     
 }

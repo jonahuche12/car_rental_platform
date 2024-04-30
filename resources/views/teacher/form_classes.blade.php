@@ -6,7 +6,7 @@
 
 @endsection
 
-@section('title', "Central School System - $school->name - Admins")
+@section('title', "CSS - $school->name - Form Classes")
 
 @section('style')
 <style>
@@ -26,34 +26,88 @@
         padding: 10px;
         margin-bottom: 10px;
     }
+    
+    .attendance-label {
+        font-weight: bold;
+    }
 
+    .attendance-icon {
+        font-size: 24px; /* Adjust size as needed */
+        margin-left: 5px; /* Add some space between label and icon */
+        transition: transform 0.3s ease; /* Add a smooth transition effect */
+    }
+
+    .attendance-icon:hover {
+        transform: scale(1.2); /* Scale the icon on hover for a subtle effect */
+    }
     .admin-card {
-        margin-bottom: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .admin-card .card-body {
-        padding: 15px;
-    }
+        .admin-card .card-body {
+            padding: 15px;
+        }
 
     .user-permissions {
-        margin-top: 15px;
-    }
-    .attendance-label {
-    font-weight: bold;
-}
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
 
-.attendance-icon {
-    font-size: 24px; /* Adjust size as needed */
-    margin-left: 5px; /* Add some space between label and icon */
-    transition: transform 0.3s ease; /* Add a smooth transition effect */
-}
+        .details-heading {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
 
-.attendance-icon:hover {
-    transform: scale(1.2); /* Scale the icon on hover for a subtle effect */
-}
+        /* Background overlay for expanded details */
+        .collapsed-details {
+            height: 100%; /* Adjust the maximum height for scrollable area */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #fff; /* Text color for details */
+        }
+
+        /* Toggle button style */
+        .toggle-details-btn {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #17a2b8; /* Your desired button color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .toggle-details-btn i {
+            margin-left: 5px;
+        }
+
+        /* Styling for detail labels and values */
+        .detail-item {
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+        }
+
+        .detail-value {
+            color: #fff; /* Text color for detail values */
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease; /* Adjust the duration and easing function as needed */
+        }
+
+
 
 
     
@@ -77,10 +131,8 @@
                 <h3 class="card-title">Students</h3>
 
                 <div class="card-tools">
-                    <span class="badge badge-danger">{{ $form_classes->count()  }}</span>
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
+                    <span class="badge bg-info">{{ $form_classes->count()  }} form class(es)</span>
+                    
                    <!-- Button to add admin -->
                    <div class="btn-group">
                     
@@ -116,15 +168,16 @@
 
                 
                 @foreach($form_classes as $form_class)
-                <div class="admin-card">
-                    <div class="card-header tog-header bg-dark">
-                        <h6 class="p-2">{{ $form_class->name }}  <i class="toggle-icon fas fa-chevron-down"></i></h6>
+                <div class="admin-card card-header p-2 tog-header collapsed"> <!-- Add 'collapsed' class here -->
+                    <div class="card-header tog-header bg-info p-2" style="cursor:pointer" >
+                        <h6 class="p-2 class-header">{{ $form_class->name }}  <i class="toggle-icon fas fa-chevron-down"></i></h6>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="display: none;"> <!-- Add 'style="display: none;"' here -->
+                    
                         <ul class="users-list clearfix">
                             @forelse($form_class->students as $student)
                             <li class="col-md-3 col-6">
-                            <div class="card admin-card" data-admin-id="{{ $student->id }}" data-admin-name="{{ $student->profile->full_name }}">
+                            <div class="card card" data-admin-id="{{ $student->id }}" data-admin-name="{{ $student->profile->full_name }}">
                                 <div class="card-body">
                                     <div class="dropdown" style="position: absolute; top: 10px; left: 10px;">
                                         <button class="btn btn-sm btn-clear dropdown-toggle" type="button" id="studentActionsDropdown{{ $student->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -138,8 +191,14 @@
                                         </style>
                                         <div class="dropdown-menu" aria-labelledby="studentActionsDropdown{{ $student->id }}">
                                             <a class="dropdown-item" href="{{ route('student', ['studentId' => $student->id]) }}">View</a>
-                                                <div class="dropdown-divider"></div>
+                                            <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="#">Message</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item result-btn" href="#" data-student-id="{{ $student->id }}" data-academic-session-id="{{ $school->academicSession->id }}" data-term-id="{{ $school->term->id }}">Compile Result</a>
+                                                <div class="dropdown-divider"></div>
+                                            <a href="{{ route('view_student_result', ['student_id' => $student->id, 'academic_session_id' => $school->academicSession->id , 'term_id' => $school->term->id ]) }}" class="btn btn-primary btn-sm mt-2">View Result</a>
+
+
                                             @if ($student->id !== auth()->id())
                                                 <div class="dropdown-divider"></div>
                                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#removestudentModal{{ $student->id }}">Remove student</a>
@@ -160,11 +219,11 @@
                                         <!-- Inside the <div class="card-body"> loop -->
                                         <div class="student-attendance">
                                             @if ($student->attendanceForToday())
-                                                <label for="attendance"  class="text-success">Today's Attendance</label>
-                                                <i class="attendance-icon fas fa-check text-success" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}"></i> <!-- Green check icon if attendance is true -->
+                                                <label for="attendance"  class="text-success attendance-icon small-text text-success" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}">Today's Attendance</label>
+                                                <i class="attendance-icon small-text fas fa-check text-success" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}"></i> <!-- Green check icon if attendance is true -->
                                             @else
-                                                <label for="attendance" class="text-secondary">Today's Attendance</label>
-                                                <i class="attendance-icon fas fa-times text-secondary" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}"></i> <!-- Grey cross icon if attendance is not true -->
+                                                <label for="attendance" class="text-secondary attendance-icon small-text text-secondary" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}">Today's Attendance</label>
+                                                <i class="attendance-icon small-text fas fa-times text-secondary" data-student-id="{{ $student->id }}" data-school-id="{{ $student->school_id }}" data-teacher-id="{{ auth()->id() }}"></i> <!-- Grey cross icon if attendance is not true -->
                                             @endif
                                             <br>
                                             <span id="attendance-message-success-{{ $student->id }}" class="text-message text-success"></span> <!-- Placeholder for success message -->
@@ -172,13 +231,14 @@
                                         </div>
 
                                     </span>
-
                                     <div class="user-permissions">
-                                        <h5 style="cursor:pointer;" class="details-heading toggle-details-btn" data-target="user-details-{{ $student->id }}">
+                                        <h5 style="cursor:pointer;" class="details-heading  small-text toggle-details-btn" data-target="user-details-{{ $student->id }}">
                                             Details <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
                                         <div id="user-details-{{ $student->id }}" class="collapsed-details">
-                                            <!-- Your existing details content here -->
+                                        <h5 style="cursor:pointer;" class="details-heading  small-text toggle-details-btn" data-target="user-details-{{ $student->id }}">
+                                            Details <i class="toggle-icon fas fa-chevron-down"></i>
+                                        </h5>
                                             <div class="detail-item">
                                                 <span class="detail-label"><strong>Email:</strong></span>
                                                 <span class="detail-value">{{ $student->email }}</span>
@@ -220,10 +280,10 @@
                                     </div>
                                 </div>
                             </div>
-                        </li>
-                            @empty
-                                <p id="no-admin" class="p-2">No Student found for this school.</p>
-                            @endforelse
+                            </li>
+                                @empty
+                                    <p id="no-admin" class="p-2">No Student found for this school.</p>
+                                @endforelse
                         </ul>
                     </div>
                 </div>
@@ -245,51 +305,50 @@
 @endsection
 @section('scripts')
 <script>
-    $(document).ready(function () {
-        // Hide all students initially
-        $('.users-list').hide();
+  document.addEventListener('DOMContentLoaded', function () {
+    // Get all form class headers
+    var classHeaders = document.querySelectorAll('.class-header');
 
-        // Show students of the first class initially
-        $('.users-list:first').closest('.admin-card').find('.card-body .users-list').slideDown();
-        $('.toggle-icon').addClass('fa-chevron-down');
+    // Add click event listener to each header
+    classHeaders.forEach(function (header) {
+        header.addEventListener('click', function () {
+            // Get the parent form class element
+            var formClass = this.parentElement.parentElement;
 
-        // Add click event to class name for toggling students
-        $('.p-2', '.tog-header').on('click', function () {
-            // Toggle the display of students for the clicked class
-            var usersList = $(this).closest('.admin-card').find('.card-body .users-list');
-            usersList.slideToggle();
+            // Close all other form classes except the clicked one
+            var allFormClasses = document.querySelectorAll('.admin-card');
+            allFormClasses.forEach(function (formCard) {
+                if (formCard !== formClass) {
+                    formCard.classList.add('collapsed');
+                    formCard.querySelector('.card-body').style.display = 'none';
+                }
+            });
 
-            // Hide other students within other cards
-            $('.admin-card .card-body .users-list').not(usersList).slideUp();
+            // Toggle the collapsed class for the clicked form class
+            formClass.classList.toggle('collapsed');
 
-            // Toggle the chevron icon
-            var toggleIcon = $(this).find('.toggle-icon');
-            toggleIcon.toggleClass('fa-chevron-down fa-chevron-up');
-
-            // Reset other icons
-            $('.toggle-icon').not(toggleIcon).removeClass('fa-chevron-up').addClass('fa-chevron-down');
-        });
-
-        // Add click event to toggle details button
-        $('.toggle-details-btn').on('click', function () {
-            var targetId = $(this).data('target');
-            $('#' + targetId).toggleClass('collapsed-details');
-            // Toggle the chevron icon
-            $(this).find('.toggle-icon').toggleClass('fa-chevron-down fa-chevron-up');
+            // Toggle the visibility of the card body for the clicked form class
+            var cardBody = this.parentElement.nextElementSibling;
+            if (cardBody.style.display === 'none') {
+                cardBody.style.display = 'block';
+            } else {
+                cardBody.style.display = 'none';
+            }
         });
     });
+});
 
 </script>
 
 <script>
-   $(document).ready(function () {
-    // Add click event for attendance icons
-    $('.attendance-icon').on('click', function () {
-        var studentId = $(this).data('student-id');
-        var schoolId = $(this).data('school-id');
-        var teacherId = $(this).data('teacher-id');
-        var attendanceIcon = $(this);
-        var attendanceLabel = attendanceIcon.siblings('label');
+  $(document).ready(function () {
+    // Add click event for attendance labels
+    $('.attendance-icon').siblings('label').on('click', function () {
+        var attendanceLabel = $(this);
+        var attendanceIcon = attendanceLabel.siblings('.attendance-icon');
+        var studentId = attendanceIcon.data('student-id');
+        var schoolId = attendanceIcon.data('school-id');
+        var teacherId = attendanceIcon.data('teacher-id');
         var successMessageSpan = $('#attendance-message-success-' + studentId);
         var errorMessageSpan = $('#attendance-message-error-' + studentId);
 
@@ -323,6 +382,45 @@
                 successMessageSpan.text('').fadeOut();
                 errorMessageSpan.text('Failed to toggle attendance. Please try again later.').fadeIn().delay(3000).fadeOut();
             }
+        });
+    });
+    });
+
+
+</script>
+
+<script>
+   $(document).ready(function () {
+    // Add click event to the "Result" button
+    $('.result-btn').on('click', function (e) {
+        e.preventDefault();
+
+        // Retrieve data attributes from the button
+        var studentId = $(this).data('student-id');
+        var academicSessionId = $(this).data('academic-session-id');
+        var termId = $(this).data('term-id');
+
+        // Make an AJAX request to compile results
+        $.ajax({
+            url: '/compile-results/' + studentId,
+            type: 'GET',
+            data: {
+                academic_session_id: academicSessionId,
+                term_id: termId
+            },
+            success: function (response) {
+                console.log(response)
+                // Redirect to the result page with the compiled results as data
+                window.location.href = response.link;
+            },
+            error: function (xhr, status, error) {
+                // Handle errors if any
+                console.log(xhr.responseText)
+                console.error(error);
+            }
+        }).done(function(response) {
+            // Store the results in sessionStorage
+            sessionStorage.setItem('compiledResults', JSON.stringify(response.results));
         });
     });
 });

@@ -86,5 +86,39 @@ class SchoolClass extends Model
         });
          
     }
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class, 'class_level', 'class_level');
+    }
+
+    /**
+     * Get lessons related to this school class based on class_level.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getLessonsByClassLevel()
+    {
+        // Retrieve lessons where the class_level matches the current class_level of this SchoolClass
+        return Lesson::where('class_level', $this->class_level)->get();
+    }
+
+    public function courses()
+    {
+        $courseIds = [];
+
+        foreach ($this->schoolClassSections as $section) {
+            $sectionCourses = $section->courses;
+
+            foreach ($sectionCourses as $course) {
+                if (!in_array($course->id, $courseIds)) {
+                    $courseIds[] = $course->id;
+                }
+            }
+        }
+
+        // Retrieve unique courses based on collected course IDs
+        return Course::whereIn('id', $courseIds)->get();
+    }
+
 
 }

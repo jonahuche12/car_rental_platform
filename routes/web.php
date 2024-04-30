@@ -11,6 +11,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\CourseController;
 
 
 Auth::routes(['verify' => true]);
@@ -86,6 +89,74 @@ Route::middleware('auth')->group(function () {
     Route::get('/view_section/{sectionId}', [AdminController::class, 'viewSection'])->name('view_section');
 
     Route::post('/submit-course',  [HomeController::class, 'submitCourse'])->name('submit.course');
+    Route::post('/offer-course',  [HomeController::class, 'offerCourse'])->name('offer.course');
+    Route::post('/create-lesson', [HomeController::class, 'createLesson'])->name('create.lesson');
+
+
+    Route::post('/upload-chunk', [HomeController::class, 'uploadChunk']);
+    Route::post('/merge-chunks', [HomeController::class, 'mergeChunks']);
+    Route::post('/create-lesson', [HomeController::class, 'createLesson']);
+    Route::post('/upload', [LessonController::class, 'upload'])->name('upload');
+    Route::post('/lessons/{lessonId}/update-details', [LessonController::class, 'updateDetails']);
+
+    // routes/web.php
+
+    Route::get('/lessons/{lesson}', [LessonController::class, 'show'])->name('lessons.show');
+
+    Route::post('/remove-lesson/{lessonId}', [LessonController::class, 'removeLesson'])->name('remove.lesson');
+    Route::get('/lessons-edit/{lessonId}', [LessonController::class, 'getLessonById'])->name('lessons-edit.get');
+    Route::post('/lessons-update/{lessonId}', [LessonController::class, 'updateLesson'])->name('lessons-update.update');
+
+    Route::post('/credit-school-connects', [HomeController::class, 'creditSchoolConnects'])->name('credit.school_connects');
+    Route::post('/buy-connects',  [HomeController::class, 'buyConnects'])->name('buy_connects');
+    Route::get('/buy-connects_page/{amount}',  [HomeController::class, 'buyConnectsPage'])->name('buy-connects_page');
+
+    // Named route for buying package
+    Route::get('/buy-package', [HomeController::class, 'buyPackage'])->name('buy_package');
+
+    // Named route for contacting support
+    Route::get('/contact-support', [HomeController::class, 'contactSupport'])->name('contact_support');
+    Route::post('/check-school-connects', [LessonController::class, 'checkSchoolConnects'])->name('check_school_connects');
+    Route::post('/check-enrollment', [LessonController::class, 'checkEnrollment'])->name('lessons.checkEnrollment');
+
+    Route::post('/lesson/{lesson}/comment', [LessonController::class, 'store'])->name('comment.store');
+    Route::post('/comment/{comment}/reply', [LessonController::class, 'reply'])->name('comment.reply');
+    Route::post('/lessons/{lesson}/favorite', [LessonController::class, 'toggleFavorite'])->name('lessons.favorite');
+    Route::post('/lessons/{lesson}/like', [LessonController::class, 'toggleLike'])->name('lessons.like');
+    Route::get('/lessons/{lesson}/comments',  [LessonController::class, 'fetchLessonComments'])->name('lesson.comments');
+
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
+    Route::get('/search-results',[SearchController::class, 'showResults'])->name('search.results');
+    Route::get('/load-more-lessons', [HomeController::class, 'loadMoreLessons'])->name('load.more.lessons');
+    Route::get('/load-more-events', [HomeController::class, 'loadMoreEvents'])->name('load.more.events');
+    Route::get('/load-more-people', [HomeController::class, 'loadMorePeople'])->name('load.more.people');
+
+    Route::get('/load-more-curriculum-lessons', [CourseController::class, 'loadMoreCurriculumLessons'])->name('load.more.curriculum.lessons');
+
+    Route::get('/classes/{class}', [HomeController::class, 'showClass'])->name('class.show');
+
+
+    Route::get('/curriculum/{course}/class/{class_id}', [CourseController::class, 'showCurriculumforClass'])->name('curriculum.show');
+  
+    Route::get('/get-curriculum-details/{curriculum}', [CourseController::class, 'getCurriculumDetails'])
+    ->name('curriculum.details');
+
+    Route::get('/get-related-lessons/{curriculum}', [CourseController::class, 'getRelatedLessons'])
+    ->name('curriculum.related_lessons');
+
+    Route::get('/get-topic-details/{topic}/{curriculum}', [CourseController::class, 'getTopicDetails']);
+    Route::get('/curriculum/{curriculumId}/topic/{topicId}', [CourseController::class, 'getRelatedTopicLessons']);
+
+    Route::delete('/school/{id}', [SchoolController::class, 'deleteSchool'])->name('school.delete');
+    Route::get('/get-grade-distribution/{courseCode}', [SchoolController::class, 'getGradeDistribution']);
+    Route::get('/course/{courseCode}/gradedistribution', [SchoolController::class, 'getGradeDistribution']);
+
+    Route::get('/terms/{academicSession}', [SchoolController::class, 'getTermsByAcademicSession']);
+    Route::get('/compile-results/{studentId}', [TeacherController::class, 'compileResults'])->name('compile.results');
+    Route::get('/result_page', [TeacherController::class, 'showResults'])->name('result.page');
+
+    Route::post('/publish-result', [TeacherController::class, 'publishResult'])->name('publish_result');
+    Route::get('/view-student-result/{student_id}/{academic_session_id}/{term_id}', [HomeController::class, 'viewStudentResult'])->name('view_student_result');
 
 
 });
@@ -121,6 +192,20 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
     Route::post('/store_curricula', [SuperAdminController::class, 'storeCurriculum'])->name('store_curricula');
     Route::post('/store_curriculum_topic/{curriculum_id}', [SuperAdminController::class, 'storeCurriculumTopic'])->name('store_curriculum_topic');
 
+    Route::get('/create-academic_session', [SuperAdminController::class, 'manageAcademicSession'])->name('manage_academic_sessions');
+    Route::post('/academic_sessions', [SuperAdminController::class, 'createAcademicSession']);
+    Route::post('/academic_sessions/{id}/edit', [SuperAdminController::class, 'editAcademicSession'])->name('academic_sessions.edit');
+    
+    Route::delete('/academic_sessions/{id}', [SuperAdminController::class, 'deleteAcademicSession'])->name('academic_sessions.delete');
+
+    Route::post('/add_term/{academic_session}', [SuperAdminController::class, 'addTerm'])->name('add_term');
+    Route::get('/terms/{id}', [SuperAdminController::class, 'getTermDetails']);
+
+    Route::post('/edit_term/{id}', [SuperAdminController::class, 'editTerm']);
+    Route::delete('/delete-term/{id}', [SuperAdminController::class, 'deleteTerm']);
+
+
+    Route::get('/manage_all_schools', [SuperAdminController::class, 'manageAllSchools'])->name('manage_all_schools');
 
 
     // Add other routes for competitions, quizzes, etc.
@@ -136,7 +221,6 @@ Route::middleware(['auth', 'school_owner'])->group(function () {
     Route::post('/check-unique-school-email', 'SchoolController@checkUniqueSchoolEmail')->name('check-unique-school-email');
     Route::post('/school/{id}/edit', [SchoolController::class, 'editSchool'])->name('school.edit');
     
-    Route::delete('/school/{id}', [SchoolController::class, 'deleteSchool'])->name('school.delete');
     Route::post('/activate-school/{schoolId}', [SchoolController::class, 'activateSchool']);
     Route::get('/payment', [PaymentController::class, 'showPackagePaymentPage']);
     
@@ -151,6 +235,9 @@ Route::middleware(['auth', 'school_owner'])->group(function () {
 
     Route::post('/grant-permission/{adminId}', [SchoolController::class, 'grantPermission']);
     Route::post('/remove-admin/{adminId}', [SchoolController::class, 'removeAdmin'])->name('remove.admin');
+    Route::post('/update-academic-session', [SchoolController::class, 'updateAcademicSession'])->name('update.academic.session');
+    Route::post('/update-term', [SchoolController::class, 'updateTerm'])->name('update.term');
+
 
 
 
@@ -207,6 +294,22 @@ Route::group(['middleware' => 'verifyAdminPermissions:create_course'], function 
     
 });
 
+
+Route::group(['middleware' => 'verifyAdminPermissions:create_event'], function () {
+    
+    Route::get('/manage-events/{schoolId}', [AdminController::class, 'showEvents'])->name('manage-events');
+    Route::post('/school-event', [AdminController::class, 'createEvent'])->name('school-event');
+    Route::post('/delete-event/{eventId}', [AdminController::class, 'deleteEvent'])->name('delete.event');
+
+    Route::post('/event/{id}/edit', [AdminController::class, 'editEvent'])->name('event.edit');
+    // Route::post('/update_class_section_course', [AdminController::class, 'updateSectionTeacherCourse'])->name('update.section_teacher_course');
+    
+    // Route::get('/fetch-class-sections/{courseId}', [AdminController::class, 'fetchClassSections']);
+    // Route::post('/course/{id}/edit', [AdminController::class, 'editCourse'])->name('course.edit');
+
+    
+});
+
 Route::middleware(['auth', 'verifyTeacher'])->group(function () {
     // Your routes for authenticated teachers
     Route::get('/manage-form_classes/{teacherId}', [TeacherController::class, 'showFormClasses'])->name('manage-form_classes');
@@ -220,6 +323,31 @@ Route::middleware(['auth', 'verifyTeacher'])->group(function () {
     Route::get('/exam/{courseId}/{classSectionId}/{teacherId}', [TeacherController::class, 'examPage'])->name('exam');
 
     Route::post('/create_assignmment', [TeacherController::class, 'createAssignment'])->name('create_assignmment');
+    Route::post('saveGrade', [TeacherController::class, 'saveGrade'])->name('saveGrade');
+    Route::post('/assignment/{id}/edit', [TeacherController::class, 'editAssignment'])->name('assignment.edit');
+    Route::delete('/assignment/{assignmentId}', [TeacherController::class, 'deleteAssignment'])->name('delete.assignment');
+
+
+    Route::post('/create_assessment', [TeacherController::class, 'createAssessment'])->name('create_assessment');
+    Route::post('saveGradeAssessment', [TeacherController::class, 'saveGradeAssessment'])->name('saveGradeAssessment');
+    Route::post('/assessment/{id}/edit', [TeacherController::class, 'editAssessment'])->name('assessment.edit');
+    Route::delete('/assessment/{assessmentId}', [TeacherController::class, 'deleteAssessment'])->name('delete.assessment');
+
+
+    Route::post('/create_exam', [TeacherController::class, 'createExam'])->name('create_exam');
+    Route::post('saveGradeExam', [TeacherController::class, 'saveGradeExam'])->name('saveGradeExam');
+    Route::post('/exam/{id}/edit', [TeacherController::class, 'editExam'])->name('exam.edit');
+    Route::delete('/exam/{examId}', [TeacherController::class, 'deleteExam'])->name('delete.exam');
+    Route::post('/archive/{model}/{assignment}', [TeacherController::class, 'archive'])->name('archive');
+
+    Route::post('/toggle-assignment/{model}/{assignmentId}', [TeacherController::class, 'toggleAssignmentStatus'])->name('toggle.assignment.status');
+
+    Route::post('/toggle-assessment/{model}/{assessmentId}', [TeacherController::class, 'toggleAssignmentStatus'])->name('toggle.assessment.status');
+
+
+    Route::post('/toggle-exam/{model}/{examId}', [TeacherController::class, 'toggleAssignmentStatus'])->name('toggle.exam.status');
+
+
 
 
 });

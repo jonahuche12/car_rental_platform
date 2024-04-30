@@ -38,8 +38,14 @@ class CreateSchoolsTable extends Migration
             $table->datetime('expected_expiration')->nullable();
             $table->boolean('verified')->default(false);
             $table->boolean('publish')->default(false);
-            $table->unsignedBigInteger('school_package_id');
+            $table->unsignedBigInteger('school_package_id')->nullable();
             $table->foreign('school_package_id')->references('id')->on('school_packages')->onDelete('cascade');
+
+
+            $table->unsignedBigInteger('academic_session_id')->nullable();
+            $table->foreign('academic_session_id')->references('id')->on('academic_sessions')->onDelete('cascade');
+            $table->unsignedBigInteger('term_id')->nullable();
+            $table->foreign('term_id')->references('id')->on('terms')->onDelete('cascade');
             $table->unsignedBigInteger('school_owner_id')->nullable();
             $table->foreign('school_owner_id')->references('id')->on('users')->onDelete('set null')->unique('fk_schools_owner_user');
 

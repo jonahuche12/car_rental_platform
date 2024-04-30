@@ -1,256 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title')</title>
 
-  <title>@yield('title')</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Sarala:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="{{asset('plugins/fontawesome-free/css/all.min.cs')}}s">
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- Tempusdominus Bootstrap 4 -->
-  <link rel="stylesheet" href="{{asset('plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}">
-  <!-- iCheck -->
-  <link rel="stylesheet" href="{{asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css')}}">
-  <!-- JQVMap -->
-  <link rel="stylesheet" href="{{asset('plugins/jqvmap/jqvmap.min.css')}}">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="{{asset('dist/css/adminlte.min.cs')}}s">
-  <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="{{asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css')}}">
-  <!-- Daterange picker -->
-  <link rel="stylesheet" href="{{asset('plugins/daterangepicker/daterangepicker.css')}}">
-  <!-- summernote -->
-  <link rel="stylesheet" href="{{asset('plugins/summernote/summernote-bs4.min.css')}}">
-  @yield('style')
-  <style>
-    #school_list_container {
-        position: absolute;
-        width: calc(100% - 2px);
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        border-top: none;
-        background-color: #fff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-    }
-
-    .school_item {
-        padding: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .school_item:hover {
-        background-color: #f0f0f0;
-    }
-    .table-responsive .table {
-        opacity: 1;
-        transition: opacity 0.6s ease-in-out;
-    }
-
-    .collapse:not(.show) .table {
-        opacity: 0;
-        transition: opacity 0.6s ease-in-out;
-    }
-
-    .card-body {
-        padding: 15px;
-    }
-
-    .admin-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        overflow: hidden;
-        transition: box-shadow 0.3s;
-    }
-
-    .admin-card:hover {
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .user-profile {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    .user-profile img {
-        border-radius: 50%;
-        max-width: 100%;
-        height: auto;
-    }
-
-    .users-list-name {
-        display: block;
-        font-size: 16px;
-        margin-top: 10px;
-        color: #333;
-        text-decoration: none;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .badge-info {
-        background-color: #17a2b8;
-    }
-
-    .users-list-date {
-        display: block;
-        font-size: 12px;
-        color: #777;
-        margin-top: 5px;
-    }
-
-    .user-permissions {
-        margin-top: 15px;
-    }
-
-    .details-heading {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
-
-    .toggle-icon {
-        margin-left: 5px;
-    }
-
-    .collapsed-details {
-        display: none;
-        margin-top: 10px;
-    }
-
-    .detail-item {
-        margin-bottom: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .action-icons {
-        margin-top: 15px;
-    }
-
-    .action-icon {
-        font-size: 20px;
-        color: #333;
-        transition: color 0.3s;
-    }
-
-    .action-icon:hover {
-        color: #007bff;
-    }
-
-    .modal-footer button {
-        padding: 8px 15px;
-    }
-
-    #no-admin {
-        color: #777;
-        margin: 20px 0;
-    }
-
-    .detail-item {
-        display: flex;
-        margin-bottom: 8px;
-    }
-
-    .detail-label {
-        font-weight: bold;
-        margin-right: 8px;
-    }
-
-    .detail-value {
-        color: #6c757d;
-    }
-    
-    .toggle-icon {
-        transition: transform 0.3s ease; /* Adjust the duration and easing function as needed */
-    }
-
-    .collapsed-details {
-        display: none;
-    }
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="{{ asset('plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
+    <!-- iCheck -->
+    <link rel="stylesheet" href="{{ asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
+    <!-- JQVMap -->
+    <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('dist/css/lesson.css') }}">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
+    <!-- Daterange picker -->
+    <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
+    <!-- Summernote -->
+    <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 
-  </style>
+    @yield('style')
+
+    <style>
+        /* Custom styles can be added here */
+        .small-text {
+            font-size: 12px; /* Adjust as needed */
+        }
+        /* Define smaller font size for small screens */
+        @media (max-width: 576px) {
+            .small-text {
+                font-size: 9px; /* Adjust as needed */
+            }
+        }
+
+    </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-  <!-- Preloader -->
-  <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
-  </div>
-    @include('navbar')
-  <!-- /.navbar -->
-
-  <!-- Main Sidebar Container -->
-    @yield('sidebar')
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            @if(isset($school))
-            <img alt="Avatar" class="table-avatar rounded-circle" src="{{ asset('storage/' . $school->logo) }}" style="width: 50px; height: 50px;">
-
-            @endif
-            <h3 class="m-0">@yield('page_title')</h3>
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">@yield('breadcrumb1')</a></li>
-              <li class="breadcrumb-item ">@yield('breadcrumb2')</li>
-              <li class="breadcrumb-item active">@yield('breadcrumb3')</li>
-            </ol>
-          </div><!-- /.col -->
-          @auth
-         
-          @if(!auth()->user()->isProfileComplete())
-        <!-- Display a button to complete the profile for school owner -->
-              <div class="text-center mt-4 complete_profile">
-                  <a href="{{ route('profile') }}" class="btn btn-danger">Complete Your Profile</a>
-              </div>
-          @endif
-          @endauth
-          
-        </div><!-- /.row -->
-        <div id="message" class="col-md-6"></div>
-      </div><!-- /.container-fluid -->
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+        <img class="animation__shake" src="{{ asset('dist/img/AdminLTELogo.png') }}" alt="AdminLTELogo" height="60" width="60">
     </div>
-    <!-- /.content-header -->
 
-    <!-- Main content -->
-    <section class="content">
-      @yield('content')
-    </section>
-    <!-- /.content -->
-  </div>
-  <!-- /.content-wrapper -->
-  <footer class="main-footer">
-    <strong>Copyright &copy; 2024 <a href="{{route('/')}}">CarRental</a>.</strong>
-    All rights reserved.
-    <!-- <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.2.0
-    </div> -->
-  </footer>
+    @include('navbar')
 
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
-</div>
-<!-- ./wrapper -->
+    <!-- Main Sidebar Container -->
+    @yield('sidebar')
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        @if(isset($school))
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <img alt="Avatar" class="table-avatar rounded-circle" src="{{ asset('storage/' . $school->logo) }}" style="width: 50px; height: 50px; display: inline-block; vertical-align: middle;">
+                                        <h5 style="display: inline-block; vertical-align: middle;">{{ $school->name }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        <h3 class="m-0">@yield('page_title')</h3>
+                    </div><!-- /.col -->
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">@yield('breadcrumb1')</a></li>
+                            <li class="breadcrumb-item">@yield('breadcrumb2')</li>
+                            <li class="breadcrumb-item active">@yield('breadcrumb3')</li>
+                        </ol>
+                    </div><!-- /.col -->
+                    @auth
+                        @if(!auth()->user()->isProfileComplete())
+                            <!-- Display a button to complete the profile for school owner -->
+                            <div class="text-center mt-4 complete_profile">
+                                <a href="{{ route('profile') }}" class="btn btn-danger">Complete Your Profile</a>
+                            </div>
+                        @endif
+                    @endauth
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div><!-- /.content-header -->
+
+        <!-- Main content -->
+        <section class="content">
+                <div id="message" class="col-md-6 small-text ml-0"></div>
+            @yield('content')
+        </section><!-- /.content -->
+    </div><!-- /.content-wrapper -->
+
+    <!-- Main Footer -->
+    <footer class="main-footer">
+        <strong>Copyright &copy; 2024 <a href="{{ route('/') }}">CarRental</a>.</strong>
+        All rights reserved.
+    </footer>
+
+</div><!-- ./wrapper -->
+
 
 
 <script src="{{ mix('js/app.js') }}"></script>
@@ -292,9 +156,45 @@
 <!-- <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script> -->
 <!-- AdminLTE App -->
 <script src="{{asset('dist/js/adminlte.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/resumable.js/1.1.0/resumable.min.js"></script>
+<script src="{{asset('dist/js/lesson.js')}}"></script>
+<script>
+    var buyConnectsRoute = '{{ route("buy_connects") }}';
+    var profileRoute = '{{ route("profile") }}';
+    var buyPackageRoute = '{{ route("buy_package") }}';
+    var contactSupportRoute = '{{ route("contact_support") }}';
+</script>
 
+<script src="{{asset('dist/js/school_connects.js')}}"></script>
 @yield('scripts')
+<script>
+ $(document).ready(function() {
+        $('#searchForm').submit(function(e) {
+            e.preventDefault();
+            var term = $('#searchInput').val();
 
+            $.ajax({
+                url: "{{ route('search') }}",
+                type: "GET",
+                data: { term: term },
+                success: function(response) {
+                    // Redirect to a new page with search results
+                    window.location.href = "/search-results?term=" + term;
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = "An error occurred.";
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+                    $('#errorMessage').text(errorMessage).show();
+                }
+            });
+        });
+    });
+
+
+
+</script>
 
 <script>
     $(document).ready(function () {

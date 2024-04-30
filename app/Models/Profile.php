@@ -56,6 +56,7 @@ class Profile extends Model
         'permission_create_event',
         'permission_confirm_staff',
         'class_id',
+        'school_connects',
     ];
     
     public function user()

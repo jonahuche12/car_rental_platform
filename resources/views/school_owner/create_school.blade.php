@@ -16,8 +16,8 @@
                   <h3 class="widget-user-username"><b>{{$school_package->name}}</b></h3>
                   <!-- <h5 class="widget-user-desc">Founder & CEO</h5> -->
                 </div>
-                <div class="widget-user-">
-                  <img class="img-fluid elevation-" width="100%"  src="{{ asset('storage/' . $school_package->picture) }}" alt="User Avatar">
+                <div class="widget-user-" style="height:150px;">
+                  <img class="img-fluid elevation- h-100 w-100" width="100%"  src="{{ asset('storage/' . $school_package->picture) }}" alt="User Avatar">
                 </div>
                 <div class="card-body">
                         <p><strong>Description:</strong> <br>{{ $school_package->description }}</p>

@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', "Central School system - Create Packages")
+@section('title', "Central School System - Curriculum")
 
 @section('breadcrumb1')
 <a href="{{route('home')}}">Home</a>
 @endsection
-@section('breadcrumb2', "School Package")
+@section('breadcrumb2', "Curricula")
 
 @section('content')
 @include('sidebar')

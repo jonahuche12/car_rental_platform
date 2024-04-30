@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Mail\ActivationEmail;
 use App\Models\SchoolPackage;
+use App\Models\School;
+use App\Models\AcademicSession;
+use App\Models\Term;
 use App\Models\UserPackage;
 use App\Mail\ConfirmTransferMail;
 use App\Models\Transfer;
@@ -167,6 +170,184 @@ class SuperAdminController extends Controller
         }
     }
 
+    public function manageAcademicSession()
+    {
+        $academic_sessions = AcademicSession::all();
+        return view('super_admin.academic_session', compact('academic_sessions'));
+    }
+
+
+    public function createAcademicSession(Request $request)
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            
+        ]);
+    
+        $academic_session = AcademicSession::create($validatedData);
+
+
+        // Return the created package as JSON response with picture_url
+        return response()->json([
+            'message' => "Academic Session Created Successfully",
+            
+        ], 201);
+    }
+
+
+    public function editAcademicSession(Request $request, $id)
+    {
+        try {
+            // Define the fields that are expected to be in the request
+            $expectedFields = [
+                'name',
+                
+            ];
+    
+            // Filter the request data to include only the expected fields
+            $validatedData = $request->only($expectedFields);
+    
+            // Validate the request data
+            $validator = Validator::make($validatedData, [
+                'name' => 'nullable|string',
+                
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
+    
+            // Find the package by ID
+            $academic_session = AcademicSession::findOrFail($id);
+    
+            // Update the package with the validated data
+            $academic_session->fill($validatedData);
+    
+            // Save the changes to the database
+            $academic_session->save();
+    
+    
+            // Return the updated package as JSON response
+            return response()->json($academic_session, 200);
+        } catch (\Exception $e) {
+            \Log::error($e);
+    
+            // Return an error response or handle accordingly
+            return response()->json(['error' => 'Failed to update the package.' . $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteAcademicSession($id)
+    {
+        try {
+            // Find the academic session by ID
+            $academic_session = AcademicSession::findOrFail($id);
+    
+            // Delete all terms associated with the academic session
+            $academic_session->terms()->delete();
+    
+            // Delete the academic session from the database
+            $academic_session->delete();
+    
+            // Return a success response
+            return response()->json(['message' => 'Academic Session and associated terms deleted successfully'], 200);
+        } catch (\Exception $e) {
+            \Log::error($e);
+    
+            // Return an error response or handle accordingly
+            return response()->json(['error' => 'Failed to delete the Academic Session and associated terms.'], 500);
+        }
+    }
+    
+
+    public function addTerm(Request $request, $academic_session_id)
+    {
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'name' => 'required|string',
+                // Add more validation rules as needed
+            ]);
+
+            // Retrieve the academic session by its ID
+            $academic_session = AcademicSession::findOrFail($academic_session_id);
+
+            // Create a new term for the academic session
+            $term = new Term();
+            $term->name = $validatedData['name'];
+            // Set any other term attributes as needed
+            // ...
+
+            // Associate the term with the academic session
+            $academic_session->terms()->save($term);
+
+            // Return a response indicating success
+            return response()->json(['message' => 'Term added successfully'], 200);
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur during the process
+            return response()->json(['error' => 'An error occurred while adding the term'. $e-getMessage()], 500);
+        }
+    }
+
+    // Controller method to fetch term details
+    public function getTermDetails($id)
+    {
+        try {
+            // Retrieve the term based on the provided ID
+            $term = Term::findOrFail($id);
+
+            // Return the term details as JSON response
+            return response()->json(['term' => $term], 200);
+        } catch (\Exception $e) {
+            // Handle exceptions, such as term not found
+            return response()->json(['error' => 'Term not found'], 404);
+        }
+    }
+
+    public function editTerm(Request $request, $id)
+    {
+        // Find the term by its ID
+        $term = Term::findOrFail($id);
+
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            // Add more validation rules as needed
+        ]);
+
+        // Update the term with the validated data
+        $term->update($validatedData);
+
+        // Return a response indicating success
+        return response()->json(['message' => 'Term updated successfully'], 200);
+    }
+
+
+    public function deleteTerm($id)
+    {
+        try {
+            // Find the package by ID
+            $term = Term::findOrFail($id);
+
+
+            // Delete the package from the database
+            $term->delete();
+
+            // Return a success response
+            return response()->json(['message' => 'Term deleted successfully'], 200);
+        } catch (\Exception $e) {
+            \Log::error($e);
+
+            // Return an error response or handle accordingly
+            return response()->json(['error' => 'Failed to delete the Term.'], 500);
+        }
+    }
+
+
+
+
+
 
     public function adminConfirmPayment($paymentSessionId)
     {
@@ -214,78 +395,93 @@ class SuperAdminController extends Controller
 
     public function createActivation(Request $request, $payment_session_id, $paid_for)
     {
-        // dd($paid_for);
-
-        // $request->validate([
-        //     'amount' => 'required|numeric',
-        //     // Add any other validation rules as per your requirements
-        // ]);
-
+        // Retrieve amount from the request
         $amount = $request->input('amount');
-       
+    
+        // Find the transfer record by payment_session_id
         $transfer = Transfer::where('payment_session_id', $payment_session_id)->first();
-
-
-
+    
         if ($transfer) {
-
-
-
-                if ($paid_for === 'user_activation') {
-                    // Activate user package
-                    $user = User::where('id', $transfer->id_paid_for)->first();
-                    // dd($user);
-                    $user->active_package = true;
-                    $user->expected_expiration = now()->addDays($user->userPackage->duration_in_days);
-                    $user->save();
-                } elseif ($paid_for === 'school_activation') {
-
-                    $user = $school->school_owner;
-                    // Activate school package
-                    $school = $payment->school;
-                    $school->is_active = true;
-                    $school->school_expected_expiration = now()->addDays($school->schoolPackage->duration_in_days);
-                    $school->save();
-        
-                    // Create a wallet for the School
-                    $wallet = new Wallet();
-                    $wallet->school_id = $school->id;
-                    $wallet->balance = 0; // Set initial balance as 0 or any other default value
-                    $wallet->save();
+            // Payment session found, proceed with activation
+    
+            if ($paid_for === 'user_activation') {
+                // Activate user package
+                $user = User::findOrFail($transfer->id_paid_for);
+                // dd($user);
+                $user->active_package = true;
+                $user->expected_expiration = now()->addDays($user->userPackage->duration_in_days);
+                $user->save();
+    
+                // Create wallet for the user
+                $wallet = new Wallet();
+                $wallet->user_id = $user->id;
+                $wallet->balance = 0; // Set initial balance as 0 or any default value
+                $wallet->save();
+            } elseif ($paid_for === 'school_activation') {
+                // Activate school package
+                $school = School::findOrFail($transfer->id_paid_for);
+                $school->is_active = true;
+                $school->school_expected_expiration = now()->addDays($school->schoolPackage->duration_in_days);
+                $school->save();
+    
+                // Create wallet for the school
+                $wallet = new Wallet();
+                $wallet->school_id = $school->id;
+                $wallet->balance = 0; // Set initial balance as 0 or any default value
+                $wallet->save();
+            }
+            elseif ($paid_for === 'school_connects') {
+                // Activate school package
+                $user = User::findOrFail($transfer->id_paid_for);
+                if ($transfer->amount == 500) {
+                    $connect = 90;
+                } elseif ($transfer->amount == 1000) {
+                    $connect = 210;
+                }elseif ($transfer->amount == 2000) {
+                    $connect = 450;
                 }
-
+                elseif ($transfer->amount == 3000) {
+                    $connect = 1000;
+                }else{
+                    $connect = 2000;
+                } 
+                         // dd($user);
+                $user->profile->school_connects += $connect;
+                $user->profile->save();
+    
+            }
+    
+            // Record payment details in payments table
             $payment = DB::table('payments')->insertGetId([
                 'user_id' => $user->id,
-                'amount' => $transfer['amount'],
-                // 'reference_id'=>$request->merchant_id,
-                'paystack_reference' => $transfer['payment_session_id'],
+                'amount' => $transfer->amount,
+                'paystack_reference' => $transfer->payment_session_id,
                 'paid_for' => $paid_for,
-                // 'created_at' => now(),
-                'paid_at'=>  now(),
-                'channel' =>"transfer",
+                'paid_at' => now(),
+                'channel' => "transfer",
                 'currency' => "NGN",
                 'ip_addr' => $request->ip(),
                 'successful' => true,
-                'reference_id'=> $transfer['id_paid_for'],
+                'reference_id' => $transfer->id_paid_for,
                 // Add other fields as needed
             ]);
-
-                $payment = Payment::find($payment);
-
-
-                if ($user ) {
-                    
-                    // Send email to the user
-                    Mail::to($user->email)->send(new ActivationEmail($user));
-                }
-               
-                session()->forget('payment_session');
-
-            // Redirect to viewprofile route with the user ID associated with the payment
+    
+            // Retrieve the payment instance
+            $payment = Payment::find($payment);
+    
+            if ($user) {
+                // Send email to the user
+                Mail::to($user->email)->send(new ActivationEmail($user));
+            }
+    
+            // Clear payment session
+            session()->forget('payment_session');
+    
+            // Redirect to home route with success message
             return redirect()->route('home')->with('success', "Package has been activated.");
         } else {
             // Payment not successful, handle appropriately
-            return redirect()->back()->with('error', 'Payment not Successful');
+            return redirect()->back()->with('error', 'Payment not successful');
         }
     }
 
@@ -320,7 +516,7 @@ class SuperAdminController extends Controller
             $imagePath = $file->storeAs('user_packages_picture', $filename, 'public');
 
             // Resize the image to 500x500
-            $resizedImage = Image::make(storage_path('app/public/' . $imagePath))->fit(500, 500);
+            $resizedImage = Image::make(storage_path('app/public/' . $imagePath))->fit(540, 360);
             $resizedImage->save(storage_path('app/public/' . $imagePath));
 
             $package->picture = $imagePath;
@@ -635,6 +831,17 @@ class SuperAdminController extends Controller
             // Return an error response or handle accordingly
             return response()->json(['error' => 'Failed to store the Curriculum Topic. ' . $e->getMessage()], 500);
         }
+    }
+
+    public function manageAllSchools()
+    {
+        // Call the static method to retrieve schools
+        $schools = School::manageAllSchools();
+        $latest_academic_session = AcademicSession::latest();
+        // dd($schools);
+
+        // Pass the $schools variable to a view or perform further operations
+        return view('super_admin.all_schools', compact('schools', 'latest_academic_session'));
     }
 
     

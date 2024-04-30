@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Course;
+use App\Models\Event;
 use App\Models\SchoolClassSection;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\Facades\Image;
+// use Intervention\Image\ImageManagerStatic as Image;
 
 class AdminController extends Controller
 {
@@ -44,6 +46,160 @@ class AdminController extends Controller
         return view('school.show_classes', compact('school', 'classCount'));
     }
 
+    public function showEvents($schoolId)
+    {
+        $school = School::findOrFail($schoolId);
+        $eventCount = $school->events()->count();
+        // dd($classCount);
+
+        return view('school.show_events', compact('school', 'eventCount'));
+    }
+
+    public function createEvent(Request $request)
+    {
+        // try {
+            // Validate the request data
+            $validatedData = $request->validate([
+                'title' => 'required|string',
+                'description' => 'nullable|string',
+                'start_date' => 'required|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'location' => 'nullable|string',
+                'banner_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'school_id' => 'required|numeric',
+            ]);
+
+            // Handle image upload if present
+            if ($request->hasFile('banner_picture')) {
+                $file = $request->file('banner_picture');
+
+                // Generate a unique filename for the file
+                $filename = 'event_' . time() . '.' . $file->getClientOriginalExtension();
+
+                // Store the image in the storage folder
+                $imagePath = $file->storeAs('event_pictures', $filename, 'public');
+
+                // Resize the image if needed (you can adjust dimensions as required)
+                $resizedImage = Image::make(storage_path('app/public/' . $imagePath))->fit(500, 500);
+                $resizedImage->save(storage_path('app/public/' . $imagePath));
+
+                // Update the validated data with the image path
+                $validatedData['banner_picture'] = $imagePath;
+            }
+
+            // Find the school and ensure it exists
+            $school = School::find($validatedData['school_id']);
+
+            // Check if the school exists
+            if ($school) {
+                // Access current academic session and term
+                $currentAcademicSession = $school->academicSession;
+                $currentTerm = $school->term;
+
+                // Add current academic session and term to validated data
+                $validatedData['academic_session_id'] = $currentAcademicSession->id;
+                $validatedData['term_id'] = $currentTerm->id;
+
+                // Create the event
+                $event = Event::create($validatedData);
+
+                // Return a JSON response with the created event data
+                return response()->json([
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'start_date' => $event->start_date,
+                    'end_date' => $event->end_date,
+                    'location' => $event->location,
+                    'banner_picture_url' => $event->banner_picture ? asset('storage/' . $event->banner_picture) : null,
+                    'school_id' => $event->school_id,
+                    'academic_session_id' => $school->academicSession->id,
+                    'term_id' => $school->term->id,
+                    'created_at' => $event->created_at,
+                ], 201);
+            } else {
+                return response()->json(['error' => "School Not Found"], 500);
+            }
+        // } catch (\Exception $e) {
+        //     // Return error response if any exception occurs
+        //     return response()->json(['error' => $e->getMessage()], 500);
+        // }
+    }
+
+    
+    
+    public function editEvent(Request $request, $id)
+    {
+        // Retrieve the event from the database based on the provided $id.
+        $event = Event::findOrFail($id);
+
+        // Validate the incoming request data.
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'banner_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Assuming image upload validation rules
+            // Add more validation rules as needed for other fields
+        ]);
+
+        // Update the event data with the validated request data.
+        $event->title = $validatedData['title'];
+        $event->description = $validatedData['description'];
+        $event->start_date = $validatedData['start_date'];
+        $event->end_date = $validatedData['end_date'];
+
+        // Handle banner picture update if a new image is uploaded.
+        if ($request->hasFile('banner_picture')) {
+            // Delete the previous image if it exists
+            if ($event->banner_picture) {
+                Storage::delete($event->banner_picture);
+            }
+
+            // Store the original image with a custom name
+            $image = $request->file('banner_picture');
+            $imagePath = $image->storeAs('public/event_images', 'original_' . $image->getClientOriginalName());
+
+            // Resize the image to 500x500
+            $resizedImage = Image::make(storage_path("app/{$imagePath}"))->fit(500, 500);
+
+            // Store the resized image with a custom name
+            $resizedImagePath = str_replace('public/', '', $imagePath); // Remove 'public/' from the image path
+            Storage::put($resizedImagePath, $resizedImage->stream());
+
+            // Update the event with the resized image path
+            $event->banner_picture = $resizedImagePath;
+        }
+
+        // Save the updated event data to the database.
+        $event->save();
+
+        // Redirect the user or return a response as needed.
+        // For example:
+        return redirect()->back()->with('success', 'Event updated successfully.');
+    }
+
+
+    public function deleteEvent($id)
+    {
+        try {
+            // Find the package by ID
+            $event = Event::findOrFail($id);
+
+            // Delete the package picture from storage
+            Storage::disk('public')->delete($event->banner_picture);
+
+            // Delete the package from the database
+            $event->delete();
+
+            // Return a success response
+            return response()->json(['message' => 'Event deleted successfully'], 200);
+        } catch (\Exception $e) {
+            \Log::error($e);
+
+            // Return an error response or handle accordingly
+            return response()->json(['error' => 'Failed to delete the Event.'], 500);
+        }
+    }
     public function confirmAndMakeStudent(Request $request, User $user)
     {
         try {
@@ -67,7 +223,7 @@ class AdminController extends Controller
             $maxStudents = $school->schoolPackage->max_students;
 
             if ($school->confirmedStudents()->count() >= $maxStudents) {
-                return response()->json(['error' => 'The maximum number of admins for this school has been reached.'], 400);
+                return response()->json(['error' => 'The maximum number of Students for this school has been reached.'], 400);
             } 
 
             // Update the user's profile to make them an admin
@@ -735,91 +891,91 @@ class AdminController extends Controller
         return response()->json($classSections);
     }
     public function updateSectionTeacherCourse(Request $request)
-{
-    try {
-        // Validate the request
-        $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'selected_classes.*' => 'sometimes|nullable|exists:school_class_sections,id',
-            'teachers.*' => 'sometimes|nullable|exists:users,id',
-            'class_id.*' => 'sometimes|nullable|exists:school_class_sections,id',
-        ]);
-
-        // Extract the data from the request
-        $courseId = $request->input('course_id');
-        $selectedClasses = $request->input('selected_classes', []);
-        $teachers = $request->input('teachers', []);
-        $classIds = $request->input('class_id', []);
-
-        // Find the course
-        $course = Course::findOrFail($courseId);
-
-        // Start a database transaction
-        DB::beginTransaction();
-
+    {
         try {
-            // Prepare data for synchronization
-            $teachersData = [];
+            // Validate the request
+            $request->validate([
+                'course_id' => 'required|exists:courses,id',
+                'selected_classes.*' => 'sometimes|nullable|exists:school_class_sections,id',
+                'teachers.*' => 'sometimes|nullable|exists:users,id',
+                'class_id.*' => 'sometimes|nullable|exists:school_class_sections,id',
+            ]);
 
-            // Remove teachers, class sections, and students if the corresponding checkbox is deselected
-            foreach ($course->class_sections as $classSection) {
-                if (!in_array($classSection->id, $selectedClasses)) {
-                    // If checkbox is deselected, remove from pivot tables
-                    $course->class_sections()->detach($classSection->id);
-                    $course->teachers()->detach($classSection->pivot->teacher_id);
+            // Extract the data from the request
+            $courseId = $request->input('course_id');
+            $selectedClasses = $request->input('selected_classes', []);
+            $teachers = $request->input('teachers', []);
+            $classIds = $request->input('class_id', []);
 
-                    // Remove students of the class
-                    $students = $classSection->students()->pluck('user_id')->toArray();
-                    $course->students()->detach($students);
+            // Find the course
+            $course = Course::findOrFail($courseId);
+
+            // Start a database transaction
+            DB::beginTransaction();
+
+            try {
+                // Prepare data for synchronization
+                $teachersData = [];
+
+                // Remove teachers, class sections, and students if the corresponding checkbox is deselected
+                foreach ($course->class_sections as $classSection) {
+                    if (!in_array($classSection->id, $selectedClasses)) {
+                        // If checkbox is deselected, remove from pivot tables
+                        $course->class_sections()->detach($classSection->id);
+                        $course->teachers()->detach($classSection->pivot->teacher_id);
+
+                        // Remove students of the class
+                        $students = $classSection->students()->pluck('user_id')->toArray();
+                        $course->students()->detach($students);
+                    }
                 }
+
+
+                // Iterate over selected classes
+                foreach ($selectedClasses as $index => $classSectionId) {
+                    // Check if the class section exists
+                    $classSection = SchoolClassSection::findOrFail($classSectionId);
+
+                    // Check if the teacher is selected
+                    if (isset($teachers[$index]) && !empty($teachers[$index])) {
+                        $teachersData[$teachers[$index]] = [
+                            'class_id' => $classIds[$index],
+                            'user_id' => $teachers[$index] // Include user_id
+                        ];
+                    }
+                    // Sync teachers for the specified course in the course_teacher pivot table
+                    $course->teachers()->sync($teachersData);
+
+                    // Sync teachers with the class sections in the course_class pivot table
+                    foreach ($teachersData as $teacherId => $teacherData) {
+                        $course->class_sections()->syncWithoutDetaching([$classSectionId => ['teacher_id' => $teacherId]]);
+                    }
+                }
+
+                
+                if ($course->compulsory) {
+                    foreach ($selectedClasses as $classSectionId) {
+                        $section = SchoolClassSection::findOrFail($classSectionId);
+                        $students = $section->students()->pluck('user_id')->toArray();
+                        $course->students()->syncWithoutDetaching($students);
+                    }
+                }
+
+                // Commit the transaction
+                DB::commit();
+
+                return response()->json(['message' => 'Teachers and class sections have been updated successfully.']);
+            } catch (\Exception $e) {
+                // Rollback the transaction on failure
+                DB::rollBack();
+                \Log::error('Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
+                return response()->json(['error' => 'Failed to update teachers and class sections. ' . $e->getMessage()], 500);
             }
-
-
-            // Iterate over selected classes
-            foreach ($selectedClasses as $index => $classSectionId) {
-                // Check if the class section exists
-                $classSection = SchoolClassSection::findOrFail($classSectionId);
-
-                // Check if the teacher is selected
-                if (isset($teachers[$index]) && !empty($teachers[$index])) {
-                    $teachersData[$teachers[$index]] = [
-                        'class_id' => $classIds[$index],
-                        'user_id' => $teachers[$index] // Include user_id
-                    ];
-                }
-                // Sync teachers for the specified course in the course_teacher pivot table
-                $course->teachers()->sync($teachersData);
-
-                // Sync teachers with the class sections in the course_class pivot table
-                foreach ($teachersData as $teacherId => $teacherData) {
-                    $course->class_sections()->syncWithoutDetaching([$classSectionId => ['teacher_id' => $teacherId]]);
-                }
-            }
-
-            
-            if ($course->compulsory) {
-                foreach ($selectedClasses as $classSectionId) {
-                    $section = SchoolClassSection::findOrFail($classSectionId);
-                    $students = $section->students()->pluck('user_id')->toArray();
-                    $course->students()->syncWithoutDetaching($students);
-                }
-            }
-
-            // Commit the transaction
-            DB::commit();
-
-            return response()->json(['message' => 'Teachers and class sections have been updated successfully.']);
         } catch (\Exception $e) {
-            // Rollback the transaction on failure
-            DB::rollBack();
-            \Log::error('Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
-            return response()->json(['error' => 'Failed to update teachers and class sections. ' . $e->getMessage()], 500);
+            \Log::error('Validation Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
+            return response()->json(['error' => 'Validation failed. ' . $e->getMessage()], 400);
         }
-    } catch (\Exception $e) {
-        \Log::error('Validation Error:', ['message' => $e->getMessage(), 'trace' => $e->getTrace()]);
-        return response()->json(['error' => 'Validation failed. ' . $e->getMessage()], 400);
     }
-}
 
     
 }

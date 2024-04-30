@@ -17,6 +17,8 @@
         border-radius: 5px;
         font-weight: bold;
     }
+
+    
   </style>
 @endsection
 
@@ -187,13 +189,10 @@
                 firstEmptyFieldset.show();
                 $('fieldset').not(firstEmptyFieldset).hide();
             }
-
             // Handle next button click with AJAX
             $('.next-btn').on('click', function () {
                 var currentFieldset = $(this).closest('fieldset');
                 var nextFieldsetId = $(this).data('next');
-                    console.log(currentFieldset.attr('id'))
-                
 
                 if (validateFields(currentFieldset)) {
                     var formData = new FormData(currentFieldset.closest('form')[0]);
@@ -208,22 +207,22 @@
                         contentType: false,
                         processData: false,
                         cache: false,
-                        // Update the AJAX success callback
+
                         success: function (response) {
                             if (response.success) {
                                 if (nextFieldsetId) {
-                                    // If nextFieldsetId exists, show the next fieldset
+                                    // Show the next fieldset and hide the current one
                                     $('#' + nextFieldsetId).show();
                                     currentFieldset.hide();
                                 } else {
-                                    // If nextFieldsetId is empty, redirect to the home page
+                                    // Redirect to the home page if nextFieldsetId is empty
                                     window.location.href = '{{ route("home") }}';
                                     return;
                                 }
 
                                 // Display success message from the server for 3 seconds
                                 var successMessage = '<span>' + response.message + '</span>';
-                                $('.success-message').html(successMessage).show();
+                                $('.success-message').html(successMessage).fadeIn();
 
                                 setTimeout(function () {
                                     $('.success-message').fadeOut();
@@ -232,9 +231,9 @@
                                 // Display validation errors in the frontend
                                 var errorMessage = '';
                                 $.each(response.errors, function (key, value) {
-                                    errorMessage += '<div class="alert alert-danger">' + value.join('<br>') + '</div><br>';
+                                    errorMessage += '<div class="alert alert-danger">' + value.join('<br>') + '</div>';
                                 });
-                                $('.error-message').html(errorMessage).show();
+                                $('.error-message').html(errorMessage).fadeIn();
 
                                 setTimeout(function () {
                                     $('.error-message').fadeOut();
@@ -246,18 +245,16 @@
                             }
                         },
 
-
                         error: function (xhr, status, error) {
                             // Handle AJAX error
                             console.error('AJAX error:', status, error);
-                            console.log('error:', xhr.responseText);
-                            // You may add additional error handling logic here if needed
-                            // For example, display an error message
                             alert('Failed to submit the form. Please try again.');
                         }
                     });
                 }
             });
+
+
 
             // Handle previous button click
             $('.prev-btn').on('click', function () {

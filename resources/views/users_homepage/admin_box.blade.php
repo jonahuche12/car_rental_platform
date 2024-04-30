@@ -6,8 +6,8 @@
 
     <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
-        @if($admin->admin_confirmed)
         <div class="row">
+            @if($admin->admin_confirmed)
 
             @if($admin->permission_confirm_student)
                 <div class="col-lg-4 col-6">
@@ -93,7 +93,7 @@
             @if($admin->permission_create_event)
                 <div class="col-lg-4 col-6">
                     <!-- small box -->
-                    <div class="small-box bg-danger">
+                    <div class="small-box bg-success">
                         <div class="inner">
                             <h3>65</h3>
                             <b>Events</b>
@@ -101,32 +101,48 @@
                         <div class="icon">
                             <i class="ion ion-bell"></i>
                         </div>
-                        <a href="#" class="small-box-footer">Manage Events <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{ route('manage-events', ['schoolId' => $school->id]) }}" class="small-box-footer">Manage Events <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             @endif
+        @endif
 
             @if($admin->teacher_confirmed)
             
-                <!-- right col -->
-                <div class="col-lg-4 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>{{ $admin->user->formClasses->count() }}</h3>
-                            <b>Form Class(es)</b>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-bag"></i>
-                        </div>
-                        <a class="small-box-footer" href="{{ route('manage-form_classes', ['teacherId' => $admin->id]) }}" class="text-decoration-none">Manage Class(es) <i class="fas fa-arrow-circle-right"></i></a>
+            <!-- right col -->
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ $admin->user->formClasses->count() }}</h3>
+                        <b>Form Class(es)</b>
                     </div>
+                    <div class="icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <a class="small-box-footer" href="{{ route('manage-form_classes', ['teacherId' => $admin->id]) }}" class="text-decoration-none">Manage Class(es) <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            
+            </div>
+
+            <!-- right col -->
+            <div class="col-lg-4 col-6">
+                <!-- small box -->
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>{{ $admin->user->lessons->count() }}</h3>
+                        <b>Lesson(s)</b>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <a class="small-box-footer" href="{{ route('manage-form_classes', ['teacherId' => $admin->id]) }}" class="text-decoration-none">Manage Class(es) <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+                        
             @endif
 
         </div>
-        @endif
         <!-- /.row -->
         
         <!-- /.row (main row) -->
