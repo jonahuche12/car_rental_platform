@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Mail\ActivationEmail;
 use App\Models\SchoolPackage;
+use App\Models\Test;
 use App\Models\School;
 use App\Models\AcademicSession;
 use App\Models\Term;
@@ -16,6 +17,8 @@ use App\Models\Wallet;
 use App\Models\Payment;
 use App\Models\Curriculum;
 use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendAcademicSessionNotification;
+use App\Jobs\SendTermNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
@@ -175,26 +178,76 @@ class SuperAdminController extends Controller
         $academic_sessions = AcademicSession::all();
         return view('super_admin.academic_session', compact('academic_sessions'));
     }
-
-
-    public function createAcademicSession(Request $request)
-    {
+    
+    
+    public function createAcademicSession(Request $request){
         // Validate the request data
         $validatedData = $request->validate([
             'name' => 'required|string',
-            
         ]);
     
-        $academic_session = AcademicSession::create($validatedData);
-
-
-        // Return the created package as JSON response with picture_url
+        // Create the academic session
+        $academicSession = AcademicSession::create($validatedData);
+        // $academicSession = AcademicSession::first();
+    
+        // Retrieve all school owners
+        $schoolOwners = User::whereHas('profile', function ($query) {
+            $query->where('role', 'school_owner');
+        })->get();
+    
+        // Dispatch email jobs to send notifications to school owners
+        foreach ($schoolOwners as $owner) {
+            // dd($owner);
+            SendAcademicSessionNotification::dispatch($owner, $academicSession);
+        }
+    
+        // Return the response
         return response()->json([
             'message' => "Academic Session Created Successfully",
-            
         ], 201);
     }
+    
+    public function addTerm(Request $request, $academic_session_id)
+    {
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'name' => 'required|string',
+                // Add more validation rules as needed
+            ]);
+    
+            // Retrieve the academic session by its ID
+            $academicSession = AcademicSession::findOrFail($academic_session_id);
+    
+            // Create a new term for the academic session
+            $term = new Term();
+            $term->name = $validatedData['name'];
+            // Set any other term attributes as needed
+            // ...
+    
+            // Associate the term with the academic session
+            $academicSession->terms()->save($term);
+    
+            // Retrieve all school owners
+            $schoolOwners = User::whereHas('profile', function ($query) {
+                $query->where('role', 'school_owner');
+            })->get();
+    
+            // Dispatch email jobs to send notifications to school owners
+            foreach ($schoolOwners as $owner) {
 
+                // \Log::error('Email: '. $owner->email);
+                SendTermNotification::dispatch($owner, $term);
+            }
+    
+            // Return a response indicating success
+            return response()->json(['message' => 'Term added successfully'], 200);
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur during the process
+            return response()->json(['error' => 'An error occurred while adding the term'. $e->getMessage()], 500);
+        }
+    }
+    
 
     public function editAcademicSession(Request $request, $id)
     {
@@ -260,35 +313,6 @@ class SuperAdminController extends Controller
         }
     }
     
-
-    public function addTerm(Request $request, $academic_session_id)
-    {
-        try {
-            // Validate the incoming request data
-            $validatedData = $request->validate([
-                'name' => 'required|string',
-                // Add more validation rules as needed
-            ]);
-
-            // Retrieve the academic session by its ID
-            $academic_session = AcademicSession::findOrFail($academic_session_id);
-
-            // Create a new term for the academic session
-            $term = new Term();
-            $term->name = $validatedData['name'];
-            // Set any other term attributes as needed
-            // ...
-
-            // Associate the term with the academic session
-            $academic_session->terms()->save($term);
-
-            // Return a response indicating success
-            return response()->json(['message' => 'Term added successfully'], 200);
-        } catch (\Exception $e) {
-            // Handle any exceptions that occur during the process
-            return response()->json(['error' => 'An error occurred while adding the term'. $e-getMessage()], 500);
-        }
-    }
 
     // Controller method to fetch term details
     public function getTermDetails($id)
@@ -843,6 +867,75 @@ class SuperAdminController extends Controller
         // Pass the $schools variable to a view or perform further operations
         return view('super_admin.all_schools', compact('schools', 'latest_academic_session'));
     }
+
+    public function manageTest()
+    {
+        $tests = Test::with(['academicSession', 'term'])->get();
+        $uniqueClassLevels = Curriculum::getUniqueClassLevels();
+        $academicSessions = AcademicSession::all();
+        $terms = Term::all();
+    
+        return view('super_admin.tests', compact('tests', 'uniqueClassLevels', 'academicSessions', 'terms'));
+    }
+    
+
+    public function createTest(Request $request)
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+        ]);
+    
+        // Create the academic session
+        $academicSession = AcademicSession::create($validatedData);
+        // $academicSession = AcademicSession::first();
+    
+        // Retrieve all school owners
+        $schoolOwners = User::whereHas('profile', function ($query) {
+            $query->where('role', 'school_owner');
+        })->get();
+    
+        // Dispatch email jobs to send notifications to school owners
+        foreach ($schoolOwners as $owner) {
+            // dd($owner);
+            SendAcademicSessionNotification::dispatch($owner, $academicSession);
+        }
+    
+        // Return the response
+        return response()->json([
+            'message' => "Academic Session Created Successfully",
+        ], 201);
+    }
+
+    public function storeTest(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'title' => 'required|string|max:255',
+        'type' => 'required|string|in:cognitive,class_level',
+        'class_level' => 'required|string|max:255',
+        'max_no_of_questions' => 'required|integer',
+        'complete_score' => 'required|integer',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['message' => $validator->errors()->first()], 422);
+    }
+
+    $latestAcademicSession = AcademicSession::latest()->first();
+    $latestTerm = Term::latest()->first();
+
+    $test = new Test();
+    $test->title = $request->title;
+    $test->type = $request->type;
+    $test->class_level = $request->class_level;
+    $test->max_no_of_questions = $request->max_no_of_questions;
+    $test->complete_score = $request->complete_score;
+    $test->academic_session_id = $latestAcademicSession->id;
+    $test->term_id = $latestTerm->id;
+    $test->save();
+
+    return response()->json(['message' => 'Test created successfully.']);
+}
 
     
 }

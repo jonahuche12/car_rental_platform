@@ -55,42 +55,42 @@
                 <table class="table projects">
                     <thead>
                         <tr>
-                            <th style="width: 1%">
+                            <th style="width: 1%" class= "small-text">
                                 #
                             </th>
-                            <th style="width: 21%">
+                            <th style="width: 21%" class= "small-text">
                                 Class Name
                             </th>
-                            <th style="width: 12%" class="text-center">
+                            <th style="width: 12%" class="text-center small-text">
                                 Banner
                             </th>
                             
-                            <th style="width: 12%" class="text-center">
+                            <th style="width: 12%" class="text-center small-text">
                                 Total Students
                             </th>
-                            <th style="width: 12%" class="text-center">
+                            <th style="width: 12%" class="text-center small-text">
                                 Total Teachers
                             </th>
                             
-                            <th style="width: 20%" class="text-center">
+                            <th style="width: 20%" class="text-center small-text">
                                 Description
                             </th>
                             <!-- <th style="width: 10%">
                                 Progress
                             </th> -->
                             
-                            <th style="width: 25%"  class="text-center">
+                            <th style="width: 25%"  class="text-center small-text">
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($school->classes as $class)
                         <tr class="bg-info">
-                            <td>
+                            <td class="small-text">
                                 {{ $loop->iteration }}
                                 <i class="toggle-icon fa fa-chevron-up"></i>
                             </td>
-                            <td style="width: 21%">
+                            <td style="width: 21%" class="small-text">
                                 <a>
                                     {{ $class->name }}
                                 </a>
@@ -100,7 +100,7 @@
                                 </small>
                                 <a class="badge badge-sm badge-warning">{{ $class->schoolClassSections()->count()}} section(s)</a>
                             </td>
-                            <td style="width: 12%" class="text-center">
+                            <td style="width: 12%" class="text-center small-text">
                                 <ul class="list-inline">
                                     <li class="list-inline-item">
                                         {{-- Add logic to display package image --}}
@@ -108,16 +108,16 @@
                                     </li>
                                 </ul>
                             </td>
-                            <td style="width: 12%" class="text-center">
+                            <td style="width: 12%" class="text-center small-text">
                                 {{ $class->students()->count() }}
                             </td>
-                            <td style="width: 12%" class="text-center">
+                            <td style="width: 12%" class="text-center small-text">
                                 {{ $class->teachers()->count() }}
                             </td>
 
 
                             
-                            <td style="width: 25%" class="text-center">
+                            <td style="width: 25%" class="text-center small-text">
                                 {{ $class->description }}
                             </td>
                             <!-- <td class="project_progress text-center" style="width: 10%" >
@@ -127,19 +127,19 @@
                                 </small>
                             </td> -->
 
-                            <td class="project-actions text-right">
+                            <td class="project-actions text-right small-text">
                                 <div class="btn-group">
                                     
-                                    <button class="btn btn-primary btn-sm add-class-section-btn" data-toggle="modal" data-class-id="{{ $class->id }}" data-target="#createClassSectionModal">
-                                        <i class="fa fa-plus"></i><span class="action d-none d-sm-inline"> Section</span>
+                                    <button class="btn btn-primary btn-sm add-class-section-btn btn-sm small-text" data-toggle="modal" data-class-id="{{ $class->id }}" data-target="#createClassSectionModal">
+                                        <i class="fa fa-plus"></i><span class="action d-sm-inline"> Section</span>
                                     </button>
-                                    <a class="btn btn-secondary btn-sm edit-class-btn" href="#" data-class-id="{{ $class->id }}">
-                                        <i class="fas fa-pencil-alt"></i> <span class="action d-none d-sm-inline">Edit</span>
+                                    <a class="btn btn-secondary btn-sm edit-class-btn btn-sm small-text" href="#" data-class-id="{{ $class->id }}">
+                                        <i class="fas fa-pencil-alt"></i> <span class="action d-sm-inline">Edit</span>
                                     </a>
-                                    <a class="btn btn-dark btn-sm view-section-details-btn" href="{{ route('view_curriculum', ['classId' => $class->id]) }}">
+                                    <a class="btn btn-dark btn-sm view-section-details-btn btn-sm small-text" href="{{ route('view_curriculum', ['classId' => $class->id]) }}">
                                         <i class="fas fa-eye"></i> Curriculum
                                     </a>
-                                    <button class="btn btn-warning toggle-nested-table" data-class-id="{{ $class->id }}">
+                                    <button class="btn btn-warning toggle-nested-table btn-sm small-text" data-class-id="{{ $class->id }}">
                                     <i class="toggle-icon fa fa-chevron-up"></i><span class="action d-none d-sm-inline"></span>
                                     </button>
                                     <!-- <a class="btn btn-danger btn-sm delete-package-btn" href="#" data-class-id="{{ $class->id }}" data-picture="{{ $class->picture }}">
@@ -160,37 +160,37 @@
       
                             <thead>
                                 <tr>
-                                    <th style="width: 1%">#</th>
-                                    <th style="width: 20%">Class Section Name</th>
-                                    <th style="width: 15%">Form Teacher</th>
-                                    <th style="width: 15%">Number of Students</th>
-                                    <th style="width: 15%">Description</th>
-                                    <th style="width: 20%">Actions</th> <!-- Add a column for actions -->
+                                    <th style="width: 1%" class= "small-text">#</th>
+                                    <th style="width: 20%" class= "small-text">Class Section Name</th>
+                                    <th style="width: 15% " class= "small-text">Form Teacher</th>
+                                    <th style="width: 15%" class= "small-text">Number of Students</th>
+                                    <th style="width: 15%" class= "small-text">Description</th>
+                                    <th style="width: 20%" class= "small-text">Actions</th> <!-- Add a column for actions -->
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($class->schoolClassSections as $section)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $section->name }}</td>
-                                        <td>
+                                        <td class="small-text">{{ $loop->iteration }}</td>
+                                        <td class="small-text">{{ $section->name }}</td>
+                                        <td class="small-text">
                                             @if ($section->mainFormTeacher)
                                                 {{ $section->mainFormTeacher->profile->full_name }}
                                             @else
                                                 No Form Teacher Assigned
                                             @endif
                                         </td>
-                                        <td>{{ $section->students->count() }}</td>
-                                        <td>{{ $section->description }}</td>
-                                        <td>
+                                        <td class="small-text">{{ $section->students->count() }}</td>
+                                        <td class="small-text">{{ $section->description }}</td>
+                                        <td class="small-text">
                                             <div class="btn-group">
-                                                <a class="btn btn-info btn-sm view-section-details-btn" href="{{ route('view_section', ['sectionId' => $section->id]) }}">
+                                                <a class="btn btn-info btn-sm view-section-details-btn btn-sm small-text" href="{{ route('view_section', ['sectionId' => $section->id]) }}">
                                                     <i class="fas fa-eye"></i> View
                                                 </a>
-                                                <a class="btn btn-secondary btn-sm edit-section-z" href="#" data-section-id="{{ $section->id }}" data-toggle="modal" data-target="#editSectionModal">
+                                                <a class="btn btn-secondary btn-sm edit-section-z btn-sm small-text" href="#" data-section-id="{{ $section->id }}" data-toggle="modal" data-target="#editSectionModal">
                                                     <i class="fas fa-pencil-alt"></i> Edit
                                                 </a>
-                                                <a class="btn btn-danger btn-sm delete-section-btn" href="#" data-section-id="{{ $section->id }}">
+                                                <a class="btn btn-danger  btn-sm small-text delete-section-btn" href="#" data-section-id="{{ $section->id }}">
                                                     <i class="fas fa-trash"></i> Delete
                                                 </a>
                                             </div>
@@ -198,7 +198,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">
+                                        <td colspan="6"  style="small-text" class="text-center">
                                             No Class Sections available for this Class.
                                             <!-- You can add a button to create new class sections if needed -->
                                         </td>
@@ -437,10 +437,7 @@
                             <div class="form-group">
                                 <label for="main_form_teacher">Main Form Teacher:</label>
                                 <select class="form-control" id="main_form_teacher" name="main_form_teacher">
-                                    <!-- <option value=""></option> -->
-                                    @foreach ($school->confirmedTeachers as $teacher)
-                                        <option value="{{ $teacher->id }}">{{ $teacher->profile->full_name }}</option>
-                                    @endforeach
+                                  
                                 </select>
                             </div>
 
@@ -585,24 +582,6 @@
                     success: function (response) {
                         $('#createClassModal').modal('hide');
 
-                        // Assuming your response is a JSON object, not a string
-                        // var newRow = '<tr>' +
-                        //     '<td>#</td>' +
-                        //     '<td><a>' + response.name + '</a><br/><small>Created ' + response.created_at + '</small></td>' +
-                        //     '<td><ul class="list-inline"><li class="list-inline-item"><img alt="Avatar" class="table-avatar" src="' + response.picture_url + '"></li></ul></td>' +
-                        //     '<td>' + response.code + ' </td>' +
-                        //     '<td>' + 0 + '</td>' +
-                        //     '<td>' + 0 + '</td>' +
-                        //     '<td>' + response.description + '</td>' +
-                            
-                        //     '<td class="project-actions text-right">' +
-                        //     '<a class="btn btn-primary btn-sm" href="#"><i class="fas fa-folder"></i> View</a>' +
-                        //     '<a class="btn btn-info btn-sm edit-package-btn" data-package-id="' + response.id + '" href="#"><i class="fas fa-pencil-alt"></i> Edit</a>' +
-                        //     '<a class="btn btn-danger btn-sm delete-package-btn" data-package-id="' + response.id + '" data-picture="' + response.picture_path + '" href="#"><i class="fas fa-trash"></i> Delete</a>' +
-                        //     '</td>' +
-                        //     '</tr>';
-
-                        // $('.table tbody').append(newRow);
 
                         // Add success message to the .message div
                         $('.message').removeClass('alert-danger').addClass('alert-success').html('Class created successfully.').show();
@@ -772,7 +751,6 @@
                 }
             });
         });
-
         // Handle click event on the "Edit" button for class section
         $(document).on('click', '.edit-section-z', function (e) {
             e.preventDefault(); // Prevent the default behavior
@@ -783,40 +761,62 @@
             var sectionObj = sections.find(function (sec) {
                 return sec.id == sectionId;
             });
-            console.log(sections)
 
             // Pass the sectionObj to the Blade view
-            var sectionJson = @json($school->confirmedTeachers->toArray());
+            var sectionTeachersJson = @json($school->confirmedTeachers);
 
             $('#editSectionForm input[name="name"]').val(sectionObj.name);
             $('#editSectionForm input[name="code"]').val(sectionObj.code);
             $('#editSectionForm textarea[name="description"]').val(sectionObj.description);
 
             // Populate the main form teacher dropdown
-            var mainFormTeacherSelect = $('#main_form_teacher');
-            mainFormTeacherSelect.empty(); // Clear existing options
+            var mainFormTeacherSelect = $('#editSectionForm select[name="main_form_teacher"]');
+            mainFormTeacherSelect.empty();
 
-            // Populate with teachers from the school using the JSON data
-            sectionJson.forEach(function (teacher) {
+            var currentFormTeacherAdded = false; // Flag to track if current form teacher is added
+
+            // Check if the sectionObj has a main_form_teacher and find the main form teacher in sectionTeachersJson
+            if (sectionObj.main_form_teacher_id) {
+                var currentFormTeacher = sectionTeachersJson.find(function (teacher) {
+                    return teacher.id == sectionObj.main_form_teacher_id;
+                });
+
+                if (currentFormTeacher) {
+                    // Add the current form teacher as the first option
+                    mainFormTeacherSelect.append($('<option>', {
+                        value: currentFormTeacher.id,
+                        text: currentFormTeacher.profile.full_name,
+                        selected: true // Select the current form teacher
+                    }));
+                    currentFormTeacherAdded = true;
+                }
+            }
+
+            // Add an empty option as the first option if no current form teacher
+            if (!currentFormTeacherAdded) {
                 mainFormTeacherSelect.append($('<option>', {
-                    value: teacher.id,
-                    text: teacher.profile.full_name,
-                    selected: teacher.id == sectionObj.main_form_teacher_id ? 'selected' : ''
-                }));
-            });
-
-            // If there is no current form teacher, add an empty option
-            if (!sectionObj.main_form_teacher_id) {
-                mainFormTeacherSelect.prepend($('<option>', {
                     value: '',
-                    text: ''
+                    text: 'Select Form Teacher'
                 }));
             }
+
+            // Populate the rest of the options with teachers from the school using the JSON data
+            sectionTeachersJson.forEach(function (teacher) {
+                console.log(sectionObj.main_form_teacher_id)
+                // Skip the current form teacher if already added
+                if (!currentFormTeacherAdded || teacher.id != sectionObj.main_form_teacher_id) {
+                    mainFormTeacherSelect.append($('<option>', {
+                        value: teacher.id,
+                        text: teacher.profile.full_name
+                    }));
+                }
+            });
 
             // Show the edit section modal
             $('#editSectionForm').attr('data-section-id', sectionId);
             $('#editSectionModal').modal('show');
         });
+
 
         // Submit form using AJAX for the edit form
         $('#editSectionForm').submit(function (e) {
@@ -824,7 +824,7 @@
 
             var formData = new FormData(this);
             var sectionId = $(this).data('section-id');
-            console.log(sectionId)
+            console.log(formData)
             var url = '/section/' + sectionId + '/edit';
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
 

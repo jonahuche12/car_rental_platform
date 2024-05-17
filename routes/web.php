@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/create', [ProfileController::class, 'create'])->name('profile.create');
 
     Route::get('profile', [ProfileController::class, 'profile'])->name('profile');
+    Route::get('dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/check-profile', [ProfileController::class, 'checkProfile']);
     
@@ -109,6 +110,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/credit-school-connects', [HomeController::class, 'creditSchoolConnects'])->name('credit.school_connects');
     Route::post('/buy-connects',  [HomeController::class, 'buyConnects'])->name('buy_connects');
+    Route::post('/buy-connects-for-student/{id}',  [HomeController::class, 'buyConnectsForStudent'])->name('buy_connects_for_student');
+    Route::get('/buy-connects-for-student-page/{id}/{amount}',  [HomeController::class, 'buyConnectsForStudentPage'])->name('buy-connects-for-student-page');
     Route::get('/buy-connects_page/{amount}',  [HomeController::class, 'buyConnectsPage'])->name('buy-connects_page');
 
     // Named route for buying package
@@ -128,6 +131,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/search', [SearchController::class, 'search'])->name('search');
     Route::get('/search-results',[SearchController::class, 'showResults'])->name('search.results');
     Route::get('/load-more-lessons', [HomeController::class, 'loadMoreLessons'])->name('load.more.lessons');
+    Route::get('/load-more-viewedlessons', [HomeController::class, 'loadMoreViewedLessons'])->name('load.more.viewedlessons');
+    Route::get('/load-more-favlessons', [HomeController::class, 'loadMoreFavLessons'])->name('load.more.favlessons');
     Route::get('/load-more-events', [HomeController::class, 'loadMoreEvents'])->name('load.more.events');
     Route::get('/load-more-people', [HomeController::class, 'loadMorePeople'])->name('load.more.people');
 
@@ -157,6 +162,15 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/publish-result', [TeacherController::class, 'publishResult'])->name('publish_result');
     Route::get('/view-student-result/{student_id}/{academic_session_id}/{term_id}', [HomeController::class, 'viewStudentResult'])->name('view_student_result');
+
+
+    Route::get('/find-wards', [HomeController::class, 'findWards'])->name('find-wards');
+    Route::post('/add-ward',  [HomeController::class, 'addWard'])->name('add-ward');
+    Route::delete('/remove-ward/{ward}', [HomeController::class, 'removeWard'])->name('remove-ward');
+
+    Route::get('/ward/confirm/{token}', [HomeController::class, 'confirmGuardian'])->name('ward.confirm');      
+
+    Route::get('/student/{student_id}/progress', [HomeController::class, 'viewStudentProgress'])->name('student.progress');
 
 
 });
@@ -193,6 +207,7 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
     Route::post('/store_curriculum_topic/{curriculum_id}', [SuperAdminController::class, 'storeCurriculumTopic'])->name('store_curriculum_topic');
 
     Route::get('/create-academic_session', [SuperAdminController::class, 'manageAcademicSession'])->name('manage_academic_sessions');
+    Route::get('/create-test', [SuperAdminController::class, 'manageTest'])->name('manage_tests');
     Route::post('/academic_sessions', [SuperAdminController::class, 'createAcademicSession']);
     Route::post('/academic_sessions/{id}/edit', [SuperAdminController::class, 'editAcademicSession'])->name('academic_sessions.edit');
     
@@ -207,6 +222,9 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
 
     Route::get('/manage_all_schools', [SuperAdminController::class, 'manageAllSchools'])->name('manage_all_schools');
 
+    // In web.php
+
+    Route::post('/tests', [SuperAdminController::class, 'storeTest'])->name('tests.store');
 
     // Add other routes for competitions, quizzes, etc.
 });
@@ -347,6 +365,14 @@ Route::middleware(['auth', 'verifyTeacher'])->group(function () {
 
     Route::post('/toggle-exam/{model}/{examId}', [TeacherController::class, 'toggleAssignmentStatus'])->name('toggle.exam.status');
 
+    Route::post('/promotion_criteria', [TeacherController::class, 'storePromotionCriteria'])->name('promotion_criteria.store');
+
+    Route::get('/fetch-criteria-values', [TeacherController::class, 'fetchCriteriaValues'])->name('fetch.criteria.values');
+
+    Route::post('/update_promotion_criteria', [TeacherController::class, 'updatePromotionCriteria'])->name('update_promotion_criteria');
+    Route::post('/promote-students', [TeacherController::class, 'promoteStudents'])->name('promote_students');
+
+    Route::post('/get-next-class', [TeacherController::class, 'getNextClass'])->name('get_next_class');
 
 
 

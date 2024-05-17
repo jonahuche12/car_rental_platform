@@ -7,6 +7,8 @@ use App\Models\Profile;
 use App\Models\School;
 use App\Models\Course;
 use App\Models\SchoolClass;
+use App\Models\AcademicSession;
+use App\Models\Term;
 use App\Models\UserPackage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -182,7 +184,7 @@ class ProfileController extends Controller
             $displayData = $this->updateUserPackage($user, $validatedData);
         } elseif ($updatedField === 'school_id') {
             $displayData = $this->updateSchool($user, $validatedData);
-        }elseif ($updatedField === 'class_id') {
+        } elseif ($updatedField === 'class_id') {
             $displayData = $this->updateClass($user, $validatedData);
         } else {
             $displayData = isset($validatedData[$updatedField]) ? $validatedData[$updatedField] : '';
@@ -192,14 +194,18 @@ class ProfileController extends Controller
     
         $newIcon = "<span class='ion ion-good float-right text-info'>$displayData</span><i class='fas fas-good float-right text-info'></i>";
     
+        // Modify the response message to include the specific field that was updated
+        $responseMessage = ucfirst(str_replace('_', ' ', $updatedField)) . ' updated';
+    
         return response()->json([
             'response' => $validatedData,
-            'message' => 'Profile updated',
+            'message' => $responseMessage,
             'hide_button' => true,
             'new_icon' => $newIcon,
             'updated_field' => $updatedField,
         ]);
     }
+    
     
     private function updateAddress($profile, $validatedData)
     {

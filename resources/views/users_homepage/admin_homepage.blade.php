@@ -1,230 +1,149 @@
-@include('users_homepage.admin_box')
-
 <!-- Main content -->
 <section class="content">
-      <div class="container-fluid">
-        <div class="row">
+    <div class="container-fluid">
+    <div class="row">
 
 
-        <div class="col-md-8">
-            <div class="card">
-              <div class="card-header p-2">
-                <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#timeline" data-toggle="tab">Timeline</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#activity" data-toggle="tab">Activity</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#lessons" data-toggle="tab">Lessons</a></li>
-                </ul>
-              </div><!-- /.card-header -->
-              <div class="card-body">
-                <div class="tab-content">
-                  
-                  <!-- /.tab-pane -->
-                  <div class="active tab-pane" id="timeline">
+    <div class="col-md-12">
+    <button class="btn bg-primary" id="getFreeConnects">Get Free Connects</button>
+        <div class="card">
+            <div class="card-header p-2">
+            <ul class="nav nav-pills">
+                <li class="nav-item small-text">
+                    <a class="nav-link" href="#events" data-toggle="tab">
+                        <i class="far fa-calendar-alt"></i> Events
+                    </a>
+                </li>
+                <li class="nav-item small-text">
+                    <a class="nav-link active" href="#lessons" data-toggle="tab">
+                        <i class="fas fa-book-open"></i> Lessons
+                    </a>
+                </li>
+            </ul>
+
+            </div><!-- /.card-header -->
+            <div class="card-body">
+            <div class="tab-content">
+                
+            <div class="tab-pane" id="events">
                     <!-- The timeline -->
                     <div class="timeline timeline-inverse">
                         <!-- timeline time label -->
-                        @foreach($sorted_events as $event)
-                        <div class="time-label">
-                            <span class="bg-danger">
-                                {{ \Carbon\Carbon::parse($event->start_date)->format('d M Y') }}
-                            </span>
-                        </div>
-                        <!-- /.timeline-label -->
-                        <!-- timeline item -->
-                        <div>
-                            <i class="fas fa-envelope bg-primary"></i>
+                        <!-- timeline time label -->
+                @foreach($top_events as $event)
+                <div class="time-label">
+                    <span class="badge bg-blue">
+                        {{ \Carbon\Carbon::parse($event->start_date)->format('d M Y') }}
+                    </span>
+                </div>
+                <!-- /.timeline-label -->
+                <!-- timeline item -->
+                <div>
+                    <div class="timeline-item" data-event-id="{{ $event->id }}">
+                        <span class="time"><i class="far fa-clock"></i> {{ \Carbon\Carbon::parse($event->start_date)->format('H:i') }}</span>
 
-                            <div class="timeline-item">
-                                <span class="time"><i class="far fa-clock"></i> {{ \Carbon\Carbon::parse($event->start_date)->format('H:i') }}</span>
+                        <h4 class="timeline-header"><a href="#">{{ $event->title }}</a></h4>
 
-                                <h3 class="timeline-header"><a href="#">{{ $event->title }}</a></h3>
+                        <div class="timeline-body">
+                        <b class="timeline-header"><a href="#">{{$event->school->name}}</a></b>
 
-                                <div class="timeline-body">
-                                    {{ $event->description }}
-                                </div>
-                                <div class="timeline-footer">
-                                    <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                                    <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                                </div>
+                            @if($event->banner_picture || $school->logo)
+                            <!-- Display the image as a link to open in a modal -->
+                            <div>
+                            <a href="#">
+                                <img src="{{ $event->banner_picture ? asset('storage/' . $event->banner_picture) : ($school->logo ? asset('storage/' . $school->logo) : asset('path_to_camera_icon')) }}" alt="Event Banner" class="img-fluid mt-2" style="max-width: 200px;">
+                            </a>
                             </div>
+                            @endif
+
+                            {{ $event->description }}
                         </div>
-                        <!-- END timeline item -->
-                        @endforeach
+                        <div class="timeline-footer">
+                            <div>
+                            <i class="fa fa-heart p-2"></i>
+
+                            <i class="fa fa-comments p-2"></i>
+
+                            </div>
+
+                        <p class="badge bg-primary "><a href="#">{{$event->academicSession->name}}</a></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- END timeline item -->
+                @endforeach
+
                     </div>
                 </div>
 
-                  <!-- /.tab-pane -->
-                  <div class="tab-pane" id="activity">
-                    <!-- Post -->
-                    <div class="post">
-                      <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
-                        <span class="username">
-                          <a href="#">Jonathan Burke Jr.</a>
-                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
-                        </span>
-                        <span class="description">Shared publicly - 7:30 PM today</span>
-                      </div>
-                      <!-- /.user-block -->
-                      <p>
-                        Lorem ipsum represents a long-held tradition for designers,
-                        typographers and the like. Some people hate it and argue for
-                        its demise, but others ignore the hate as they create awesome
-                        tools to help create filler text for everyone from bacon lovers
-                        to Charlie Sheen fans.
-                      </p>
 
-                      <p>
-                        <a href="#" class="link-black text-sm mr-2"><i class="fas fa-share mr-1"></i> Share</a>
-                        <a href="#" class="link-black text-sm"><i class="far fa-thumbs-up mr-1"></i> Like</a>
-                        <span class="float-right">
-                          <a href="#" class="link-black text-sm">
-                            <i class="far fa-comments mr-1"></i> Comments (5)
-                          </a>
-                        </span>
-                      </p>
+                <div class="active tab-pane" id="lessons">
+                <div class="lessons-container">
+                    <div class="row">
+                    
 
-                      <input class="form-control form-control-sm" type="text" placeholder="Type a comment">
-                    </div>
-                    <!-- /.post -->
+                    @foreach ($top_lessons as $lesson)
+                        <div class="col-md-4">
+                            <div class="card lesson-card">
+                                
 
-                    <!-- Post -->
-                    <div class="post clearfix">
-                      <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image">
-                        <span class="username">
-                          <a href="#">Sarah Ross</a>
-                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
-                        </span>
-                        <span class="description">Sent you a message - 3 days ago</span>
-                      </div>
-                      <!-- /.user-block -->
-                      <p>
-                        Lorem ipsum represents a long-held tradition for designers,
-                        typographers and the like. Some people hate it and argue for
-                        its demise, but others ignore the hate as they create awesome
-                        tools to help create filler text for everyone from bacon lovers
-                        to Charlie Sheen fans.
-                      </p>
+                                <!-- Display lesson thumbnail -->
+                                <div class="thumbnail-container position-relative">
+                                    <a href="#" class="lesson-link" data-lesson-id="{{ $lesson->id }}" data-lesson-title="{{ $lesson->title }}" data-school-connects-required="{{ $lesson->school_connects_required }}">
+                                    <!-- Conditionally display enrollment badge -->
+                                    @if ($lesson->enrolledUsers()->where('user_id', auth()->id())->exists())
+                                            <span class="badge bg-primary" style="position:absolute; top:10; right:10; z-index:99;"><i class="fas fa-check"></i></span> <!-- Success badge with check icon -->
+                                        @endif
 
-                      <form class="form-horizontal">
-                        <div class="input-group input-group-sm mb-0">
-                          <input class="form-control form-control-sm" placeholder="Response">
-                          <div class="input-group-append">
-                            <button type="submit" class="btn btn-danger">Send</button>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                    <!-- /.post -->
+                                        @if ($lesson->thumbnail)
+                                            <!-- Display the lesson thumbnail with play icon overlay -->
+                                            <div class="thumbnail-with-play">
+                                                <img src="{{ asset($lesson->thumbnail) }}" alt="{{ $lesson->title }}" class="img-fluid lesson-thumbnail">
+                                                <div class="play-icon-overlay">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <!-- Display default thumbnail with play icon -->
+                                            <div class="no-thumbnail">
+                                                <div class="video-icon">
+                                                    <i class="fas fa-video"></i>
+                                                </div>
+                                                <div class="overlay"></div>
+                                                <img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">
+                                            </div>
+                                        @endif
 
-                    <!-- Post -->
-                    <div class="post">
-                      <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="../../dist/img/user6-128x128.jpg" alt="User Image">
-                        <span class="username">
-                          <a href="#">Adam Jones</a>
-                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
-                        </span>
-                        <span class="description">Posted 5 photos - 5 days ago</span>
-                      </div>
-                      <!-- /.user-block -->
-                      <div class="row mb-3">
-                        <div class="col-sm-6">
-                          <img class="img-fluid" src="../../dist/img/photo1.png" alt="Photo">
-                        </div>
-                        <!-- /.col -->
-                        <div class="col-sm-6">
-                          <div class="row">
-                            <div class="col-sm-6">
-                              <img class="img-fluid mb-3" src="../../dist/img/photo2.png" alt="Photo">
-                              <img class="img-fluid" src="../../dist/img/photo3.jpg" alt="Photo">
+                                    </a>
+
+                                <p class="badge bg-primary" style="position:relative;  z-index:99;"><small><b>{{ $lesson->school_connects_required }} SC</b></small></p>
+                                </div>
+
+                                <!-- Additional lesson details -->
+                                <p><small><b>{{ $lesson->teacher->profile->full_name }}</b></small></p>
+                                        
+                                <h5><small>{{ \Illuminate\Support\Str::limit($lesson->title, 15) }}</small></h5>
+                                <p><small>{{ \Illuminate\Support\Str::limit($lesson->description, 200) }}</small></p>
                             </div>
-                            <!-- /.col -->
-                            <div class="col-sm-6">
-                              <img class="img-fluid mb-3" src="../../dist/img/photo4.jpg" alt="Photo">
-                              <img class="img-fluid" src="../../dist/img/photo1.png" alt="Photo">
-                            </div>
-                            <!-- /.col -->
-                          </div>
-                          <!-- /.row -->
                         </div>
-                        <!-- /.col -->
-                      </div>
-                      <!-- /.row -->
-
-                      <p>
-                        <a href="#" class="link-black text-sm mr-2"><i class="fas fa-share mr-1"></i> Share</a>
-                        <a href="#" class="link-black text-sm"><i class="far fa-thumbs-up mr-1"></i> Like</a>
-                        <span class="float-right">
-                          <a href="#" class="link-black text-sm">
-                            <i class="far fa-comments mr-1"></i> Comments (5)
-                          </a>
-                        </span>
-                      </p>
-
-                      <input class="form-control form-control-sm" type="text" placeholder="Type a comment">
+                    @endforeach
                     </div>
-                    <!-- /.post -->
-                  </div>
-
-                  <div class="tab-pane" id="lessons">
-                    <form class="form-horizontal">
-                      <div class="form-group row">
-                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputName" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputName2" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
-                        <div class="col-sm-10">
-                          <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <div class="checkbox">
-                            <label>
-                              <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-danger">Submit</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                  <!-- /.tab-pane -->
                 </div>
-                <!-- /.tab-content -->
-              </div><!-- /.card-body -->
+
+                </div>
+
+
+
+                <!-- /.tab-pane -->
             </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col -->
+            <!-- /.tab-content -->
+            </div><!-- /.card-body -->
         </div>
-        <!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </section>
+        <!-- /.card -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <div id="loader"></div>
+    <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>

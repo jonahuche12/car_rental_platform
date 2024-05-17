@@ -78,7 +78,7 @@
         <div class="certificate-table">
             <h4 class="text-dark small-text">Result for <b>{{ $compiledResults['student_info']['student_name'] }}</b> - <em><b>{{ $compiledResults['student_info']['academic_session'] }} - {{ $compiledResults['student_info']['term'] }}- {{ $compiledResults['student_info']['class_name'] }} ({{ $compiledResults['student_info']['class_section_name'] }})</b></em> </h4>
             <div class="table-responsive">
-                <div class="overlay"></div> <!-- Overlay div -->
+               
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>

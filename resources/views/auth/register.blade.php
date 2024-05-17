@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
+@section('title', "Central School System - Register")
 @section('content')
+@include('sidebar')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -15,9 +17,9 @@
                        <!-- <a href="{{route('login.facebook')}}" class="btn btn-block btn-primary">
                        <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
                        </a> -->
-                       <a href="{{route('login.google')}}" class="btn btn-block btn-danger">
-                       <i class="fab fa-google mr-2"></i> Continue with Google
-                       </a>
+                       <a href="{{ route('login.google') }}" class="btn btn-block btn-danger google-btn mb-3">
+                            <i class="fab fa-google mr-2"></i> Continue with Google
+                        </a>
                        <!-- <a href="{{route('login.apple')}}" class="btn btn-block btn-primary">
                        <i class="fab fa-apple mr-2"></i> Sign in using Apple
                        </a> -->
@@ -25,7 +27,6 @@
                        <i class="fab fa-github mr-2"></i> Sign in using Github
                        </a> -->
 
-                       <p>- OR -</p>
                    
                         <div class="row mb-3">
                             <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('First Name') }}</label>

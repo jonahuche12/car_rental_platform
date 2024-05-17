@@ -84,7 +84,11 @@ function saveData(field) {
             }
 
             // Display success message with fade animation
-            $("." + field + "-message").text(response.message).fadeIn();
+            $(".profile-message").text(response.message).fadeIn();
+            setTimeout(function() {
+                $('.profile-message').fadeOut();
+                
+            }, 3000); // 3 seconds
 
             // Update the edit icon with the response data
             $("#" + field + "-icon").replaceWith(response.new_icon);
@@ -102,11 +106,11 @@ function saveData(field) {
             console.error(xhr.responseText);
 
             // Display specific error message from the server with fade animation
-            $("." + field + "-error").text("Failed to update. Please try again.").fadeIn();
+            $(".profile-error").text("Failed to update. Please try again.").fadeIn();
 
             // Hide the error message after 3 seconds with fade animation
             setTimeout(function() {
-                $("." + field + "-error").fadeOut();
+                $(".profile-error").fadeOut();
             }, 3000);
 
             location.reload()
@@ -161,7 +165,7 @@ function proceedWithUserPackage() {
             }
 
             // Display success message with fade animation
-            $("." + field + "-message").text(response.message).fadeIn();
+            $(".package-message").text(response.message).fadeIn();
 
             // Update the edit icon with the response data
             $("#" + field + "-icon").replaceWith(response.new_icon);
@@ -169,7 +173,8 @@ function proceedWithUserPackage() {
 
             // Update the edit icon with the response data after 3 seconds
             setTimeout(function() {
-                $("." + field + "-message").fadeOut();
+                $(".package-message").fadeOut();
+                location.reload()
             }, 3000);
         },
 
@@ -179,11 +184,11 @@ function proceedWithUserPackage() {
             console.error(xhr.responseText);
 
             // Display specific error message from the server with fade animation
-            $("." + field + "-error").text("Failed to update. Please try again.").fadeIn();
+            $(".package-error").text("Failed to update. Please try again.").fadeIn();
 
             // Hide the error message after 3 seconds with fade animation
             setTimeout(function() {
-                $("." + field + "-error").fadeOut();
+                $(".package-error").fadeOut();
             }, 3000);
         }
     });

@@ -10,6 +10,20 @@ Central School System
 @endif
 @endsection
 
+@section('breadcrumb3')
+    <a href="{{ route('home') }}">Home</a>
+@endsection
+
+@section('breadcrumb2')
+@if(auth()->user()->profile)
+<span>{{auth()->user()->profile->role}}</span>
+@endif
+@endsection
+@section('breadcrumb1')
+@if(auth()->user()->profile)
+<p>{{auth()->user()->profile->full_name}}</p>
+@endif
+@endsection
 @section('sidebar')
     @include('sidebar')
 @endsection
@@ -171,7 +185,7 @@ if ($userRole == "school_owner") {
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-purple text-white">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="errorModalLabel">Error!</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -208,7 +222,7 @@ if ($userRole == "school_owner") {
 <div class="modal fade" id="schoolConnectsModal" tabindex="-1" aria-labelledby="schoolConnectsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-purple text-white">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="schoolConnectsModalLabel">School Connects Required</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -581,7 +595,7 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
         html += '<a href="#" class="lesson-link text-dark" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
 
         if (item.is_enrolled == true) {
-            html += '<span class="badge bg-purple" style="position: absolute; top: 10px; left: 10px; z-index: 99;"><i class="fas fa-check"></i></span>';
+            html += '<span class="badge bg-primary" style="position: absolute; top: 10px; left: 10px; z-index: 99;"><i class="fas fa-check"></i></span>';
         }
 
         html += '<div class="thumbnail-container position-relative">';
@@ -630,7 +644,7 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
 
         html += '<div class="timeline-footer">';
         html += '<div><i class="fa fa-heart p-2"></i><i class="fa fa-comments p-2"></i></div>';
-        html += '<p class="badge bg-purple"><a href="#">' + event.academic_session_name + '</a></p>';
+        html += '<p class="badge bg-primary"><a href="#">' + event.academic_session_name + '</a></p>';
         html += '</div>';
 
         html += '</div>'; // Close timeline-body

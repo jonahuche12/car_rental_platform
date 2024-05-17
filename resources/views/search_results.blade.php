@@ -4,6 +4,14 @@
     Central School System
 @endsection
 
+@section('breadcrumb1')
+   <a href="{{route('home')}}">Home</a>
+@endsection
+
+
+@section('breadcrumb2', "Search")
+  
+
 @section('sidebar')
     @include('sidebar')
 @endsection
@@ -81,7 +89,7 @@
                                 <div class="lessons-container">
                                     <div class="row">
                                         @foreach ($results['lessons'] as $lesson)
-                                            <div class="col-md-4 col-6">
+                                            <div class="col-md-4 col-">
                                                 <div class="card lesson-card">
                                                     @if ($lesson->user_id == auth()->id())
                                                         <!-- Dropdown menu for actions (only visible to the lesson owner) -->
@@ -140,9 +148,9 @@
                         <div class="tab-pane{{ setActiveTab($results, 'events') }}" id="events">
                             @if ($results['events']->isNotEmpty())
                                 <h5>Events</h5>
-                                <ul class="users-list clearfix">
+                                <ul class="users-list event-list clearfix">
                                     @foreach ($results['events'] as $event)
-                                        <li class="col-md-4 col-6">
+                                        <li class="col-md-4 col-">
                                             <!-- Display event card -->
                                             <div class="card admin-card" data-event-id="{{ $event->id }}" data-event-title="{{ $event->title }}">
                                                 <!-- Event card details -->
@@ -187,15 +195,15 @@
                         <div class="tab-pane{{ setActiveTab($results, 'users') }}" id="people">
                             @if ($results['users']->isNotEmpty())
                                 <h5>Users</h5>
-                                <ul class="users-list clearfix">
+                                <ul class="users-list people-list clearfix">
                                     @foreach ($results['users'] as $user)
-                                        <li class="col-md-4 col-6">
+                                        <li class="col-md-4 col-">
                                             <!-- Display user card -->
                                             <div class="card people-card" data-people-id="{{ $user->id }}" data-admin-name="{{ $user->profile->full_name }}">
                                                 <!-- User card details -->
                                                 <div class="card-body">
                                                     <div class="user-profile">
-                                                        <p class="badge bg-purple"> {{$user->profile->full_name}}</p>
+                                                        <p class=""><b> {{$user->profile->full_name}}</b></p>
                                                         @if ($user->profile->profile_picture)
                                                             <img src="{{ asset('storage/' . $user->profile->profile_picture) }}" alt="User Image" width="150px">
                                                         @else
@@ -238,6 +246,7 @@
         </div>
     </div>
 </div>
+
 
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -671,6 +680,39 @@ function setActiveTab($results, $tabName) {
             }
         });
     }
+    function createLessonHtml(item) {
+        var html = '<div class="col-md-4">';
+        html += '<div class="card lesson-card">';
+        html += '<a href="#" class="lesson-link text-dark" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
+
+        if (item.is_enrolled == true) {
+            html += '<span class="badge bg-purple" style="position: absolute; top: 10px; left: 10px; z-index: 99;"><i class="fas fa-check"></i></span>';
+        }
+
+        html += '<div class="thumbnail-container position-relative">';
+        if (item.thumbnail) {
+            html += '<div class="thumbnail-with-play">';
+            html += '<img src="' + item.thumbnail + '" alt="' + item.title + '" class="img-fluid lesson-thumbnail">';
+            html += '<div class="play-icon-overlay"><i class="fas fa-play"></i></div>';
+            html += '</div>';
+        } else {
+            html += '<div class="no-thumbnail">';
+            html += '<div class="video-icon"><i class="fas fa-video"></i></div>';
+            html += '<div class="overlay"></div>';
+            html += '<img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        html += '<p><small><b>' + item.teacher_name + '</b></small></p>';
+        html += '<h5><small>' + item.title + '</small></h5>';
+        html += '<p><small>' + item.description + '</small></p>';
+        html += '</a>';
+        html += '</div>';
+        html += '</div>';
+
+        return html;
+    }
 
     function loadMoreEvents(activeTabId) {
         loadingEvents = true;
@@ -713,39 +755,6 @@ function setActiveTab($results, $tabName) {
     }
 
 
-    function createLessonHtml(item) {
-        var html = '<div class="col-md-4">';
-        html += '<div class="card lesson-card">';
-        html += '<a href="#" class="lesson-link text-dark" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
-
-        if (item.is_enrolled == true) {
-            html += '<span class="badge bg-purple" style="position: absolute; top: 10px; left: 10px; z-index: 99;"><i class="fas fa-check"></i></span>';
-        }
-
-        html += '<div class="thumbnail-container position-relative">';
-        if (item.thumbnail) {
-            html += '<div class="thumbnail-with-play">';
-            html += '<img src="' + item.thumbnail + '" alt="' + item.title + '" class="img-fluid lesson-thumbnail">';
-            html += '<div class="play-icon-overlay"><i class="fas fa-play"></i></div>';
-            html += '</div>';
-        } else {
-            html += '<div class="no-thumbnail">';
-            html += '<div class="video-icon"><i class="fas fa-video"></i></div>';
-            html += '<div class="overlay"></div>';
-            html += '<img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">';
-            html += '</div>';
-        }
-        html += '</div>';
-
-        html += '<p><small><b>' + item.teacher_name + '</b></small></p>';
-        html += '<h5><small>' + item.title + '</small></h5>';
-        html += '<p><small>' + item.description + '</small></p>';
-        html += '</a>';
-        html += '</div>';
-        html += '</div>';
-
-        return html;
-    }
 
     function createEventHtml(event) {
         var html = '<div class="timeline timeline-inverse">';
@@ -779,83 +788,78 @@ function setActiveTab($results, $tabName) {
     }
 
 
-       // Function to load more People
-       function loadMorePeople(activeTabId) {
-            loadingPeople = true;
+     // Function to load more People
+function loadMorePeople(activeTabId) {
+    loadingPeople = true;
 
-            $.ajax({
-                url: "{{ route('load.more.people') }}",
-                type: "GET",
-                data: {
-                    page: currentPagePeople,
-                    displayedPeopleIds: displayedPeopleIds,
-                    term: term
-                },
-                beforeSend: function() {
-                    $('#loader').append('<div class="loader-container"><div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading People...</div></div>');
-                },
-                success: function(response) {
-                    if (response && response.people && response.people.length > 0) {
-                        currentPagePeople++;
+    $.ajax({
+        url: "{{ route('load.more.people') }}",
+        type: "GET",
+        data: {
+            page: currentPagePeople,
+            displayedPeopleIds: displayedPeopleIds,
+            term: term
+        },
+        beforeSend: function() {
+            $('#loader').append('<div class="loader-container"><div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading People...</div></div>');
+        },
+        success: function(response) {
+            if (response && response.people && response.people.length > 0) {
+                currentPagePeople++;
 
-                        $.each(response.people, function(index, person) {
-                            if (!displayedPeopleIds.includes(person.id)) {
-                                var newPeopleHtml = createPeopleHtml(person);
-                                $('.users-list').append(newPeopleHtml);
-                                displayedPeopleIds.push(person.id);
-                            }
-                        });
-
-                    console.log(displayedPeopleIds)
-
-                    } else {
-                        console.log("No more People data available.");
-                        canLoadMore = false;
+                $.each(response.people, function(index, person) {
+                    if (!displayedPeopleIds.includes(person.id)) {
+                        var newPeopleHtml = createPeopleHtml(person);
+                        $('.people-list').append(newPeopleHtml);
+                        displayedPeopleIds.push(person.id);
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText)
-                    console.log("AJAX People Error:", error);
-                },
-                complete: function() {
-                    loadingPeople = false;
-                    $('.loader-container').remove();
-                }
-            });
-        }
+                });
 
-
-        function createPeopleHtml(person) {
-            var html = '<li class="col-md-4 col-6">';
-            html += '<div class="card people-card" data-people-id="' + person.id + '" data-people-name="' + person.full_name + '">';
-            html += '<div class="card-body">';
-            html += '<div class="user-profile">';
-            html += '<p class="badge bg-purple">'+person.full_name +'</p>';
-            if (person.profile_picture) {
-                html += '<img src="' + assetPath(person.profile_picture) + '" alt="User Image" width="150px">';
-                
+                console.log(displayedPeopleIds);
             } else {
-                html += '<img src="{{ asset('dist/img/avatar.png') }}" alt="Default Thumbnail" class="img-fluid" width="150px">';
+                console.log("No more People data available.");
+                canLoadMore = false;
             }
-            // html += '<a class="users-list-name" href="#" data-people-name="' + person.full_name + '">' + person.full_name + '<br>';
-            html += '<br><span class="badge p-1 badge-info">' + person.role + '</span></a>';
-            html += '</div>';
-            html += '<div class="user-permissions">';
-            html += '<h5 style="cursor:pointer;" class="detail-heading toggle-details-btn  btn btn-info" data-target="student-details-' + person.id + '">Details <i class="toggle-icon fas fa-chevron-down"></i></h5>';
-            html += '<div class="collapsed-details" id="student-details-' + person.id + '" style="display: none;">'; // Initially hide the details
-            html += ' <h5 style="cursor:pointer;"  class="detail-heading toggle-details-btn btn btn-info" data-target="student-details-'+ person.id+ '">Details <i class="toggle-icon fas fa-chevron-down"></i></h5>';
-            html += '<p class="small-text"><strong>Email:</strong> ' + person.email + '</p>';
-            html += '<p class="small-text"><strong>Phone:</strong> ' + (person.phone_number ? person.phone_number : 'N/A') + '</p>';
-            html += '<p class="small-text"><strong>Gender:</strong> ' + person.gender + '</p>';
-            html += '<p class="small-text"><strong>Date of Birth:</strong> ' + (person.date_of_birth ? person.date_of_birth : 'N/A') + '</p>';
-            html += '</div>';
-            html += '</div>';
-            html += '</div>';
-            html += '</div>';
-            html += '</li>';
-
-            return html;
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+            console.log("AJAX People Error:", error);
+        },
+        complete: function() {
+            loadingPeople = false;
+            $('.loader-container').remove();
         }
+    });
+}
+
+function createPeopleHtml(person) {
+    var html = '<li class="col-md-4 col-">';
+    html += '<div class="card people-card" data-people-id="' + person.id + '" data-people-name="' + person.full_name + '">';
+    html += '<div class="card-body">';
+    html += '<div class="user-profile">';
+    html += '<p class=""><b>' + person.full_name + '</b></p>';
+    if (person.profile_picture) {
+        html += '<img src="' + assetPath(person.profile_picture) + '" alt="User Image" width="150px">';
+    } else {
+        html += '<img src="{{ asset('dist/img/avatar.png') }}" alt="Default Thumbnail" class="img-fluid" width="150px">';
+    }
+    html += '<br><span class="badge p-1 badge-info">' + person.role + '</span></a>';
+    html += '</div>';
+    html += '<div class="user-permissions">';
+    html += '<h5 style="cursor:pointer;" class="detail-heading toggle-details-btn btn btn-info" data-target="student-details-' + person.id + '">Details <i class="toggle-icon fas fa-chevron-down"></i></h5>';
+    html += '<div class="collapsed-details" id="student-details-' + person.id + '" style="display: none;">'; // Initially hide the details
+    html += '<p class="small-text"><strong>Email:</strong> ' + person.email + '</p>';
+    html += '<p class="small-text"><strong>Phone:</strong> ' + (person.phone_number ? person.phone_number : 'N/A') + '</p>';
+    html += '<p class="small-text"><strong>Gender:</strong> ' + person.gender + '</p>';
+    html += '<p class="small-text"><strong>Date of Birth:</strong> ' + (person.date_of_birth ? person.date_of_birth : 'N/A') + '</p>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</li>';
+
+    return html;
+}
 
         // Function to resolve asset paths based on the environment
         function assetPath(path) {

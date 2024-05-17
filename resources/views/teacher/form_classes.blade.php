@@ -131,7 +131,7 @@
                 <h3 class="card-title">Students</h3>
 
                 <div class="card-tools">
-                    <span class="badge bg-info">{{ $form_classes->count()  }} form class(es)</span>
+                    <span class="badge bg-primary">{{ $form_classes->count()  }} form class(es)</span>
                     
                    <!-- Button to add admin -->
                    <div class="btn-group">
@@ -169,14 +169,14 @@
                 
                 @foreach($form_classes as $form_class)
                 <div class="admin-card card-header p-2 tog-header collapsed"> <!-- Add 'collapsed' class here -->
-                    <div class="card-header tog-header bg-info p-2" style="cursor:pointer" >
+                    <div class="card-header tog-header bg-primary p-2" style="cursor:pointer" >
                         <h6 class="p-2 class-header">{{ $form_class->name }}  <i class="toggle-icon fas fa-chevron-down"></i></h6>
                     </div>
                     <div class="card-body" style="display: none;"> <!-- Add 'style="display: none;"' here -->
                     
                         <ul class="users-list clearfix">
                             @forelse($form_class->students as $student)
-                            <li class="col-md-3 col-6">
+                            <li class="col-md-3 col-">
                             <div class="card card" data-admin-id="{{ $student->id }}" data-admin-name="{{ $student->profile->full_name }}">
                                 <div class="card-body">
                                     <div class="dropdown" style="position: absolute; top: 10px; left: 10px;">
@@ -213,7 +213,7 @@
                                         @else
                                             <img src="{{ asset('dist/img/avatar5.png') }}" alt="User Image" width="150px">
                                         @endif
-                                        <a class="users-list-name" href="#" data-admin-name="{{ $student->profile->full_name }}">{{ $student->profile->full_name }} <br> <span class="badge p-1 badge-info">{{ $student->profile->role }}</span> </a>
+                                        <a class="users-list-name" href="#" data-admin-name="{{ $student->profile->full_name }}">{{ $student->profile->full_name }} <br> <span class="badge p-1 badge-primary">{{ $student->profile->role }}</span> </a>
                                     </div>
                                     <span class="users-list-date">
                                         <!-- Inside the <div class="card-body"> loop -->
@@ -240,23 +240,37 @@
                                             Details <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Email:</strong></span>
-                                                <span class="detail-value">{{ $student->email }}</span>
+                                                <span class="detail-label small-text"><strong>Email:</strong></span>
+                                                <p class="detail-value small-text">{{ $student->email }}</p>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Phone:</strong></span>
-                                                <span class="detail-value">{{ $student->profile->phone_number ?? 'N/A' }}</span>
+                                                <span class="detail-label small-text"><strong>Phone:</strong></span>
+                                                <p class="detail-value small-text">{{ $student->profile->phone_number ?? 'N/A' }}</p>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Gender:</strong></span>
-                                                <span class="detail-value">{{ $student->profile->gender }}</span>
+                                                <span class="detail-label small-text"><strong>Gender:</strong></span>
+                                                <p class="detail-value small-text">{{ $student->profile->gender }}</p>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label"><strong>Date of Birth:</strong></span>
-                                                <span class="detail-value">{{ $student->profile->date_of_birth ?? 'N/A' }}</span>
+                                                <span class="detail-label small-text"><strong>Date of Birth:</strong></span>
+                                                <p class="detail-value small-text">{{ $student->profile->date_of_birth ?? 'N/A' }}</p>
                                             </div>
+                                            @if(!empty($student->guardians()))
+
+                                            <div class="detail-item">
+                                                <span class="detail-label small-text"><strong>Guardian Contact</strong></span>
+                                                @foreach($student->guardians as $guardian)
+                                                    <p class="detail-label badge bg-purple small-text"><b>{{$guardian->profile->full_name}} : </b>{{$guardian->profile->phone_number ?? 'N/A'}}</p>
+                                                @endforeach
+                                            </div>
+
+
+                                            @endif
                                         </div>
                                     </div>
+
+
+
 
                                     <!-- Remove Admin Modal -->
                                     <div class="modal fade" id="removestudentModal{{ $student->id }}" tabindex="-1" role="dialog" aria-labelledby="removestudentModalLabel" aria-hidden="true">
@@ -285,11 +299,182 @@
                                     <p id="no-admin" class="p-2">No Student found for this school.</p>
                                 @endforelse
                         </ul>
+                        @php
+                            $academicSessionId = $school->academicSession->id;
+                            $hasRequiredTerms = $school->country === 'Nigeria' ? $school->academicSession->terms()->count() >= 0 : true;
+                            $promotionCriteriaExists = $form_class->promotionCriteria()->where('academic_session_id', $academicSessionId)->exists();
+                        @endphp
+
+                        @if ($form_class->students->count() > 0 && $hasRequiredTerms && $form_class->students->count() === $form_class->students->filter(function($student) use ($academicSessionId) {
+                            return $student->studentResults()->where('academic_session_id', $academicSessionId)->exists();
+                        })->count())
+                            <!-- Button trigger modal -->
+                            @if ($promotionCriteriaExists)
+                                <button type="button" class="btn btn-primary small-text btn-sm" data-toggle="modal" data-target="#editPromotionCriteriaModal" data-academic_session-id={{$academicSessionId}} data-section-id={{ $form_class->id }}>
+                                    Edit Promotion Criteria
+                                </button>
+                                @if(!$form_class->promotionCriteria->isEmpty() && !$form_class->promotionCriteria->first()->student_promoted)
+                                    <button type="button" class="btn btn-success btn-sm small-text" data-toggle="modal" data-target="#confirmationModal" data-academic_session-id="{{$academicSessionId}}" data-section-id="{{$form_class->id}}">
+                                        Promote Eligible Students
+                                    </button>
+                                @endif
+
+
+                            @else
+                            <!-- Button trigger modal -->
+                            <button id="createPromotionCriteriaButton" type="button" class="btn btn-sm small-text btn-primary" data-toggle="modal" data-target="#promotionCriteriaModal" data-academic_session-id={{$academicSessionId}} data-section-id={{ $form_class->id }}>
+                                Create Promotion Criteria
+                            </button>
+                            @endif
+                        @endif
+
+
+
                     </div>
                 </div>
                 @endforeach
                 <!-- /.users-list -->
             </div>
+
+            <!-- Promotion Criteria Modal -->
+            <div class="modal fade" id="promotionCriteriaModal" tabindex="-1" role="dialog" aria-labelledby="promotionCriteriaModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary">
+                            <h5 class="modal-title" id="promotionCriteriaModalLabel">Create Promotion Criteria</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                           
+
+                            <!-- Form for creating promotion criteria -->
+                            <form id="promotionCriteriaForm" data-academic_session-id="" data-section-id="">
+                                <!-- Checkbox to promote all students -->
+                            <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="promoteAllStudents">
+                                <label class="form-check-label" for="promoteAllStudents">Promote all students regardless of performance</label>
+                            </div>
+                                <!-- Criteria 1: Required Average Score -->
+                                <div id="promotionCriteria">
+                                <div class="form-group">
+                                    <label for="requiredAvgScore">Required Average Score</label>
+                                    <input type="number" class="form-control" id="requiredAvgScore" name="requiredAvgScore" placeholder="Enter required average score" required>
+                                    <small class="form-text text-muted">Enter the minimum average score required for promotion.</small>
+                                </div>
+
+                                <!-- Criteria 2: Total Attendance Percentage -->
+                                <div class="form-group">
+                                    <label for="totalAttendancePercentage">Total Attendance Percentage</label>
+                                    <input type="number" class="form-control" id="totalAttendancePercentage" name="totalAttendancePercentage" placeholder="Enter total attendance percentage" required>
+                                    <small class="form-text text-muted">Enter the minimum total attendance percentage required for promotion.</small>
+                                </div>
+
+                                <!-- Criteria 3: Average Score for Compulsory Courses -->
+                                <div class="form-group">
+                                    <label for="compulsoryCoursesAvgScore">Average Score for Compulsory Courses</label>
+                                    <input type="number" class="form-control" id="compulsoryCoursesAvgScore" name="compulsoryCoursesAvgScore" placeholder="Enter average score for compulsory courses" required>
+                                    <small class="form-text text-muted">Enter the minimum average score required for compulsory courses.</small>
+                                </div>
+
+
+                                </div>
+                                
+                            </form>
+                            <!-- Description -->
+                            <p id="promotionCriteriaDescription"><strong>Description:</strong> To determine whether a student is eligible for promotion, provide the required average score, total attendance percentage, and average score for compulsory courses.</p>
+                        </div>
+                        <p class="alert alert-success p-2" id="criteria-message" style="display:none"></p>
+                        <p class="alert alert-danger p-2" id="criteria-error" style="display:none"></p>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="savePromotionCriteria">Continue</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+<!-- Edit Promotion Criteria Modal -->
+<div class="modal fade" id="editPromotionCriteriaModal" tabindex="-1" role="dialog" aria-labelledby="editPromotionCriteriaModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title" id="editPromotionCriteriaModalLabel">Edit Promotion Criteria</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for editing promotion criteria -->
+                <form id="editPromotionCriteriaForm" data-academic_session-id="{{ $academicSessionId }}" data-section-id="{{ $form_class->id }}">
+                    <!-- Checkbox to promote all students -->
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="editPromoteAllStudents">
+                        <label class="form-check-label" for="editPromoteAllStudents">Promote all students regardless of performance</label>
+                    </div>
+                    <!-- Criteria 1: Required Average Score -->
+                    <div id="promotionEditCriteria">
+                    <div class="form-group">
+                        <label for="editRequiredAvgScore">Required Average Score</label>
+                        <input type="number" class="form-control" id="editRequiredAvgScore" name="requiredAvgScore" placeholder="Enter required average score" value="" required>
+                        <small class="form-text text-muted">Enter the minimum average score required for promotion.</small>
+                    </div>
+                    <!-- Criteria 2: Total Attendance Percentage -->
+                    <div class="form-group">
+                        <label for="editTotalAttendancePercentage">Total Attendance Percentage</label>
+                        <input type="number" class="form-control" id="editTotalAttendancePercentage" name="totalAttendancePercentage" placeholder="Enter total attendance percentage" value="" required>
+                        <small class="form-text text-muted">Enter the minimum total attendance percentage required for promotion.</small>
+                    </div>
+                    <!-- Criteria 3: Average Score for Compulsory Courses -->
+                    <div class="form-group">
+                        <label for="editCompulsoryCoursesAvgScore">Average Score for Compulsory Courses</label>
+                        <input type="number" class="form-control" id="editCompulsoryCoursesAvgScore" name="compulsoryCoursesAvgScore" placeholder="Enter average score for compulsory courses" value="" required>
+                        <small class="form-text text-muted">Enter the minimum average score required for compulsory courses.</small>
+                    </div>
+                </div>
+                </form>
+                <!-- Description -->
+                <p id="editPromotionCriteriaDescription"><strong>Description:</strong> To determine whether a student is eligible for promotion, provide the required average score, total attendance percentage, and average score for compulsory courses.</p>
+            </div>
+                <p class="alert alert-success p-2" id="edit-criteria-message" style="display:none"></p>
+                <p class="alert alert-danger p-2" id="edit-criteria-error" style="display:none"></p>
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                <button type="button" class="btn btn-primary" id="saveEditPromotionCriteria">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true" data-academic_session_modal-id="" data-section_modal-id="" data-next_class-id="">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Promotion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <p class="alert alert-success p-2" id="promotion-message" style="display:none"></p>
+            <p class="alert alert-danger p-2" id="promotion-error" style="display:none"></p>
+            <div class="modal-body">
+                Are you sure you want to promote all eligible students to the next class <b> <span id="next-class"></span></b> ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmPromotion">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
             <!-- /.card-body -->
@@ -304,6 +489,276 @@
 
 @endsection
 @section('scripts')
+<script>
+    $(document).on('click', '[data-target="#confirmationModal"]', function () {
+        // Get the academic session ID and class section ID from the button's data attributes
+        var academicSessionId = $(this).data('academic_session-id');
+        var classSectionId = $(this).data('section-id');
+        console.log(classSectionId);
+        
+        // Set the academic session ID and class section ID in the confirmation modal
+        $('#confirmationModal').data('academic_session_modal-id', academicSessionId);
+        $('#confirmationModal').data('section_modal-id', classSectionId);
+        
+        // AJAX request to get the next class
+        $.ajax({
+            url: '{{ route("get_next_class") }}',
+            type: 'POST',
+            data: {
+                class_section_id: classSectionId
+            },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                // Update the next class in the modal
+                $('#next-class').text(response.next_class);
+                $('#confirmationModal').data('next_class-id', response.next_class_id);
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error(xhr.responseText);
+            }
+        });
+    });
+
+$(document).ready(function() {
+    // Handle click event of the confirmation button
+    $('#confirmPromotion').click(function() {
+        var academicSessionId = $('#confirmationModal').data('academic_session_modal-id');
+        var classSectionId = $('#confirmationModal').data('section_modal-id');
+        var nextClassId = $('#confirmationModal').data('next_class-id');
+        var confirmButton = $(this);
+
+        // Show spinner icon and disable the button
+        confirmButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Confirming...');
+        confirmButton.prop('disabled', true);
+
+        // Make AJAX request to promote students
+        $.ajax({
+            url: '{{ route("promote_students") }}',
+            type: 'POST',
+            data: {
+                academic_session_id: academicSessionId,
+                class_section_id: classSectionId,
+                next_class_id: nextClassId,
+            },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                // Handle success response
+                console.log(response);
+                $('#promotion-message').text(response.message).fadeIn().delay(6000).fadeOut(function(){
+                    // Close the modal and reload the page
+                    $('#confirmationModal').modal('hide');
+                    location.reload();
+                });
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error(xhr.responseText);
+                $('#promotion-error').text(xhr.responseText).fadeIn();
+            },
+            complete: function() {
+                // Delay restoration of button text and re-enabling the button for up to 6 seconds
+                setTimeout(function() {
+                    // Restore button text and enable the button
+                    confirmButton.html('Confirm');
+                    confirmButton.prop('disabled', false);
+                }, 6000);
+            }
+        });
+    });
+});
+
+
+</script>
+
+
+
+<script>
+    $(document).on('click', '[data-target="#editPromotionCriteriaModal"]', function () {
+        // Get the academic session ID and class section ID from the data attributes of the button
+        var academicSessionId = $(this).data('academic_session-id');
+        var classSectionId = $(this).data('section-id');
+
+        // Populate the modal fields with the retrieved data
+        $('#editPromotionCriteriaForm').attr('data-academic_session-id', academicSessionId);
+        $('#editPromotionCriteriaForm').attr('data-section-id', classSectionId);
+
+        // AJAX request to fetch the criteria values
+        $.ajax({
+            url: '/fetch-criteria-values', // Replace this with your actual endpoint
+            type: 'GET',
+            data: {
+                academic_session_id: academicSessionId,
+                class_section_id: classSectionId
+            },
+            success: function (response) {
+                // Check if all values are 0, if yes, check the checkbox and hide the criteria section
+                if (response.requiredAvgScore == 0 && response.totalAttendancePercentage == 0 && response.compulsoryCoursesAvgScore == 0) {
+                    $('#editPromoteAllStudents').prop('checked', true);
+                    $('#editRequiredAvgScore').val(response.requiredAvgScore);
+                    $('#editTotalAttendancePercentage').val(response.totalAttendancePercentage);
+                    $('#editCompulsoryCoursesAvgScore').val(response.compulsoryCoursesAvgScore);
+                    $('#promotionEditCriteria').hide();
+                    $('#editPromotionCriteriaDescription').hide(); // Hide description
+                } else {
+                    // Populate the criteria fields with the retrieved data
+                    $('#editRequiredAvgScore').val(response.requiredAvgScore);
+                    $('#editTotalAttendancePercentage').val(response.totalAttendancePercentage);
+                    $('#editCompulsoryCoursesAvgScore').val(response.compulsoryCoursesAvgScore);
+                    $('#promotionEditCriteria').show();
+                    $('#editPromotionCriteriaDescription').show(); // Show description
+                }
+            },
+            error: function (xhr, status, error) {
+                // Handle error
+                console.error(xhr.responseText);
+                console.error(error);
+            }
+        });
+    });
+
+    // Event listener for the checkbox to toggle the promotionEditCriteria section and description
+    $('#editPromoteAllStudents').change(function () {
+        if ($(this).is(':checked')) {
+            $('#promotionEditCriteria').hide();
+            $('#editPromotionCriteriaDescription').hide(); // Hide description
+        } else {
+            $('#promotionEditCriteria').show();
+            $('#editPromotionCriteriaDescription').show(); // Show description
+        }
+    });
+
+    $(document).ready(function() {
+        // Handle form submission
+        $('#saveEditPromotionCriteria').click(function() {
+            // Serialize form data
+            var formData = $('#editPromotionCriteriaForm').serialize();
+
+            // Check if the 'Promote all students' checkbox is checked
+            var editPromoteAllStudents = $('#editPromoteAllStudents').is(':checked');
+            if (editPromoteAllStudents) {
+                console.log(editPromoteAllStudents)
+                // Set all form fields to zero
+                formData += '&requiredAvgScore=0&totalAttendancePercentage=0&compulsoryCoursesAvgScore=0';
+            }
+            console.log("Not checked")
+
+            // Get academicSessionId and class_section_id from data attributes
+            var academicSessionId = $('#editPromotionCriteriaForm').data('academic_session-id');
+            var classSectionId = $('#editPromotionCriteriaForm').data('section-id');
+
+            // Append academicSessionId and class_section_id to formData
+            formData += '&academicSessionId=' + academicSessionId + '&class_section_id=' + classSectionId;
+
+            // Send AJAX request
+            $.ajax({
+                url: '{{ route("update_promotion_criteria") }}', // Replace with your actual route
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // Show success message and fade out after 3 seconds
+                    $('#edit-criteria-message').html(response.message).fadeIn().delay(3000).fadeOut();
+                    setTimeout(function() {
+                        location.reload(); // Reload page after 3 seconds
+                    }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    // Log error to console
+                    console.log(xhr.responseText);
+
+                    // Show error message and fade out after 3 seconds
+                    $('#edit-criteria-error').html(xhr.responseJSON.message).fadeIn().delay(3000).fadeOut();
+                }
+            });
+        });
+    });
+
+</script>
+
+
+<script>
+   $(document).ready(function() {
+    // Handle form submission
+    $('#savePromotionCriteria').click(function() {
+        // Serialize form data
+        var formData = $('#promotionCriteriaForm').serialize();
+        
+        // Check if the 'Promote all students' checkbox is checked
+        var promoteAllStudents = $('#promoteAllStudents').is(':checked');
+        if (promoteAllStudents) {
+            // Set all form fields to zero
+            formData += '&requiredAvgScore=0&totalAttendancePercentage=0&compulsoryCoursesAvgScore=0';
+        }
+
+        // Get academicSessionId and class_section_id from data attributes
+        var academicSessionId = $('#promotionCriteriaForm').data('academic_session-id');
+        var classSectionId = $('#promotionCriteriaForm').data('section-id');
+        console.log(academicSessionId)
+
+        // Append academicSessionId and class_section_id to formData
+        formData += '&academicSessionId=' + academicSessionId + '&class_section_id=' + classSectionId;
+
+        // Send AJAX request
+        $.ajax({
+            url: '{{ route("promotion_criteria.store") }}',
+            type: 'POST',
+            data: formData,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                // Show success message and fade out after 3 seconds
+                $('#criteria-message').html(response.message).fadeIn().delay(3000).fadeOut();
+                setTimeout(function() {
+                    location.reload(); // Reload page after 3 seconds
+                }, 3000);
+            },
+            error: function(xhr, status, error) {
+                // Log error to console
+                console.log(xhr.responseText);
+
+                // Show error message and fade out after 3 seconds
+                $('#criteria-error').html(xhr.responseJSON.message).fadeIn().delay(3000).fadeOut();
+            }
+        });
+    });
+});
+
+</script>
+
+<script>
+      $(document).ready(function() {
+        // Function to fill academic session ID and class section ID dynamically
+        $('#createPromotionCriteriaButton').click(function() {
+            // Get academic session ID and class section ID from data attributes
+            var academicSessionId = $(this).data('academic_session-id');
+            var classSectionId = $(this).data('section-id');
+            
+            // Set the data attributes of the form
+            $('#promotionCriteriaForm').attr('data-academic_session-id', academicSessionId);
+            $('#promotionCriteriaForm').attr('data-section-id', classSectionId);
+        });
+    });
+    // JavaScript to show/hide the promotion criteria form based on checkbox status
+    $(document).ready(function() {
+        $('#promoteAllStudents').change(function() {
+            if (this.checked) {
+                $('#promotionCriteria').hide(); // Hide the promotion criteria form
+                $('#promotionCriteriaDescription').text('All students in the class will automatically be promoted.'); // Change description
+            } else {
+                $('#promotionCriteria').show(); // Show the promotion criteria form
+                $('#promotionCriteriaDescription').text('To determine whether a student is eligible for promotion, provide the required average score, total attendance percentage, and average score for compulsory courses. '); // Reset description
+            }
+        });
+    });
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // Get all form class headers

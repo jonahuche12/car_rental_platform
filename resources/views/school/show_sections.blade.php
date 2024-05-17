@@ -139,8 +139,9 @@ Central School System - {{$section->name }}- Class Section
                                 <div>
                                     <span class="font-weight-bold">{{ $potentialStudent->profile->full_name }}</span>
                                     <br>
-                                    <small class="text-muted">{{ $potentialStudent->email }}</small>
+                                    <small class="text-muted">{{ $potentialStudent->email }} </small>
                                 </div>
+                                
                             </a>
                             <div class="dropdown-divider"></div>
                             
@@ -196,11 +197,12 @@ Central School System - {{$section->name }}- Class Section
                                         <img src="{{ asset('dist/img/avatar5.png') }}" alt="User Image" width="150px">
                                     @endif
                                     <a class="users-list-name" href="#" data-admin-name="{{ $student->profile->full_name }}">
-                                        {{ $student->profile->full_name }} <br>
+                                        {{ $student->profile->full_name }} <br> 
                                         <span class="text-success">{{ $student->userClassSection->code }}</span>
                                     </a>
                                 </div>
                                 <span class="users-list-date">{{ \Carbon\Carbon::parse($student->created_at)->diffForHumans() }}</span>
+                             
 
                                 @if ($student->id !== auth()->id())
                                     <div class="user-permissions">

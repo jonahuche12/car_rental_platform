@@ -203,12 +203,12 @@
                                     <!-- Add permission checkboxes -->
                                     @if ($admin->id !== auth()->id())
                                     <div class="user-permissions">
-                                        <h5 style="cursor:pointer;" class="details-heading btn bg-purple toggle-details-btn" data-target="user-details-{{ $admin->id }}">
+                                        <h5 style="cursor:pointer;" class="details-heading btn bg-primary btn-sm toggle-details-btn" data-target="user-details-{{ $admin->id }}">
                                             Permissions <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
                                         <div id="user-details-{{ $admin->id }}" class="collapsed-details">
                                         <!-- Add your permission checkboxes here as you have already done -->
-                                        <h5 style="cursor:pointer;" class="details-heading  btn bg-purple toggle-details-btn" data-target="user-details-{{ $admin->id }}">
+                                        <h5 style="cursor:pointer;" class="details-heading  btn bg-primary btn-sm toggle-details-btn" data-target="user-details-{{ $admin->id }}">
                                             Permissions <i class="toggle-icon fas fa-chevron-down"></i>
                                         </h5>
                                         <div class="form-group mb-2">
@@ -216,13 +216,13 @@
                                             <input type="checkbox"  class="small-text" data-permission="permission_confirm_student" {{ $admin->profile->permission_confirm_student ? 'checked' : '' }}>
     
                                         </div>
-                                        <div class="form-group mb-2">
+                                        <!-- <div class="form-group mb-2">
 
                                         <label for="confirm-admin" class="small-text" >Confirm Admin </label>
                                         
                                         <input type="checkbox" data-permission="permission_confirm_admin" {{ $admin->profile->permission_confirm_admin ? 'checked' : '' }}>
     
-                                        </div>
+                                        </div> -->
                                         <div class="form-group mb-2">
 
                                         <label for="confirm-admin" class="small-text" >Confirm Teachers </label>
@@ -230,12 +230,12 @@
                                         <input type="checkbox" data-permission="permission_confirm_teacher" {{ $admin->profile->permission_confirm_teacher ? 'checked' : '' }}>
     
                                         </div>
-                                        <div class="form-group mb-2">
+                                        <!-- <div class="form-group mb-2">
 
                                         <label for="confirm-admin" class="small-text" >Confirm Staff</label>
                                         <input type="checkbox" data-permission="permission_confirm_staff" {{ $admin->profile->permission_confirm_staff ? 'checked' : '' }}>
     
-                                        </div>
+                                        </div> -->
                                         <div class="form-group mb-2">
 
                                         <label for="confirm-admin" class="small-text" >Create Course</label>
@@ -266,14 +266,14 @@
                                         </button>
 
                                         </div>
-                                        <div class="action-icons">
+                                        <!-- <div class="action-icons">
                                             <a href="#" class="mr-2" title="View Student Data">
                                                 <i class="action-icon fas fa-eye text-primary"></i>
                                             </a>
                                             <a href="#" class="mr-2" title="Message Student">
                                                 <i class="action-icon fas fa-envelope text-success"></i>
                                             </a>
-                                        </div>
+                                        </div> -->
 
                                         <!-- Remove Admin Modal -->
                                         <div class="modal fade" id="removeAdminModal{{ $admin->id }}" tabindex="-1" role="dialog" aria-labelledby="removeAdminModalLabel" aria-hidden="true">

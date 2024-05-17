@@ -27,6 +27,15 @@
         clip: rect(0,0,0,0);
         border: 0;
     }
+    #event-details{
+        margin:auto;
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #fff; /* Text color for details */
+    }
 
     
 
@@ -196,7 +205,7 @@
                                             </div>
                                             <div class="" id="event-details">
                                                 <h5 style="cursor:pointer;" class="details-heading bg-secondary p-2 toggle-details-btn" data-target="event-details">
-                                                    Details <i class="toggle-icon fas fa-chevron-down"></i>
+                                                    Details 
                                                 </h5>
                                                 <div class="detail-item">
                                                     <span class="detail-label"><strong>Starting Date:</strong></span>

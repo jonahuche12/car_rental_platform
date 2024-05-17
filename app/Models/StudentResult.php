@@ -42,12 +42,12 @@ class StudentResult extends Model
     
         public function schoolClassSection()
         {
-            return $this->belongsTo(SchoolClassSection::class);
+            return $this->belongsTo(SchoolClassSection::class, 'class_section_id');
         }
     
         public function schoolClass()
         {
-            return $this->belongsTo(SchoolClass::class);
+            return $this->belongsTo(SchoolClass::class, 'class_id');
         }
     
         public function formTeacher()

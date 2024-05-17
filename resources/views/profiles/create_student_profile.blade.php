@@ -4,6 +4,7 @@
 
 @section('style')
 <style>
+  
   .complete_profile{
     display: none;
   }
@@ -18,47 +19,6 @@
       padding: 10px;
       margin-bottom: 10px;
   }
-
-
-  .expand-icon {
-    cursor: pointer;
-}
-
-.expand-icon.rotate-down {
-    transform: rotate(180deg);
-}
-
-
-
-  .dropdown-toggle::after {
-            content: none !important;
-        }
-        .dropdown-menu {
-            left: -59px !important;
-            right: 0 !important;
-        }
-        .dropdown-item {
-            text-align: left;
-            padding: 5px;
-        }
-        .dropdown-header {
-            font-weight: bold;
-            padding: 5px 15px;
-        }
-        .dropdown-divider {
-            margin: 5px 0 !important;
-        }
-        .dropdown-menu.show {
-            display: block;
-            opacity: 1;
-            visibility: visible;
-        }
-        .dropdown-item:hover {
-            font-weight:900;
-        background-color: #007bff;
-        color: #f8f9fa; /* Change to desired text color */
-    }
-
 
 </style>
 @endsection
@@ -79,7 +39,7 @@
     <section class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-6">
 
             <!-- Profile Image -->
             <div class="card card-primary card-outline">
@@ -111,6 +71,8 @@
                 <h3 class="profile-username text-center">{{auth()->user()->profile->full_name}}</h3>
 
                 <p class="text-muted text-center">{{auth()->user()->profile->role}}</p>
+                    <div class="alert alert-success profile-message" style="display:none"></div>
+                    <div class="alert alert-success profile-error" style="display:none"></div>
 
                 <ul class="list-group list-group-unbordered mb-3">
                     <!-- Email Field -->
@@ -333,6 +295,9 @@
                   </li>
                   @endif
                   <li class="list-group-item">
+
+                  <div class="alert alert-danger package-error" style="display:none"></div>
+                          <div class="alert alert-success package-message" style="display:none"></div>
                       <b class="float-left">User Package: </b>
                       <a class="float-right" id="user_package_data">
                         @if(auth()->user()->userPackage)
@@ -389,8 +354,6 @@
                               <button class="btn btn-small bg-primary user_package-button" id="user_package-button" onclick="saveData('user_package')">Save</button>
                           </span>
                           
-                          <div class="alert alert-danger user_package-error" style="display:none"></div>
-                          <div class="alert alert-success user_package-message" style="display:none"></div>
                       
                          
                       
@@ -435,7 +398,7 @@
                     </button>
                   </div>
                   <div class="modal-body">
-                    Are you sure you want to change your School? You will lose your Progress.
+                    Are you sure you want to change your School? .
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -468,6 +431,11 @@
             </div>
 
 
+           
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+          <div class="col-md-6">
             <!-- About Me Box -->
             <div class="card card-primary">
               <div class="card-header">
@@ -477,7 +445,7 @@
               <div class="card-body">
                 <strong class="float-left"><i class="fas fa-book mr-1 -left"></i> Courses</strong>
                 @if(auth()->user()->userClassSection)
-                <strong class="float-right"><i id="plusButton" class="fas fa-plus mr-1 -left" onclick="toggleCoursesForm()"></i></strong>
+                <strong class="float-right"><i id="plusButton" class="fas fa-chevron-down mr-1 -left" onclick="toggleCoursesForm()"></i></strong>
                 @endif
                 <ul class="list-group list-group-unbordered mt-5 ml-4">
                 </ul>
@@ -486,7 +454,7 @@
                 <div class="course-error alert alert-danger" style="display:none"></div>
                
 
-                <div class="container mt-2  courses-form-container" style="display:none; vertical-align: middle;">
+                <div class="container mt-2  courses-form-container" style="vertical-align: middle;">
                     <form id="qualificationForm">
                         <div id="qualificationsContainer">
                             <h3>Available Courses </h3>
@@ -509,339 +477,9 @@
 
 
                 <hr>
-
-                <strong><i class="far fa-file-alt mr-1"></i> Bio</strong>
-
-                <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p>
+<!--  -->
               </div>
               <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col -->
-          <div class="col-md-8">
-            <div class="card">
-              <div class="card-header p-2">
-                <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#courses" data-toggle="tab">Course</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
-                </ul>
-              </div><!-- /.card-header -->
-              <div class="card-body">
-                <div class="tab-content">
-                  <div class="active tab-pane" id="courses">
-                    <!-- Post -->
-                    <div class="post">
-                    <div class="user-block">
-                    <div class="post">
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="card">
-                            <div class="card-header">
-                              <h3 class="card-title">Courses You Offer </h3>
-                              <p id="course-offer-success" class="alert alert-success p-2" style="display:none"></p>
-                              <p id="course-offer-error" class="alert alert-success p-2" style="display:none"></p>
-                              @php
-                                  $student = auth()->user();
-                                  $school = $student->school;
-                                  if($school){
-                                    $school_session = $school->academicSession;
-                                    $school_term = $school->term;
-                                    
-                                  }
-
-                                  @endphp
-                                  <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
-                                    <button class="btn btn-sm btn-clear dropdown-toggle" type="button" id="studentActionsDropdown{{ $student->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><sup class="text-success"><b>{{$student->availableCourses()->count()}}</b></sup>
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <div class="dropdown-menu" style="width: 250px;" aria-labelledby="studentActionsDropdown{{ $student->id }}">
-                                        @if ($student->id == auth()->id())
-                                            <h6 class="dropdown-header text-left">Available Courses:</h6>
-                                            <div class="dropdown-divider"></div>
-                                            @foreach($student->availableCourses() as $course)
-                                              <a href="#" class="dropdown-item" data-course-id="{{ $course->id }}" data-student-id="{{ $student->id }}">
-                                                  <div class="d-flex justify-content-between align-items-center">
-                                                      <div>
-                                                          <p class="mb-0">{{ $course->name }}</p>
-                                                          <p class="small text-muted mb-0">Teacher: {{ $course->getTeacherForClassSection($student->class_section_id)->profile->full_name }}</p>
-                                                      </div>
-                                                  </div>
-                                              </a>
-                                              <div class="dropdown-divider"></div>
-                                          @endforeach
-
-                                            @if($student->availableCourses()->isEmpty())
-                                                <div class="dropdown-item">
-                                                    <p class="mb-0">No available courses</p>
-                                                </div>
-                                            @endif
-                                        @endif
-                                    </div>
-                                </div>
-
-
-
-                            </div>
-                            <!-- ./card-header -->
-                            <div class="card-body table-responsive">
-                              <table class="table table-bordered table-hover">
-                                  <thead class="thead-dark">
-                                      <tr>
-                                          <th>#</th>
-                                          <th>Course</th>
-                                          <th>Teacher</th>
-                                          <th>Compulsory</th>
-                                          <th>Description</th>
-                                      </tr>
-                                  </thead>
-                                  <tbody>
-                                      @foreach(auth()->user()->student_courses()->get() as $course)
-                                          <tr>
-                                              <td>{{$loop->iteration}}</td>
-                                              <td>
-                                                  <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_{{$course->id}}" aria-expanded="false" aria-controls="collapse_{{$course->id}}">
-                                                      {{$course->name}}
-                                                  </button>
-                                              </td>
-                                              <td>
-                                                  @if($teacher = $course->getTeacherForClassSection($student->class_section_id))
-                                                      {{$teacher->profile->full_name}}
-                                                  @endif
-                                              </td>
-                                              <td>
-                                                  @if($course->compulsory)
-                                                      <span class="badge badge-success">Compulsory</span>
-                                                  @else
-                                                      <span class="badge badge-warning">Elective</span>
-                                                  @endif
-                                              </td>
-                                              <td>{{$course->description}}</td>
-                                          </tr>
-                                          <tr>
-                                              <td colspan="5">
-                                                  <div id="collapse_{{$course->id}}" class="collapse" aria-labelledby="heading_{{$course->id}}" data-parent="#accordion_{{$course->id}}">
-                                                      <div id="accordion_{{$course->id}}">
-    @foreach($school_session->terms->sortByDesc('created_at') as $term)
-    @if($term->name == $school_term->name)
-        <div class="card">
-            <div class="card-header" id="heading_{{$term->id}}_{{$course->id}}">
-                <h2 class="mb-0">
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_{{$term->id}}_{{$course->id}}" aria-expanded="true" aria-controls="collapse_{{$term->id}}_{{$course->id}}">
-                        {{$course->name}}
-                        (<b> <span class="">{{$school_session->name ?? ''}}</b>
-                        <b class="">{{$term->name}}</b>)
-                        
-                    </button>
-                </h2>
-            </div>
-            <div id="collapse_{{$term->id}}_{{$course->id}}" class="collapse" aria-labelledby="heading_{{$term->id}}_{{$course->id}}" data-parent="#accordion_{{$course->id}}">
-                <div class="card-body">
-                    <h6 class="badge badge-warning">Assignments</h6>
-                    @include('partials.assignment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
-                </div>
-                <div class="card-body">
-                    <h6 class="badge badge-info">Assessments</h6>
-                    @include('partials.assessment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
-                </div>
-                <div class="card-body">
-                    <h6 class="badge badge-primary">Exams</h6>
-                    @include('partials.exam_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
-                </div>
-            </div>
-            @php
-            $total_assignment_score = 0;
-            $num_assignments = 0;
-            $total_assessment_score = 0;
-            $num_assessments = 0;
-            $total_exam_score = 0;
-            $num_exams = 0;
-
-            foreach($student->grades->where('course_id', $course->id) as $grade){
-                if($grade->assignment && $grade->assignment->academicSession->id == $school_session->id && $grade->assignment->term->name == $term->name){
-                    $total_assignment_score += $grade->score;
-                    $num_assignments++;
-                }
-                if($grade->assessment && $grade->assessment->academicSession->id == $school_session->id && $grade->assessment->term->name == $term->name){
-                    $total_assessment_score += $grade->score;
-                    $num_assessments++;
-                }
-                if($grade->exam && $grade->exam->academicSession->id == $school_session->id && $grade->exam->term->name == $term->name){
-                    $total_exam_score += $grade->score;
-                    $num_exams++;
-                }
-            }
-
-            $average_assignment_score = ($num_assignments > 0) ? $total_assignment_score / $num_assignments : 0;
-            $average_assessment_score = ($num_assessments > 0) ? $total_assessment_score / $num_assessments : 0;
-            $average_exam_score = ($num_exams > 0) ? $total_exam_score / $num_exams : 0;
-            @endphp
-
-            <div class="card mb-3">
-              <div class="card-body">
-                  <h6 class="card-title">Summary</h6>
-
-                  <div class="row">
-                      <div class="col-md-4 col-sm-12">
-                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
-                              <h6 class="mb-3">Assignments</h6>
-                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_assignment_score }}</p>
-                              <p class="mb-1"><span class="badge badge-info">Average Score: </span>  {{ number_format($average_assignment_score, 2) }}</p>
-                          </div>
-                      </div>
-
-                      <div class="col-md-4 col-sm-12">
-                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
-                              <h6 class="mb-3">Assessments</h6>
-                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_assessment_score }}</p>
-                              <p class="mb-1"><span class="badge badge-info">Average Score: </span> {{ number_format($average_assessment_score, 2) }}</p>
-                          </div>
-                      </div>
-
-                      <div class="col-md-4 col-sm-12">
-                          <div class="summary-section bg-light p-3 shadow-sm mb-3">
-                              <h6 class="mb-3">Exams</h6>
-                              <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_exam_score }}</p>
-                              <p class="mb-1"><span class="badge badge-info">Average Score: </span>  {{ number_format($average_exam_score, 2) }}</p>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-
-
-          </div>
-       
-    @else
-        <div class="card">
-            <div class="card-header" id="heading_{{$term->id}}_{{$course->id}}">
-                <h2 class="mb-0">
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_{{$term->id}}_{{$course->id}}" aria-expanded="false" aria-controls="collapse_{{$term->id}}_{{$course->id}}">
-                        {{$course->name}}
-                        (<b class="">{{$school_session->name ?? ''}}</b>
-                        <b class="">{{$term->name}}</b>)
-                    </button>
-                </h2>
-            </div>
-            <div id="collapse_{{$term->id}}_{{$course->id}}" class="collapse" aria-labelledby="heading_{{$term->id}}_{{$course->id}}" data-parent="#accordion_{{$course->id}}">
-                <div class="card-body">
-                    <h6 class="badge badge-warning">Assignments</h6>
-                    @include('partials.assignment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
-                </div>
-                <div class="card-body">
-                    <h6 class="badge badge-info">Assessments</h6>
-                    @include('partials.assessment_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
-                </div>
-                <div class="card-body">
-                    <h6 class="badge badge-primary">Exams</h6>
-                    @include('partials.exam_table', ['grades' => $student->grades, 'course_id' => $course->id, 'school_session' => $school_session, 'school_term' => $term])
-                </div>
-            </div>
-            @php
-    $total_assignment_score = 0;
-    $num_assignments = 0;
-    $total_assessment_score = 0;
-    $num_assessments = 0;
-    $total_exam_score = 0;
-    $num_exams = 0;
-
-    foreach($student->grades->where('course_id', $course->id) as $grade){
-        if($grade->assignment && $grade->assignment->academicSession->id == $school_session->id && $grade->assignment->term->name == $term->name){
-            $total_assignment_score += $grade->score;
-            $num_assignments++;
-        }
-        if($grade->assessment && $grade->assessment->academicSession->id == $school_session->id && $grade->assessment->term->name == $term->name){
-            $total_assessment_score += $grade->score;
-            $num_assessments++;
-        }
-        if($grade->exam && $grade->exam->academicSession->id == $school_session->id && $grade->exam->term->name == $term->name){
-            $total_exam_score += $grade->score;
-            $num_exams++;
-        }
-    }
-
-    $average_assignment_score = ($num_assignments > 0) ? $total_assignment_score / $num_assignments : 0;
-    $average_assessment_score = ($num_assessments > 0) ? $total_assessment_score / $num_assessments : 0;
-    $average_exam_score = ($num_exams > 0) ? $total_exam_score / $num_exams : 0;
-    @endphp
-
-    <div class="card mb-3">
-    <div class="card-body">
-        <h6 class="card-title">Summary</h6>
-
-        <div class="row">
-            <div class="col-md-4 col-sm-12">
-                <div class="summary-section bg-light p-3 shadow-sm mb-3">
-                    <h6 class="mb-3">Assignments</h6>
-                    <p class="mb-1"><span class="badge badge-primary">Total Score: </span> {{ $total_assignment_score }}</p>
-                    <p class="mb-1"><span class="badge badge-info">Average Score: </span>  {{ number_format($average_assignment_score, 2) }}</p>
-                </div>
-            </div>
-
-            <div class="col-md-4 col-sm-12">
-                <div class="summary-section bg-light p-3 shadow-sm mb-3">
-                    <h6 class="mb-3">Assessments</h6>
-                    <p class="mb-1"><span class="badge badge-primary">Total Score: </span>  {{ $total_assessment_score }}</p>
-                    <p class="mb-1"><span class="badge badge-info">Total Score: </span>  {{ number_format($average_assessment_score, 2) }}</p>
-                </div>
-            </div>
-
-            <div class="col-md-4 col-sm-12">
-                <div class="summary-section bg-light p-3 shadow-sm mb-3">
-                    <h6 class="mb-3">Exams</h6>
-                    <p class="mb-1"> <span class="badge badge-primary">Total Score: </span> {{ $total_exam_score }}</p>
-                    <p class="mb-1"><span class="badge badge-info">Average Score: </span>{{ number_format($average_exam_score, 2) }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-        </div>
-    @endif
-@endforeach
-
-                                                      </div>
-                                                  </div>
-                                              </td>
-                                          </tr>
-                                      @endforeach
-                                  </tbody>
-                              </table>
-                          </div>
-
-                            <!-- /.card-body -->
-                          </div>
-                          <!-- /.card -->
-                        </div>
-                      </div>
-                    </div>
-                    </div>
-                     
-                    </div>
-                   
-                    <!-- /.post -->
-                  </div>
-                  <!-- /.tab-pane -->
-                  <div class="tab-pane" id="timeline">
-                    <!-- The timeline -->
-                    <div class="timeline timeline-inverse">
-                      
-                    </div>
-                  </div>
-                  <!-- /.tab-pane -->
-
-                  <div class="tab-pane" id="settings">
-                    
-                  </div>
-                  
-                  <!-- /.tab-pane -->
-                </div>
-                <!-- /.tab-content -->
-              </div><!-- /.card-body -->
             </div>
             <!-- /.card -->
           </div>
@@ -875,6 +513,10 @@
               console.log('Courses Status Updated:', response);
               // Display success message
               $('.course-message').text('Courses Status Updated.').show().delay(3000).fadeOut();
+              setTimeout(function() {
+                $('.course-message').fadeOut();
+                location.reload(); // Reload the page
+            }, 3000); // 3 seconds
           },
           error: function (xhr, status, error) {
               console.log(xhr.responseText)
@@ -885,39 +527,7 @@
       });
     }
 
-    $(document).ready(function() {
-        $('.dropdown-menu').on('click', '.dropdown-item', function(e) {
-            e.preventDefault();
-            var courseId = $(this).data('course-id');
-            var studentId = $(this).data('student-id');
-
-            // Send AJAX request to assign the student to the course
-            $.ajax({
-                type: 'POST',
-                url: '/offer-course',
-                data: {
-                    course_id: courseId,
-                    student_id: studentId,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    // Display success message
-                    $('#course-offer-success').text('You have been successfully Enrolled to '+ response.course.name).show();
-                    setTimeout(function() {
-                        $('#course-offer-success').fadeOut();
-                        location.reload(); // Reload the page
-                    }, 3000); // 3 seconds
-                },
-                error: function(xhr, status, error) {
-                    // Display error message
-                    $('#course-offer-error').text('Error assigning student to course: ' + xhr.responseText).show();
-                    setTimeout(function() {
-                        $('#course-offer-error').fadeOut();
-                    }, 3000); // 3 seconds
-                }
-            });
-        });
-    });
+   
 
 
 </script>

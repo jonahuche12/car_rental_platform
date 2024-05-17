@@ -2,6 +2,22 @@ body,  h1, h2, h3{
     font-family: 'Sarala','Balsamiq Sans', sans-serif;
 
 }
+.google-btn {
+    background-color: #fff;
+    color: #757575;
+    border-color: #757575;
+}
+
+.google-btn:hover {
+    background-color: #f8f9fa;
+    color: #757575;
+    border-color: #757575;
+}
+
+.google-btn .fab.fa-google {
+    color: #DB4437; /* Google Red */
+}
+
 p,h4,h6, h5{
     font-family: 'Balsamiq Sans', sans-serif;
 }

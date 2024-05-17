@@ -12423,31 +12423,33 @@ body:not(.layout-fixed) .main-sidebar .sidebar {
 .navbar-light .navbar-search-block .form-control-navbar:focus + .input-group-append .btn-navbar {
   color: rgba(0, 0, 0, 0.6);
 }
-
 .navbar-search-block {
-  position: absolute;
+  position: fixed;
   padding: 0 1rem;
-  left: 0;
   top: 0;
+  left: 0;
   right: 0;
   bottom: 0;
-  z-index: 10;
+  z-index: 1000;
   display: none;
-  -ms-flex-pack: center;
   justify-content: center;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  background-color: initial;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 
 .navbar-search-block.navbar-search-open {
-  display: -ms-flexbox;
   display: flex;
 }
 
 .navbar-search-block .input-group {
   width: 100%;
+  max-width: 500px; /* Limiting the width for better responsiveness */
 }
+
+.form-control-sidebar {
+  background-color: #fff; /* Background color for the input */
+}
+
 
 .brand-link {
   display: block;
@@ -34659,6 +34661,30 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 .dark-mode .direct-chat-gray-dark .right > .direct-chat-text::after, .dark-mode .direct-chat-gray-dark .right > .direct-chat-text::before {
   border-left-color: #343a40;
 }
+.users-list-people {
+  padding-left: 0;
+  list-style: none;
+}
+
+.users-list-people > li {
+  float: left;
+  padding: 10px;
+  text-align: center;
+  /* width: 25%; */
+}
+
+.users-list-people > li img {
+  border-radius: 50%;
+  height: auto;
+  max-width: 100%;
+}
+
+.users-list-people > li > a:hover,
+.users-list-people > li > a:hover .users-list-name {
+  color: #999;
+}
+
+
 
 
 

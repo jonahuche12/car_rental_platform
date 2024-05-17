@@ -29,8 +29,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <!-- Summernote -->
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    
 
 
     @yield('style')
@@ -40,6 +39,11 @@
         .small-text {
             font-size: 12px; /* Adjust as needed */
         }
+        .dropdown-menu a.dropdown-item:hover {
+    background-color: #007bff; /* Use your primary color here */
+    color: #fff; /* Set text color to white */
+}
+
         /* Define smaller font size for small screens */
         @media (max-width: 576px) {
             .small-text {
@@ -49,7 +53,7 @@
 
     </style>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
 <div class="wrapper">
 
     <!-- Preloader -->
@@ -69,7 +73,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        @if(isset($school))
+                        @if(isset($school) && auth()->user()->school)
                             <div class="container">
                                 <div class="row">
                                     <div class="col">
@@ -79,7 +83,7 @@
                                 </div>
                             </div>
                         @endif
-                        <h3 class="m-0">@yield('page_title')</h3>
+                        <h4 class="mt-2">@yield('page_title')</h4>
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
@@ -109,10 +113,44 @@
 
     <!-- Main Footer -->
     <footer class="main-footer">
-        <strong>Copyright &copy; 2024 <a href="{{ route('/') }}">CarRental</a>.</strong>
+        <strong>Copyright &copy; 2024 <a href="{{ route('/') }}">Central School System</a>.</strong>
         All rights reserved.
     </footer>
 
+    <div class="modal fade" id="yStudyConnectModal" tabindex="-1" aria-labelledby="yourStudyConnectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white">
+                <h5 class="modal-title" id="yourStudyConnectModalLabel">Top Up Study Connects</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success" id="connects-message" style="display:none;"></div>
+                <div class="alert alert-danger" id="connects-error" style="display:none;"></div>
+               
+                <div id="connectsForm">
+                <div class="form-group">
+                    <label for="yourConnectsAmountSuccess">Select Number of Connects:</label>
+                    <select class="form-control" name="yourConnectsAmountSuccess" id="yourConnectsAmountSuccess">
+                        <option value="500">90 Connects - ₦500</option>
+                        <option value="1000">210 Connects - ₦1000</option>
+                        <option value="2000">450 Connects - ₦2000</option>
+                        <option value="3000">1000 Connects - ₦3000</option>
+                    </select>
+                </div>
+                <button id="yourConfirmBuySucessConnectsBtn" class="btn btn-success">Top Up Connects</button>
+
+                </div>
+            </div>
+            <div class="modal-footer" id="conect-modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <!-- <button type="button" class="btn btn-primary" id="confirmPlayBtn">Continue</button> -->
+            </div>
+        </div>
+    </div>
+</div>
 </div><!-- ./wrapper -->
 
 
@@ -125,9 +163,9 @@
 <!-- <script src="plugins/jquery/jquery.min.js"></script> -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 <!-- jQuery UI 1.11.4 -->
-<script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- <script src="plugins/jquery-ui/jquery-ui.min.js"></script> -->
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <script>
   $.widget.bridge('uibutton', $.ui.button)
@@ -156,6 +194,7 @@
 <!-- <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script> -->
 <!-- AdminLTE App -->
 <script src="{{asset('dist/js/adminlte.js')}}"></script>
+<script src="{{asset('dist/js/scrolable_view_fav.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/resumable.js/1.1.0/resumable.min.js"></script>
 <script src="{{asset('dist/js/lesson.js')}}"></script>
 <script>
@@ -168,29 +207,44 @@
 <script src="{{asset('dist/js/school_connects.js')}}"></script>
 @yield('scripts')
 <script>
- $(document).ready(function() {
-        $('#searchForm').submit(function(e) {
-            e.preventDefault();
-            var term = $('#searchInput').val();
+$(document).ready(function() {
+    $('#searchForm').submit(function(e) {
+        e.preventDefault();
+        var term = $('#searchInput').val();
 
-            $.ajax({
-                url: "{{ route('search') }}",
-                type: "GET",
-                data: { term: term },
-                success: function(response) {
-                    // Redirect to a new page with search results
-                    window.location.href = "/search-results?term=" + term;
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = "An error occurred.";
-                    if (xhr.responseJSON && xhr.responseJSON.error) {
-                        errorMessage = xhr.responseJSON.error;
-                    }
-                    $('#errorMessage').text(errorMessage).show();
+        $.ajax({
+            url: "{{ route('search') }}",
+            type: "GET",
+            data: { term: term },
+            success: function(response) {
+                // Redirect to a new page with search results
+                window.location.href = "/search-results?term=" + term;
+            },
+            error: function(xhr, status, error) {
+                var errorMessage = "An error occurred.";
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
                 }
-            });
+                
+                // Hide the form and display the error message
+                $('#searchForm').hide();
+                $('#errorMessage').text(errorMessage).fadeIn();
+
+                // Show the form again after 3 seconds
+                setTimeout(function() {
+                    $('#errorMessage').fadeOut(function() {
+                        $('#searchForm').show();
+                    });
+                }, 3000);
+            }
         });
     });
+
+    // Button click event to close the search block
+    $('[data-widget="navbar-search-submit"]').click(function() {
+        $('#searchForm').submit(); // Trigger form submission
+    });
+});
 
 
 
@@ -229,6 +283,213 @@
         if (errorMessage) {
             displayMessage(errorMessage, 'alert-danger');
         }
+    });
+</script>
+
+<script>
+     $(document).on('click', '#yourConfirmBuySucessConnectsBtn', function() {
+        const yourConnectsAmountSuccess = $('#yourConnectsAmountSuccess').val(); // Get selected connects amount
+        console.log('Selected Connects Amount:', yourConnectsAmountSuccess);
+
+        if (yourConnectsAmountSuccess) {
+            buyConnects(yourConnectsAmountSuccess); // Call buyConnects function with selected amount
+        } else {
+            console.error('Selected Connects Amount is empty or invalid');
+        }
+    });
+
+    // Function to handle buying connects via AJAX
+    function buyConnects(selectedConnectsAmount) {
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        // Perform AJAX request to buy more connects with selected price value
+        $.ajax({
+            url: buyConnectsRoute,
+            method: 'POST',
+            data: {
+                amount: selectedConnectsAmount,
+                _token: csrfToken
+            },
+            success: function(response) {
+                // Handle success response
+                console.log('Buy Connects Response:', response); // Log the response for debugging
+
+                if (response && response.redirect_url) {
+                    window.location.href = response.redirect_url; // Redirect to the specified URL
+                } else {
+                    console.error('Invalid response format');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText)
+                console.error('Error buying connects:', error);
+            }
+        });
+    }
+</script>
+<script>
+$(document).ready(function() {
+    // Handle keyup event on search input
+    $('#searchQuery').keyup(function() {
+        var query = $(this).val().trim(); // Get the search query
+        if (query.length >= 3) { // Only perform search if query is at least 3 characters long
+            // Send AJAX request to fetch students/wards
+            $.ajax({
+                url: '{{ route("find-wards") }}', // Define your route for searching
+                method: 'GET',
+                data: { query: query }, // Pass the search query as data
+                success: function(response) {
+                    // Process the JSON response
+                    var html = '';
+                    $.each(response, function(index, ward) {
+                        html += '<div class="card ward-card" style="cursor:pointer" data-student-id="' + ward.id + '">';
+                        html += '<div class="card-body">';
+                        html += '<div class="d-flex">';
+                        html += '<div class="profile-picture mr-3">';
+                        if (ward.profile_picture) {
+                            var profilePictureUrl = "{{ asset('storage/') }}" + '/' + ward.profile_picture;
+                            html += '<img src="' + profilePictureUrl + '" alt="Profile Picture" class="rounded-circle" style="width: 72px;">';
+                        } else {
+                            html += '<i class="fas fa-camera fa-5x rounded-circle"></i>';
+                        }
+                        html += '</div><br><br>';
+                        html += '<div class="ward-info" data-ward-id="'+ward.id+'">';
+                        html += '<h5 class="card-title">' + ward.full_name + '</h5>';
+                        html += '<p class="card-text">School: ' + ward.school_name + '</p>';
+                        html += '<p class="card-text">Class: ' + ward.class_name + '</p>';
+                        html += '</div>';
+                        html += '</div>'; // Close d-flex div
+                        html += '</div>'; // Close card-body div
+                        html += '</div>'; // Close card div
+                    });
+                    // Update the wards list with the generated HTML
+                    $('#wardsList').html(html);
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        } else {
+            // If query is less than 3 characters, clear the wards list
+            $('#wardsList').html('');
+        }
+    });
+
+    // Attach click event handler to each ward card
+    $(document).on('click', '.ward-card', function() {
+        var wardInfo = $(this).html(); // Get the HTML content of the clicked card
+        var studentId = $(this).data('student-id'); // Get the student ID from the data attribute
+        console.log(wardInfo)
+        // Set the ward info and student ID in the modal
+        $('#wardInfo').html(wardInfo).attr('data-student-id', studentId);
+        $('#confirmModal').modal('show'); // Show the modal
+    });
+
+    $('#confirmAddWard').click(function() {
+    var studentId = $('#wardInfo').data('student-id');
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    
+    // Disable the button and show the loading spinner
+    $('#confirmAddWard').prop('disabled', true);
+    $('#addWardBtnText').hide();
+    $('#addWardBtnSpinner').show();
+
+    $.ajax({
+        url: '{{ route("add-ward") }}',
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        data: { student_id: studentId },
+        success: function(response) {
+            // Display success message
+            $('#add-ward-message').html('Student added as ward successfully!.').fadeIn().delay(3000).fadeOut();
+            setTimeout(function() {
+
+        $('#confirmModal').modal('hide'); // Show the modal
+                location.reload();
+            }, 3000);
+        },
+        error: function(xhr, status, error) {
+            // Display error message
+            console.log(xhr.responseText);
+            $('#add-ward-error').html('Failed to add ward. Please try again.').fadeIn().delay(3000).fadeOut();
+        },
+        complete: function() {
+            // Enable the button and hide the loading spinner
+            $('#confirmAddWard').prop('disabled', false);
+            $('#addWardBtnText').show();
+            $('#addWardBtnSpinner').hide();
+        }
+    });
+});
+
+
+   
+});
+function confirmRemoveWard(wardId, wardName, wardClass) {
+    // Populate modal with ward details
+    var modalBody = 'Are you sure you want to remove ' + wardName + ' from class ' + wardClass + ' as a ward?';
+    $('#wardDetails').html(modalBody);
+
+    // Open modal
+    $('#confirmRemoveModal').modal('show');
+
+    // Attach click event handler to remove button in modal
+    $('#confirmRemoveButton').click(function() {
+        // Hide the button text and show the spinner icon
+        $('#removeWardBtnText').html('<i class="fas fa-spinner fa-spin"></i>'); // Replace text with spinner icon
+
+        // Send an AJAX request to remove the ward
+        $.ajax({
+            url: '/remove-ward/' + wardId,
+            method: 'DELETE', // Assuming you're using DELETE method to remove the ward
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token in the headers
+            },
+            success: function(response) {
+                // Display success message
+                $('#ward-message').html('Ward removed successfully.').fadeIn().delay(3000).fadeOut();
+                // Reload the page after 3 seconds
+                setTimeout(function() {
+                    location.reload();
+                }, 3000);
+            },
+            error: function(xhr, status, error) {
+                // Display error message
+                console.log(xhr.responseText)
+                $('#ward-error').html('Failed to remove ward. Please try again.').fadeIn().delay(3000).fadeOut();
+            },
+            complete: function() {
+
+                $('#confirmRemoveModal').modal('hide');
+                // Show the button text again after the AJAX request completes
+                $('#removeWardBtnText').html('Remove Ward'); // Restore original text
+            }
+        });
+    });
+}
+
+
+</script>
+<script>
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        const courseLinks = document.querySelectorAll('.course-link');
+
+        courseLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const target = this.dataset.target;
+
+                // Close all other course collapses
+                const allCourseCollapses = document.querySelectorAll('.collapse.show');
+                allCourseCollapses.forEach(collapse => {
+                    if (collapse.id !== target) {
+                        $(collapse).collapse('hide');
+                    }
+                });
+            });
+        });
     });
 </script>
 </body>

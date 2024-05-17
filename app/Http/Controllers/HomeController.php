@@ -10,6 +10,8 @@ use App\Models\Course;
 use App\Models\Event;
 use App\Models\SchoolClass;
 use App\Models\StudentResult;
+use App\Models\Attendance;
+use App\Models\StudentResultComment;
 use App\Models\Lesson;
 use App\Models\Curriculum;
 use App\Models\AcademicSession;
@@ -25,6 +27,10 @@ use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+
+use App\Mail\GuardianConfirmation;
+use App\Mail\GuardianAddedYouAsWard;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -159,6 +165,85 @@ class HomeController extends Controller
             'totalAcademicSessionCount',
             'uniqueSubjectNames'
         ));
+    }
+
+
+    public function dashboard()
+    {
+        $user = auth()->user();
+        $viewed_lessons = $user->enrolledLessons()->latest()->take(6)->get();
+        $fav_lessons = $user->favoriteLessons()->latest()->take(2)->get();
+
+        // dd($viewed_lessons);
+
+        if (!$user) {
+            return redirect('login');
+        }
+
+        $profile = $user->profile;
+
+        if (!$profile) {
+            return redirect('home');
+        }
+
+        $role = $profile->role;
+        $dashboardpage = "dashboard.$role"."_dashboard";
+
+        $uniqueSubjectNames = Course::getAllUniqueSubjects(); // Retrieve unique subject names
+
+        if ($role === 'teacher' || $role === 'admin') {
+            $lessons = $user->lessons()->withCount('enrolledUsers')->get();
+
+            $lessonAnalyticsData = $lessons->map(function ($lesson) use ($user) {
+                $schoolConnectsHistory = $lesson->schoolConnectsHistory();
+
+                $lessonEarnings = 0;
+
+                foreach ($schoolConnectsHistory as $index => $change) {
+                    if ($index > 0) {
+                        $previousRequired = $schoolConnectsHistory[$index - 1]['school_connects_required'];
+                        $currentRequired = $change['school_connects_required'];
+
+                        $earnedSchoolConnects = $currentRequired - $previousRequired;
+                        $lessonEarnings += $earnedSchoolConnects * 9; // Each school_connect is worth 9 units
+                    }
+                }
+
+                $teacherEarnings = 0;
+                $schoolEarnings = $lessonEarnings * 0.20; // School earns 20%
+
+                if ($user->wallet) {
+                    $teacherEarnings = $lessonEarnings * 0.40; // Teacher earns 40%
+                }
+
+                return [
+                    'title' => $lesson->title,
+                    'views' => $lesson->enrolled_users_count,
+                    'lesson_earnings' => $lessonEarnings,
+                    'teacher_earnings' => $teacherEarnings,
+                    'school_earnings' => $schoolEarnings,
+                    'viewed_lessons'=> $view_lessons,
+                    'fav_lessons'=> $fav_lessons,
+                ];
+            });
+
+            $school = $user->school;
+
+            return view($dashboardpage, compact('school', 'lessonAnalyticsData', 'uniqueSubjectNames'));
+        } elseif ($role === 'school_owner') {
+            // Retrieve schools owned by the user
+            $schools = $user->ownedSchools()->get();
+    
+            // Retrieve the latest academic session and term
+            $latest_academic_session = AcademicSession::latest()->first();
+            $latest_term = Term::latest()->first();
+    
+            return view($dashboardpage, compact('schools', 'viewed_lessons','fav_lessons', 'uniqueSubjectNames', 'latest_academic_session', 'latest_term'));
+        }
+        // For roles other than 'teacher', pass the profile, school (if exists), and uniqueSubjectNames to the view
+        $school = $user->school;
+
+        return view($dashboardpage, compact('school','viewed_lessons','fav_lessons', 'uniqueSubjectNames'));
     }
 
     private function calculateLessonRank($lesson, $school, $userRole, $user)
@@ -326,6 +411,69 @@ class HomeController extends Controller
             'filteredLessonIds' => $filteredLessonIds, // Pass back IDs of filtered lessons
         ]);
     }
+    public function loadMoreViewedLessons(Request $request)
+{
+    $user = auth()->user();
+    $page = $request->get('page', 0);
+    $perPage = 2;
+
+    $displayedViewedLessonIds = $request->get('displayedLessonIds', []);
+
+    $lessons = $user->enrolledLessons()
+        ->whereNotIn('lessons.id', $displayedViewedLessonIds)
+        // ->skip($page * $perPage)
+        ->take($perPage)
+        ->get();
+
+    $transformedLessons = $lessons->map(function ($lesson) {
+        return [
+            'id' => $lesson->id,
+            'thumbnail' => $lesson->thumbnail,
+            'title' => $lesson->title,
+            'created_at' => $lesson->created_at->diffForHumans(),
+            'description' => $lesson->description,
+            'teacher_name' => $lesson->teacher->profile->full_name,
+            'school_connects_required' => $lesson->school_connects_required,
+        ];
+    });
+
+    return response()->json([
+        'lessons' => $transformedLessons,
+    ]);
+}
+
+public function loadMoreFavLessons(Request $request)
+{
+    $user = auth()->user();
+    $page = $request->get('page', 0);
+    $perPage = 2;
+
+    $displayedFavLessonIds = $request->get('displayedLessonIds', []);
+
+    $lessons = $user->favoriteLessons()
+        ->whereNotIn('lessons.id', $displayedFavLessonIds)
+        // ->skip($page * $perPage)
+        ->take($perPage)
+        ->get();
+
+    $transformedLessons = $lessons->map(function ($lesson) {
+        return [
+            'id' => $lesson->id,
+            'thumbnail' => $lesson->thumbnail,
+            'title' => $lesson->title,
+            'created_at' => $lesson->created_at->diffForHumans(),
+            'description' => $lesson->description,
+            'teacher_name' => $lesson->teacher->profile->full_name,
+            'school_connects_required' => $lesson->school_connects_required,
+        ];
+    });
+
+    return response()->json([
+        'lessons' => $transformedLessons,
+    ]);
+}
+
+
     
     public function loadMoreEvents(Request $request)
     {
@@ -392,6 +540,7 @@ class HomeController extends Controller
             'filteredEventIds' => $filteredEventIds, // Pass back IDs of filtered events
         ]);
     }
+    
     public function loadMorePeople(Request $request)
     {
         $page = $request->get('page');
@@ -573,21 +722,27 @@ class HomeController extends Controller
         return redirect()->route('home')->with('error', 'Unauthorized for this action');
     }
 
-
-
     public function submitCourse(Request $request)
     {
         try {
             $user = auth()->user();
+            
+            // Sync the courses with the user
             $user->student_courses()->sync($request->courses);
-
+    
+            // Get the user's class section ID
+            $classSectionId = $user->userClassSection->id;
+    
+            // Update the pivot table records with the class_section_id
+            $user->student_courses()->updateExistingPivot($request->courses, ['class_section_id' => $classSectionId]);
+    
             return response()->json(['success' => true], 200);
         } catch (\Exception $e) {
             \Log::error($e);
-            return response()->json(['error' => 'Failed to enroll in course.'. $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to enroll in course. ' . $e->getMessage()], 500);
         }
     }
-
+    
     public function offerCourse(Request $request)
     {
         try {
@@ -610,7 +765,7 @@ class HomeController extends Controller
     
             // If the student's class section is among the class sections offered for the course, attach the student to the course
             if ($studentInSection) {
-                $course->students()->attach($student);
+                $course->students()->attach($student, ['class_section_id' => $studentClassSection->id]);
     
                 // Return a success response
                 return response()->json(['message' => 'Student assigned to course successfully', 'course' => $course], 200);
@@ -623,6 +778,7 @@ class HomeController extends Controller
             return response()->json(['error' => 'Failed to assign student to course'], 500);
         }
     }
+    
     public function creditSchoolConnects(Request $request)
     {
         $user = Auth::user();
@@ -700,6 +856,24 @@ class HomeController extends Controller
             'amount' => $selectedAmount
         ], 200);
     }
+
+         
+    public function buyConnectsForStudent(Request $request, $id)
+    {
+        $selectedAmount = $request->input('amount');
+        $studentId = $id;
+
+        // Perform any necessary operations with the selected amount
+        // For example, log the selected amount
+        \Log::info('Selected Amount: ' . $selectedAmount);
+
+        // Redirect to another route after successful processing
+        return response()->json([
+            'redirect_url' => route('buy-connects-for-student-page', ['id'=> $id, 'amount' => $selectedAmount]),
+            'amount' => $selectedAmount,
+            'id'=>$id,
+        ], 200);
+    }
     public function buyConnectsPage(Request $request, $amount)
     {
         // $request->session()->forget('payment_session');
@@ -707,6 +881,15 @@ class HomeController extends Controller
         //     $request->session()->forget('payment_session_expires_at');
         // Here you can pass the amount to the view or perform any other logic
         return view('payment.buy_connects', ['amount' => $amount]);
+    }
+    public function buyConnectsForStudentPage($id, $amount)
+    {
+        // dd($id, $amount);
+        // $request->session()->forget('payment_session');
+        //     $request->session()->forget('payment_confirmation');
+        //     $request->session()->forget('payment_session_expires_at');
+        // Here you can pass the amount to the view or perform any other logic
+        return view('payment.buy_connects_for_student', ['id'=>$id,'amount' => $amount]);
     }
 
     public function showClass(SchoolClass $class)
@@ -748,24 +931,30 @@ class HomeController extends Controller
     {
         // Retrieve the student result based on the provided parameters
         $studentResults = $this->getStudentResults($student_id, $academic_session_id, $term_id);
-        
+
         if ($studentResults->isEmpty()) {
             return redirect()->back()->with('error', 'Student results not found.');
         }
-        
+
         $student = User::findOrFail($student_id);
+
         $school = $student->school;
-        
+
         // Extract course names from student results
         $courseNames = $studentResults->pluck('course_name')->unique()->toArray();
-        
+
         // Calculate average scores and course grades
         $averageScores = $this->calculateAverageScores($studentResults);
         $courseGrades = $this->calculateCourseGrades($studentResults);
-        
+
+        // Retrieve class position and class section position
+        $classPosition = $this->getClassPosition($student_id, $academic_session_id, $term_id);
+        $classSectionPosition = $this->getClassSectionPosition($student_id, $academic_session_id, $term_id);
+        // dd($classSectionPosition);
         // Return the view with the result data
-        return view('school.student_result', compact('studentResults', 'courseNames', 'school', 'averageScores', 'courseGrades'));
+        return view('school.student_result', compact('studentResults', 'courseNames', 'school', 'averageScores', 'courseGrades', 'classPosition', 'classSectionPosition'));
     }
+
     
    // Retrieve student results based on parameters, filtering out courses with zero exam score
     private function getStudentResults($student_id, $academic_session_id, $term_id)
@@ -775,6 +964,16 @@ class HomeController extends Controller
             'academic_session_id' => $academic_session_id,
             'term_id' => $term_id,
         ])->where('exam_score', '>', 0)->get();
+    }
+
+    private function getStudentResultComment($student_id, $academic_session_id, $term_id)
+    {
+        // dd($student_id, $academic_session_id, $term_id);
+        return StudentResultComment::where([
+            'student_id' => $student_id,
+            'academic_session_id' => $academic_session_id,
+            'term_id' => $term_id,
+        ]);
     }
 
     
@@ -807,6 +1006,233 @@ class HomeController extends Controller
         return $courseGrades;
     }
     
+    // Get the position of the student based on total average score in the class
+    public function getClassPosition($student_id, $academic_session_id, $term_id)
+    {
+        // Find the student
+        $student = User::findOrFail($student_id);
+
+        // Retrieve the student's class ID and class section ID
+        $class_id = $student->profile->class_id;
+        $class_section_id = $student->profile->class_section_id;
+
+        // Get the position of the student within the class based on total average score
+        $students = StudentResultComment::where('academic_session_id', $academic_session_id)
+            ->where('term_id', $term_id)
+            ->where('class_id', $class_id)
+            ->orderByDesc('total_average_score')
+            ->pluck('student_id')
+            ->toArray();
+
+        $position = array_search($student_id, $students) + 1;
+
+        // Get the total number of students in the class
+        $totalStudentsInClass = count($students);
+
+        // Retrieve the comments for the student
+        $comments = StudentResultComment::where('academic_session_id', $academic_session_id)
+            ->where('term_id', $term_id)
+            ->where('class_id', $class_id)
+            ->where('student_id', $student_id)
+            ->pluck('comment')
+            ->toArray();
+            // dd($comments);
+
+        return [
+            'position' => $position,
+            'total_students' => $totalStudentsInClass,
+            'comments' => $comments
+        ];
+    }
+
+        
+
+    // Get the position of the student based on total average score in the class section
+    public function getClassSectionPosition($student_id, $academic_session_id, $term_id)
+    {
+        $student = User::findOrFail($student_id);
+
+        $students = StudentResultComment::where('academic_session_id', $academic_session_id)
+            ->where('term_id', $term_id)
+            ->where('class_section_id', $student->userClassSection->id)
+            ->orderByDesc('total_average_score')
+            ->pluck('student_id')
+            ->toArray();
+
+        $position = array_search($student_id, $students) + 1;
+
+        // Get the total number of students in the class section
+        $totalStudentsInClassSection = count($students);
+
+        return ['position' => $position, 'total_students' => $totalStudentsInClassSection];
+    }
+
+    public function findWards(Request $request)
+    {
+        // Get the search query from the request
+        $query = $request->input('query');
+
+        // Get the authenticated guardian user
+        $guardian = auth()->user();
+
+        // Perform the search query with eager loading of relationships
+        $wards = User::whereHas('profile', function ($queryBuilder) use ($query) {
+                $queryBuilder->where('full_name', 'like', '%' . $query . '%');
+            })
+            ->whereHas('profile', function ($queryBuilder) {
+                $queryBuilder->where('role', 'student');
+            })
+            // Filter out students who are already wards of the guardian
+            ->whereDoesntHave('guardians', function ($queryBuilder) use ($guardian) {
+                $queryBuilder->where('guardian_id', $guardian->id);
+            })
+            ->get();
+
+        // Structure the wards data
+        $wardsData = [];
+        foreach ($wards as $ward) {
+            // dd($ward->profile->profile_picture);
+            $wardData = [
+                'id' => $ward->id,
+                'full_name' => $ward->profile->full_name,
+                'profile_picture' => $ward->profile->profile_picture,
+                'school_name' => $ward->school->name,
+                'class_name' => $ward->schoolClass()->name,
+            ];
+            $wardsData[] = $wardData;
+        }
+
+        // Return the data as a JSON response
+        return response()->json($wardsData);
+    }
+
+    public function addWard(Request $request)
+    {
+        // Get the authenticated guardian user
+        $guardian = auth()->user();
+
+        // Get the student ID from the request data
+        $studentId = $request->input('student_id');
+
+        // Find the student by ID
+        $student = User::find($studentId);
+
+        if (!$student) {
+            // If student not found, return error response
+            return response()->json(['error' => 'Student not found.'], 404);
+        }
+
+        // Check if the student is already a ward of the guardian
+        if ($guardian->wards->contains($studentId)) {
+            return response()->json(['error' => 'Student is already a ward.'], 422);
+        }
+
+        // Generate a confirmation token
+        $confirmationToken = Str::random(32);
+
+        // Send email to the student
+        Mail::to($student->email)->send(new GuardianAddedYouAsWard($guardian, $student, $confirmationToken));
+
+        // Add the student as a ward of the guardian
+        $ward = $guardian->wards()->attach($studentId, ['confirmation_token' => $confirmationToken]);
+        
+
+        // Return success response
+        return response()->json(['message' => 'Student added as ward successfully.']);
+    }
+
+
+    public function removeWard($wardId)
+    {
+        try {
+            // Get the authenticated guardian user
+            $guardian = auth()->user();
+
+            // Detach the ward from the guardian's list of wards
+            $guardian->wards()->detach($wardId);
+
+            return response()->json(['message' => 'Ward removed successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to remove ward'], 500);
+        }
+    }
+    public function confirmGuardian($token)
+    {
+        try {
+            // Find the authenticated user (assuming the user is logged in)
+            $student = auth()->user();
+    
+            // Find the unconfirmed ward record by confirmation token
+            $guardian = $student->unconfirmedGuardians()
+            ->where('confirmation_token', $token)
+            ->where('ward_id', $student->id)
+            
+            ->first();
+            // dd($guardian);
+    
+            // Check if the ward exists and the confirmation token matches
+            if ($guardian) {
+                // Update the confirmation status to true
+                $student->guardians()->updateExistingPivot($guardian->id, ['confirmed' => true, 'confirmation_token' => null]);
+                
+                    // Send email to the student
+                    Mail::to($guardian->email)->send(new GuardianConfirmation($guardian, $student));
+    
+                // Redirect to a success page with a success message
+                return redirect()->route('home')->with('success', 'Guardian confirmed successfully.');
+            }
+            // dd($guardian);
+    
+            // If the confirmation fails, redirect with an error message
+            return redirect()->route('home')->with('error', 'Failed to confirm guardian.');
+        } catch (\Exception $e) {
+            // Dump the exact error for debugging
+            dd($e->getMessage());
+        }
+    }
+    public function viewStudentProgress($studentId)
+    {
+
+        $student = User::findOrFail($studentId);
+        // dd($student);
+        // dd($student->studentResults);
+         // Check if the student is enrolled in a school
+        $school = $student->school;
+        if (!$school) {
+            return redirect()->route('home')->with('error', 'This student is not enrolled in any school yet.');
+        }
+
+        $academic_session_id = $school->academicSession->id;
+        $term_id= $school->term->id;
+        $studentResults = $this->getStudentResults($studentId, $academic_session_id, $term_id);
+
+        // if ($studentResults->isEmpty()) {
+        //     return redirect()->back()->with('error', 'Student results not found.');
+        // }
+
+
+        // Extract course names from student results
+        $courseNames = $studentResults->pluck('course_name')->unique()->toArray();
+
+        // Calculate average scores and course grades
+        $averageScores = $this->calculateAverageScores($studentResults);
+        $courseGrades = $this->calculateCourseGrades($studentResults);
+
+        // Retrieve class position and class section position
+        $classPosition = $this->getClassPosition($studentId, $academic_session_id, $term_id);
+        $classSectionPosition = $this->getClassSectionPosition($studentId, $academic_session_id, $term_id);
+        // Retrieve the student from the database
+        $student = User::findOrFail($studentId);
+        $school = $student->school;
+
+        // Add logic to retrieve academic progress data for the student
+        // For example, you can retrieve grades, attendance, etc.
+
+        // Return the view with the academic progress data
+        return view('student.student_progress', compact('student', 'studentResults', 'courseNames', 'school', 'averageScores', 'courseGrades', 'classPosition', 'classSectionPosition'));
+    }
+
+   
 
 }
     

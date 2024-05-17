@@ -48,21 +48,25 @@ class SchoolClassSection extends Model
     public function getPotentialStudents()
     {
         $potentialStudents = User::whereHas('profile', function ($query) {
-                $query->where('class_id', $this->schoolClass->id) // Assuming the class_id is stored directly in the profile
-                    ->where('class_confirmed', false);
+                $query->where('class_id', $this->schoolClass->id);
+                    // ->where('class_section_id', '!=', $this->id);
             })
-            
             ->get();
-            // dd($this->schoolClass->id);
-            return $potentialStudents;
+
+        return $potentialStudents;
     }
 
+    
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'course_class', 'class_id', 'course_id')
             ->withTimestamps();
     }
 
+    public function promotionCriteria()
+    {
+        return $this->hasMany(PromotionCriteria::class);
+    }
 
 
 }

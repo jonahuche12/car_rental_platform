@@ -51,11 +51,6 @@
     }
     
 
-
-
-    
-</style>
-<style>
     /* Background overlay for expanded details */
     .collapsed-details {
         height: 100%; /* Adjust the maximum height for scrollable area */
@@ -197,20 +192,28 @@
                                     <a class="users-list-name" href="{{ route('schools.show', ['id' => $school->id]) }}" data-admin-name="{{ $school->name }}">{{ $school->name }}</a>
 
                                     @if($school->academicSession)
-
-                                    <a href="#" class="badge badge-sm badge-info">Academic Session{{$school->academicSession->name ?? ''}}</a>
+                                        @php
+                                            $isLatestAcademicSession = $school->academicSession->id === $latest_academic_session->id;
+                                            $academicSessionClass = $isLatestAcademicSession ? 'success' : 'info';
+                                        @endphp
+                                        <a href="#" class="badge badge-sm bg-{{ $academicSessionClass }}">Academic Session{{ $school->academicSession->name ?? '' }}</a>
                                     @endif
-
                                     @if($school->term)
-                                    <br><a href="#" class="badge badge-sm badge-info">{{$school->term->name ?? ''}}</a>
+                                        @php
+                                            $isLatestTerm = $school->term->id === $latest_term->id;
+                                            $termClass = $isLatestTerm ? 'success' : 'info';
+                                        @endphp
+                                        <br><a href="#" class="badge badge-sm bg-{{ $termClass }}">{{ $school->term->name ?? '' }}</a>
                                     @endif
 
-                                    @if(!$school->academicSession || $school->academicSession->name !== $latest_academic_session->name)
+
+
+                                    @if(!$school->academicSession || $school->academicSession->id !== $latest_academic_session->id)
                                         <a class="badge badge-sm badge-warning" style="cursor:pointer;" data-toggle="modal" data-target="#updateSessionModal">Update Academic Session</a><br><br>
                                     @endif
 
                                     <!-- Update Term badge -->
-                                    @if($school->academicSession && $school->academicSession->name === $latest_academic_session->name && (!$school->term || $school->term->name !== $latest_term->name))
+                                    @if($school->academicSession && $school->academicSession->id === $latest_academic_session->id && (!$school->term || $school->term->id !== $latest_term->id))
                                         <br><a class="badge badge-sm badge-warning" style="cursor:pointer;" data-toggle="modal" data-target="#updateTermModal">Update Term</a>
                                     @endif
 
@@ -707,9 +710,26 @@
                     }, 3000);
                 },
                 error: function (xhr, status, error) {
-                    // Display error message
-                    $('.session-message').removeClass('alert-success').addClass('alert-danger p-2').text('Error updating term: ' + xhr.responseText).fadeIn();
+                    try {
+                        // Parse the JSON response
+                        var response = JSON.parse(xhr.responseText);
+                        var errorMessage = '';
+
+                        // Check if the response contains an 'error' key
+                        if (response && response.error) {
+                            errorMessage = response.error;
+                        } else {
+                            errorMessage = 'Unknown error occurred.';
+                        }
+
+                        // Display the error message
+                        $('.session-message').removeClass('alert-success').addClass('alert-danger p-2').text('Error updating term: ' + errorMessage).fadeIn();
+                    } catch (e) {
+                        // If parsing JSON or accessing error message fails, display a generic error message
+                        $('.session-message').removeClass('alert-success').addClass('alert-danger p-2').text('An error occurred while processing the request.').fadeIn();
+                    }
                 }
+
             });
         });
     });
@@ -741,10 +761,28 @@
                     }, 3000);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseText)
-                    // Display error message
-                    $('.term-message').removeClass('alert-success').addClass('alert-danger p-2').text('Error updating term: ' + xhr.responseText).fadeIn();
+                    try {
+                        // Parse the JSON response
+                        var response = JSON.parse(xhr.responseText);
+                        var errorMessage = '';
+
+                        // Check if the response contains an 'error' key
+                        if (response && response.error) {
+                            errorMessage = response.error; // Access the 'error' property of the response
+                        } else {
+                            errorMessage = 'Unknown error occurred.';
+                        }
+
+                        // Display the error message
+                        $('.term-message').removeClass('alert-success').addClass('alert-danger p-2').text('Error updating term: ' + errorMessage).fadeIn();
+                    } catch (e) {
+                        // If parsing JSON or accessing error message fails, display a generic error message
+                        $('.term-message').removeClass('alert-success').addClass('alert-danger p-2').text('An error occurred while processing the request.').fadeIn();
+                    }
                 }
+
+
+
             });
         });
     });

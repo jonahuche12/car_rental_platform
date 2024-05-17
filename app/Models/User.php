@@ -11,6 +11,8 @@ use Carbon\Carbon;
 use App\Models\Profile;
 use App\Models\School;
 use App\Models\Qualification;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\StudentResult;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -34,6 +36,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'user_package_id',
         'expected_expiration'
     ];
+
+
+    public function ownedSchools()
+    {
+        return $this->hasMany(School::class, 'school_owner_id');
+    }
+
 
     public function formClasses()
     {
@@ -233,11 +242,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return true;
     }
 
-    public function ownedSchools()
-    {
-        return $this->hasMany(School::class, 'school_owner_id');
-    }
-
     
     public function isSchoolAdmin(School $school)
     {
@@ -356,6 +360,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return collect();
     }
 
+    public function studentSelectedCourses()
+    {
+        // Retrieve the class section of the student
+        $classSection = $this->userClassSection;
+    
+        // Check if the class section exists
+        if ($classSection) {
+            // Retrieve the IDs of courses already enrolled by the student
+            $enrolledCourseIds = $this->student_courses->pluck('id')->toArray();
+    
+            // Retrieve the courses available for the class section excluding those already enrolled
+            return $classSection->courses()
+                ->where('courses.id', $enrolledCourseIds) // Specify the table name to avoid ambiguity
+                ->get();
+        }
+    
+        // If the class section does not exist, return an empty collection
+        return collect();
+    }
+
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
@@ -391,6 +415,34 @@ class User extends Authenticatable implements MustVerifyEmail
                   ->orWhere('email', 'like', "%$term%");
         });
     }
+    public function wards()
+    {
+        return $this->belongsToMany(User::class, 'guardian_ward', 'guardian_id', 'ward_id')
+            ->withPivot('confirmed')
+            ->withTimestamps();
+    }
     
+    public function guardians()
+    {
+        return $this->belongsToMany(User::class, 'guardian_ward', 'ward_id', 'guardian_id')
+            ->withPivot('confirmed')
+            ->withTimestamps();
+    }
+    
+    public function unconfirmedGuardians()
+    {
+        return $this->guardians()->wherePivot('confirmed', false);
+    }
+
+    // Get unconfirmed wards of a guardian
+    public function unconfirmedWards()
+    {
+        return $this->wards()->wherePivot('confirmed', false);
+    }
+    public function studentResults(): HasMany
+    {
+        return $this->hasMany(StudentResult::class, 'student_id');
+    }
+   
     
 }

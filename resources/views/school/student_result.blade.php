@@ -8,9 +8,6 @@
 
 @section('breadcrumb2', "Results")
 
-@section('page_title')
-    {{ $school->name }}
-@endsection
 
 @section('style')
     <!-- Your styles -->
@@ -19,11 +16,12 @@
         .certificate-container {
             position: relative;
             /* background-image: url('{{ asset('storage/' . $school->logo) }}'); */
-            background-size: cover;
+            /* background-size: cover; */
             background-position: center;
-            padding: 50px;
+            /* padding: 50px; */
             color: #333;
             font-family: 'Sarala','Balsamiq Sans', sans-serif;
+            font-size:12px;
             text-align: center;
         }
 
@@ -52,16 +50,7 @@
           
         }
 
-        /* Overlay */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.3); /* Adjust the transparency as needed */
-            border-radius: 10px;
-        }
+        
 
         /* Hidden comment form */
         .comment-form-container {
@@ -74,11 +63,20 @@
 @section('content')
 @include('sidebar')
     <div class="certificate-container">
-        <h1 class="certificate-title text-dark">{{ $school->name }}</h1>
-        <div class="certificate-table">
-            <h4 class="text-dark small-text">Result for <b>{{ $studentResults[0]->student->profile->full_name }}</b> - <em><b>{{ $studentResults[0]->academicSession->name }} - {{ $studentResults[0]->term->name }} - {{ $studentResults[0]->student->schoolClass()->name }} ({{ $studentResults[0]->student->userClassSection->name }} {{$studentResults[0] ->student->id}} )</b></em> </h4>
-            <div class="table-responsive">
-                <div class="overlay"></div> <!-- Overlay div -->
+        <h1 class="certificate-title text-dark" style="font-size:18px;">{{ $school->name }}</h1>
+        <div class="certificate-table table-responsive">
+        <h4 class="text-dark small-text">Result for <b>{{ $studentResults[0]->student->profile->full_name }}</b> - <em>
+    <b>
+    <!-- {{ $studentResults[0]->school->name ?? '' }} -  -->
+        {{ $studentResults[0]->academicSession->name ?? '' }} - 
+        {{ $studentResults[0]->term->name ?? '' }} - 
+        {{ $studentResults[0]->schoolClass->name ?? '' }} 
+        ({{ $studentResults[0]->schoolClassSection()->first()->name ?? '' }})
+    </b>
+</em></h4>
+
+        
+            <div class="certificate-table ">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
@@ -94,6 +92,27 @@
                     @php
                         $totalScores = 0;
                         $totalCourses = 0; // Initialize total courses counter
+
+                        // Function to get the ordinal suffix for a number
+                            function getOrdinalSuffix($number) {
+                                // Special cases for 11th, 12th, and 13th
+                                if (in_array(($number % 100), [11, 12, 13])) {
+                                    return 'th';
+                                }
+
+                                // Handle other cases
+                                switch ($number % 10) {
+                                    case 1:
+                                        return 'st';
+                                    case 2:
+                                        return 'nd';
+                                    case 3:
+                                        return 'rd';
+                                    default:
+                                        return 'th';
+                                }
+                            }
+
                     @endphp
                     @foreach($studentResults as $studentResult)
                         @php
@@ -118,6 +137,28 @@
                             <td colspan="2">{{ number_format($totalScores / $totalCourses, 2) }}</td>
                         </tr>
                     @endif
+                    <tr>
+                        <td colspan="4" style="text-align: right;">Position:</td>
+                        <td colspan="2"><b>{{ $classSectionPosition['position'] }}<sup>{{ getOrdinalSuffix($classSectionPosition['position']) }}</sup> out of {{$classSectionPosition['total_students']}} </b> </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: left;">Teacher's Remark:</td>
+                        <td colspan="2" style="text-align: left;"><b>
+                            @if(isset($classPosition['comments']) && !empty($classPosition['comments']))
+                                {{ $classPosition['comments'][0] }} <!-- Assuming you only need the first comment -->
+                            @else
+                                No comments available
+                            @endif
+                        </b></td>
+                    </tr>
+
+
+
+                    <!-- <tr>
+                        <td colspan="4" style="text-align: right;">Overall Position:</td>
+                        <td colspan="2"><b>{{ $classPosition['position'] }}<sup>{{ getOrdinalSuffix($classPosition['position']) }}</sup> out of {{$classPosition['total_students']}} </b> </td>
+                    </tr> -->
+
 
                 </table>
             </div>
@@ -133,11 +174,14 @@
 @endsection
 
 @section('scripts')
+
 <script>
 $(document).ready(function () {
     const courseNames = {!! json_encode($courseNames) !!};
     const averageScores = {!! json_encode($averageScores) !!};
     const courseGrades = {!! json_encode($courseGrades) !!};
+    const classPosition = {!! json_encode($classPosition) !!};
+    const classSectionPosition = {!! json_encode($classSectionPosition) !!};
 
     // Define grade colors
     const gradeColors = {
@@ -150,29 +194,35 @@ $(document).ready(function () {
         'F': '#E44743'     // Light Grey
     };
 
-    // Chart.js configuration
     const ctx = document.getElementById('gradeChart').getContext('2d');
 
-    const gradeChart = new Chart(ctx, {
+const gradeChart = new Chart(ctx, {
     type: 'horizontalBar',
     data: {
         labels: courseNames,
         datasets: [{
-            label: 'Average Scores',
+            label: 'Course Statistics',
             data: Object.values(averageScores),
             backgroundColor: courseNames.map(courseName => gradeColors[courseGrades[courseName]]),
             borderColor: courseNames.map(courseName => `${gradeColors[courseGrades[courseName]]}80`),
-            borderWidth: 1,
-            barThickness: 60 // Adjust the width of the bars (in pixels)
+            borderWidth: 1
         }]
     },
     options: {
+        responsive: true, // Enable responsiveness
         scales: {
             xAxes: [{
                 ticks: {
                     beginAtZero: true
                 }
             }]
+        },
+        legend: {
+            display: false
+        },
+        title: {
+            display: true,
+            text: 'Result Course Statistics'
         },
         tooltips: {
             callbacks: {
@@ -182,7 +232,11 @@ $(document).ready(function () {
                     var grade = courseGrades[courseName];
                     return `Course: ${courseName}, Average Score: ${averageScore}, Grade: ${grade}`;
                 }
-            }
+            },
+            backgroundColor: 'rgba(255, 99, 132, 0.8)', // Background color of the tooltip
+            bodyFontColor: '#fff', // Text color of the tooltip
+            titleFontColor: '#fff', // Title text color of the tooltip
+            displayColors: false // Hide the color box in the tooltip
         },
         plugins: {
             annotation: {
@@ -203,16 +257,17 @@ $(document).ready(function () {
                 })
             }
         },
-        elements: {
-            rectangle: {
-                barPercentage: 0.8, // 80% of available space
-                categoryPercentage: 0.6 // 60% of the space in the category
+        layout: {
+            padding: {
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 20
             }
         }
     }
 });
 
-    
     // Calculate insights
     const maxScoreIndex = Object.values(averageScores).indexOf(Math.max(...Object.values(averageScores)));
     const minScoreIndex = Object.values(averageScores).indexOf(Math.min(...Object.values(averageScores)));
@@ -234,16 +289,19 @@ $(document).ready(function () {
     // Calculate distribution of grades
     const gradeDistribution = calculateGradeDistribution(courseGrades);
 
-    // Display insights
-    $('#student-result-insight').html(`
-        Overall Performance Summary:<br>
-        Total Average Score: ${totalAverageScore.toFixed(2)}<br>
-        Overall Grade: ${overallGrade}<br><br>
-        Best-performing course: ${bestCourse} (Grade: ${bestCourseGrade}, Score: ${bestCourseScore})<br>
-        Worst-performing course: ${worstCourse} (Grade: ${worstCourseGrade}, Score: ${worstCourseScore})<br><br>
-        Distribution of Grades:<br>
-        ${Object.entries(gradeDistribution).map(([grade, count]) => `${grade}: ${count}`).join('<br>')}
-    `);
+
+// Display insights
+$('#student-result-insight').html(`
+    Overall Performance Summary:<br>
+    Total Average Score: ${totalAverageScore.toFixed(2)}<br>
+    Overall Grade: ${overallGrade}<br><br>
+    Best-performing course: ${bestCourse} (Grade: ${bestCourseGrade}, Score: ${bestCourseScore})<br>
+    Worst-performing course: ${worstCourse} (Grade: ${worstCourseGrade}, Score: ${worstCourseScore})<br><br>
+    Distribution of Grades:<br>
+    ${Object.entries(gradeDistribution).map(([grade, count]) => `${grade}: ${count}`).join('<br>')}<br><br>
+    Position: ${classSectionPosition.position}${getOrdinalSuffix(classSectionPosition.position)} out of ${classSectionPosition.total_students}<br>
+    Overall Position: ${classPosition.position}${getOrdinalSuffix(classPosition.position)} out of ${classPosition.total_students}
+`);
 
     // Function to calculate overall grade based on average score
 function calculateOverallGrade(averageScore) {
@@ -266,6 +324,26 @@ function calculateOverallGrade(averageScore) {
     }
     return 'F'; // Default grade if score is below minimum boundary
 }
+
+function getOrdinalSuffix(number) {
+    // Special cases for 11th, 12th, and 13th
+    if ([11, 12, 13].includes(number % 100)) {
+        return 'th';
+    }
+
+    // Handle other cases
+    switch (number % 10) {
+        case 1:
+            return 'st';
+        case 2:
+            return 'nd';
+        case 3:
+            return 'rd';
+        default:
+            return 'th';
+    }
+}
+
 
 // Function to calculate distribution of grades
 function calculateGradeDistribution(courseGrades) {

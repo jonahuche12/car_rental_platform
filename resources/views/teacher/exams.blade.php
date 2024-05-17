@@ -52,7 +52,7 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="mb-4">
-                <button class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#creatExamModal">Create New Exam</button>
+                <button class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#createexamModal">Create New Exam</button>
             </div>
             <section class="content">
                 <!-- Default box -->
@@ -66,38 +66,55 @@
                     <div class="card-body p-0">
                         <div class="message alert alert-success mb-0" style="display:none"></div>
                         @foreach ($academicSessions->sortByDesc('created_at') as $academicSession)
-                            <div class="mb-3 p-3 border-bottom">
-                                <h4 class="badge badge-primary">Academic Session: {{ $academicSession->name }}</h4>
-                                
-                                @foreach ($academicSession->terms->sortByDesc('created_at') as $term)
-                                @php
-                                    $sortedexams = $term->exams->sortByDesc('created_at');
-                                @endphp
-                                    <div class="term-card border rounded mb-3">
-                                        <div class="term-header bg-light p-2" data-toggle="collapse" data-target="#term-{{ $term->id }}" aria-expanded="true" aria-controls="term-{{ $term->id }}">
-                                            <span class="term-name">Term: {{ $term->name }}</span>
-                                            <span class="badge bg-purple">{{$sortedexams->count()}}</span>
-                                        </div>
-                                        <div id="term-{{ $term->id }}" class="collapse" aria-labelledby="term-header-{{ $term->id }}">
-                                            <div class="card-body p-0">
-                                                <!-- Your nested table and content for this term goes here -->
-                                                <div class="collapse table-responsive" id="term-{{ $term->id }}">
-                                                    <table class="table projects table mb-0">
-                                                        <!-- Table header -->
-                                                        <thead class="bg-dark text-light">
-                                                            <tr>
-                                                                <th style="width: 1%">#</th>
-                                                                <th>Exam Name</th>
-                                                                <th class="text-center">Description</th>
-                                                                <th class="text-center">Complete Score</th>
-                                                                <th>Due Date</th>
-                                                                <th style="width: 25%" class="text-center"></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <!-- Table body -->
-                                                        <tbody>
+                    <div class="mb-3 p-3 border-bottom">
+                        <h4 class="badge 
+                            @if($academicSession->id > $school->academicSession->id)
+                                badge-danger
+                            @elseif($academicSession->id < $school->academicSession->id)
+                                badge-warning
+                            @else
+                                badge-primary
+                            @endif">Academic Session: {{ $academicSession->name }}
+                        </h4>
+                        
+                        @foreach ($academicSession->terms->sortByDesc('created_at') as $term)
+                            @php
+                                $sortedexams = $term->exams->sortByDesc('created_at');
+                                $termColorClass = '';
+                                if ($term->id > $school->term->id) {
+                                    $termColorClass = 'bg-success';
+                                } elseif ($term->id < $school->term->id) {
+                                    $termColorClass = 'bg-tertiary';
+                                } else {
+                                    $termColorClass = 'bg-primary';
+                                }
+                            @endphp
+                            <div class="term-card border rounded mb-3 ml-3">
+                                <div class="term-header {{ $termColorClass }} p-2" data-toggle="collapse" data-target="#term-{{ $term->id }}" aria-expanded="true" aria-controls="term-{{ $term->id }}">
+                                    <span class="term-name">{{ $term->name }}</span>
+                                    <span class="badge bg-primary">{{ $sortedexams->count() }}</span>
+                                </div>
+                                    <div id="term-{{ $term->id }}" class="collapse" aria-labelledby="term-header-{{ $term->id }}">
+                                        <div class="card-body p-0">
+                                            <!-- Your nested table and content for this term goes here -->
+                                            <div class="collapse table-responsive" id="term-{{ $term->id }}">
+                                                <table class="table table-striped nested-table bg-light">
+                                                    <!-- Table header -->
+                                                    <thead class="bg-dark text-light">
+                                                        <tr>
+                                                            <th style="width: 1%">#</th>
+                                                            <th>Exam Name</th>
+                                                            <th class="text-center">Description</th>
+                                                            <th class="text-center">Complete Score</th>
+                                                            <th>Due Date</th>
+                                                            <th style="width: 25%" class="text-center"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <!-- Table body -->
+                                                    <tbody>
 
 @foreach ($sortedexams as $exam)
+
     <tr class="">
         <td>{{ $loop->iteration }}</td>
         <td style="width: 19%">
@@ -139,7 +156,7 @@
     <td colspan="6">
         <div class="collapse" id="exam-{{ $exam->id }}">
             <table class="table table-striped nested-table bg-light">
-                <thead class="bg-purple text-light">
+                <thead class="bg-primary text-light">
                     <tr>
                         <th>#</th>
                         <th>Student Full Name</th>
@@ -149,50 +166,72 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($exam->course->students as $student)
-                        @if ($student->userClassSection && $student->userClassSection->name == $exam->class_section->name)
+                    @if($exam->academicSession->id == $school->academicSession->id)
+                        @foreach ($exam->course->students as $student)
+                            @if ($student->userClassSection && $student->userClassSection->name == $exam->class_section->name)
+                                <tr>
+                                    <td>{{ $loop->iteration }} </td>
+                                    <td>{{ $student->profile->full_name }}</td>
+                                    <td>
+                                        <p id="message-{{ $student->id }}-{{$exam->id}}" class="span-message text-success" style="display:none"></p>
+                                        <p id="error-{{ $student->id }}-{{$exam->id}}" class="span-error text-danger" style="display:none"></p>
+                                        @php
+                                            $grade = $student->getGradeForexam($exam->id);
+                                        @endphp
+                                        @if ($grade)
+                                            <div id="grade-display-{{ $student->id }}-{{ $exam->id }}">
+                                                <span class="current-score">{{ $grade->score }}</span>
+                                                @if (!$exam->archived)
+                                                    <button class="btn btn-sm btn-outline-primary edit-score" data-student-id="{{ $student->id }}" data-exam-id="{{ $exam->id }}"><i class="fas fa-edit"></i></button>
+                                                @endif
+                                            </div>
+                                            <div id="edit-grade-form-{{ $student->id }}-{{ $exam->id }}" style="display:none;">
+                                                <form action="" id="gradeForm-{{ $student->id }}-{{ $exam->id }}" method="POST" class="form-inline grade-form">
+                                                    @csrf
+                                                    <input type="hidden" name="user_id" value ="{{ $student->id }}">
+                                                    <input type="hidden" name="exam_id" value="{{ $exam->id }}">
+                                                    <input type="hidden" name="course_id" value="{{ $exam->course->id }}">
+                                                    <input type="number" class="form-control mr-2" style="max-width: 100px;" max="999" name="score" placeholder="Score" required>
+                                                    <button class="btn btn-sm btn-primary" type="submit">Save</button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <div id="edit-grade-form-{{ $student->id }}-{{ $exam->id }}" style="">
+                                                <form action="" id="gradeForm-{{ $student->id }}-{{ $exam->id }}" method="POST" class="form-inline grade-form">
+                                                    @csrf
+                                                    <input type="hidden" name="user_id" value="{{ $student->id }}">
+                                                    <input type="hidden" name="exam_id" value="{{ $exam->id }}">
+                                                    <input type="hidden" name="course_id" value="{{ $exam->course->id }}">
+                                                    <input type="number" class="form-control mr-2" style="max-width: 100px;" max="999" name="score" placeholder="Score" required>
+                                                    <button class="btn btn-sm btn-primary" type="submit">Save</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $percentage = $grade ? \App\Models\Grade::calculatePercentage($grade->score, $exam->complete_score ?? 0) : 0;
+                                        @endphp
+                                        {{ $percentage }}%
+                                    </td>
+                                    <td>
+                                        @php
+                                            $grade = \App\Models\Grade::calculateGrade($percentage);
+                                        @endphp
+                                        {{ $grade }}
+                                    </td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    @else
+                        @foreach ($exam->grades as $grade)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $student->profile->full_name }}</td>
-                                <td>
-                                    <p id="message-{{ $student->id }}-{{$exam->id}}" class="span-message text-success" style="display:none"></p>
-                                    <p id="error-{{ $student->id }}-{{$exam->id}}" class="span-error text-danger" style="display:none"></p>
-                                    @php
-                                        $grade = $student->getGradeForexam($exam->id);
-                                    @endphp
-                                    @if ($grade)
-                                        <div id="grade-display-{{ $student->id }}-{{ $exam->id }}">
-                                            <span class="current-score">{{ $grade->score }}</span>
-                                            @if (!$exam->archived)
-                                                <button class="btn btn-sm btn-outline-primary edit-score" data-student-id="{{ $student->id }}" data-exam-id="{{ $exam->id }}"><i class="fas fa-edit"></i></button>
-                                            @endif
-                                        </div>
-                                        <div id="edit-grade-form-{{ $student->id }}-{{ $exam->id }}" style="display:none;">
-                                            <form action="" id="gradeForm-{{ $student->id }}-{{ $exam->id }}" method="POST" class="form-inline grade-form">
-                                                @csrf
-                                                <input type="hidden" name="user_id" value ="{{ $student->id }}">
-                                                <input type="hidden" name="exam_id" value="{{ $exam->id }}">
-                                                <input type="hidden" name="course_id" value="{{ $exam->course->id }}">
-                                                <input type="number" class="form-control mr-2" style="max-width: 100px;" max="999" name="score" placeholder="Score" required>
-                                                <button class="btn btn-sm btn-primary" type="submit">Save</button>
-                                            </form>
-                                        </div>
-                                    @else
-                                        <div id="edit-grade-form-{{ $student->id }}-{{ $exam->id }}" style="">
-                                            <form action="" id="gradeForm-{{ $student->id }}-{{ $exam->id }}" method="POST" class="form-inline grade-form">
-                                                @csrf
-                                                <input type="hidden" name="user_id" value="{{ $student->id }}">
-                                                <input type="hidden" name="exam_id" value="{{ $exam->id }}">
-                                                <input type="hidden" name="course_id" value="{{ $exam->course->id }}">
-                                                <input type="number" class="form-control mr-2" style="max-width: 100px;" max="999" name="score" placeholder="Score" required>
-                                                <button class="btn btn-sm btn-primary" type="submit">Save</button>
-                                            </form>
-                                        </div>
-                                    @endif
-                                </td>
+                                <td>{{ $grade->student->profile->full_name }}</td>
+                                <td>{{ $grade->score }}</td>
                                 <td>
                                     @php
-                                        $percentage = $grade ? \App\Models\Grade::calculatePercentage($grade->score, $exam->complete_score ?? 0) : 0;
+                                        $percentage = \App\Models\Grade::calculatePercentage($grade->score, $exam->complete_score ?? 0);
                                     @endphp
                                     {{ $percentage }}%
                                 </td>
@@ -203,19 +242,16 @@
                                     {{ $grade }}
                                 </td>
                             </tr>
-                        @endif
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center">No Class Student available for this Class.</td>
-                        </tr>
-                    @endforelse
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>
     </td>
 </tr>
 @endforeach
-                                                    </tbody>
+</tbody>
+
                                                     </table>
                                                 </div>
                                             </div>
@@ -233,12 +269,13 @@
 
 
 
+
         <!-- Modal for Creating a New Class Section -->
-        <div class="modal fade" id="creatExamModal" tabindex="-1" role="dialog" aria-labelledby="creatExamModalLabel" aria-hidden="true">
+        <div class="modal fade" id="createexamModal" tabindex="-1" role="dialog" aria-labelledby="createexamModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header bg-purple text-light">
-                        <h5 class="modal-title" id="creatExamModalLabel">Create New <b>{{$course->name}} </b> Exam for <b><span id="class-name">{{$class_section->name}}</span></b></h5>
+                    <div class="modal-header bg-primary text-light">
+                        <h5 class="modal-title" id="createexamModalLabel">Create New <b>{{$course->name}} </b> exam for <b><span id="class-name">{{$class_section->name}}</span></b></h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -247,11 +284,11 @@
                     <div class="exam-error alert alert-danger" style="display:none"></div>
                     <div class="modal-body">
                         <!-- Form for Creating a New Class Section -->
-                        <form action="{{ route('create_exam') }}" id="createExamForm" method="POST">
+                        <form action="{{ route('create_exam') }}" id="createexamForm" method="POST">
                             @csrf
                             <!-- Class Section Name -->
                             <div class="form-group">
-                                <label for="section_name">Exam Title:</label>
+                                <label for="section_name">exam Title:</label>
                                 <input type="text" class="form-control" id="section_name" name="name" placeholder="E.g {{$course->code }} First exam" required>
                             </div>
                             <div class="form-group">
@@ -283,8 +320,8 @@
             aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header bg-purple text-light">
-                        <h5 class="modal-title" id="editSectionModalLabel">Edit exam <span id='exam_name'></span></h5>
+                    <div class="modal-header bg-primary text-light">
+                        <h5 class="modal-title" id="editSectionModalLabel">Edit Exam <span id='exam_name'></span></h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -337,7 +374,7 @@
         <div class="modal" tabindex="-1" role="dialog" id="confirmationModal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header bg-purple text-light">
+                    <div class="modal-header bg-primary text-light">
                         <h5 class="modal-title">Confirmation</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -361,8 +398,8 @@
         <div class="modal fade" id="archiveConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="archiveConfirmationModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header  bg-purple text-light">
-                        <h5 class="modal-title bg-purple text-light" id="archiveConfirmationModalLabel">Archive Exam Confirmation</h5>
+                    <div class="modal-header  bg-primary text-light">
+                        <h5 class="modal-title bg-primary text-light" id="archiveConfirmationModalLabel">Archive exam Confirmation</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -371,7 +408,7 @@
                     <div class="archive-message alert alert-success" style="display:none"> </div>
                     <div class="archive-error alert alert-danger" style="display:none"> </div>
                     <div class="modal-body">
-                        Are you sure you want to archive this exam <b><span class="exam-name badge badge-warning" ></span></b> ? This action cannot be undone and you won't be able to edit student scores after archiving.
+                        Are you sure you want to archive this Exam <b><span class="exam-name badge badge-warning" ></span></b> ? This action cannot be undone and you won't be able to edit student scores after archiving.
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -384,7 +421,7 @@
         <div class="modal fade" id="resultConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="resultConfirmationModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header bg-purple text-light">
+                    <div class="modal-header bg-primary text-light">
                         <h5 class="modal-title" id="resultConfirmationModalLabel">Use in Final Result Confirmation</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -445,7 +482,7 @@
 
 
         $(document).ready(function() {
-            $('#createExamForm').submit(function(e) {
+            $('#createexamForm').submit(function(e) {
                 e.preventDefault(); // Prevent the form from submitting normally
                 
                 var formData = $(this).serialize(); // Serialize form data
@@ -465,7 +502,7 @@
                         $('.exam-error').hide();
                         setTimeout(function() {
                             $('.exam-message').fadeOut();
-                        $('#creatExamModal').modal('hide');
+                        $('#createexamModal').modal('hide');
                         location.reload()
                         }, 3000); // 3 seconds
                     },
@@ -669,7 +706,7 @@
         $('.archive-exam-btn').click(function() {
             var examId = $(this).data('exam-id');
             var examName = $(this).data('exam-name');
-            var model = 'Exam';
+            var model = 'exam';
             
             // Show archive confirmation modal
             $('#archiveConfirmationModal').modal('show');

@@ -7,10 +7,10 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Score</th>
-            <th>%</th>
-            <th>Grade</th>
+            <th class="small-text">Name</th>
+            <th class="small-text">Score</th>
+            <th class="small-text">%</th>
+            <th class="small-text">Grade</th>
         </tr>
     </thead>
     <tbody>
@@ -56,15 +56,15 @@
 
             @if($grade->exam->academicSession->id == $school_session->id && $grade->exam->term->name == $school_term->name)
                 <tr>
-                    <td>
+                    <td class="small-text">
                         @if($grade->exam->archived)
                             <i class="fa fa-archive text-success"></i>
                         @endif
                         {{$grade->exam->name}}
                     </td>
-                    <td>{{$grade->score}}</td>
-                    <td>{{$percentage}}%</td>
-                    <td>{{$grade->calculateGrade($percentage)}}</td>
+                    <td class="small-text">{{$grade->score}} <span style="font-size:9px">out of</span> {{$grade->complete_score}} </td>
+                    <td class="small-text">{{$percentage}}%</td>
+                    <td class="small-text">{{$grade->calculateGrade($percentage)}}</td>
                 </tr>
             @endif
         @endforeach
@@ -73,14 +73,14 @@
             <tr>
                 <td></td>
                 <td></td>
-                <td><strong>Total </strong></td>
-                <td><b>{{$total}}</b></td>
+                <td class="small-text"><strong>Total </strong></td>
+                <td class="small-text"><b>{{$total}}</b></td>
             </tr>
             <tr>
                 <td></td>
-                <td></td>
-                <td><strong>Average</strong></td>
-                <td><b>
+                <td class="small-text"></td>
+                <td class="small-text"><strong>Average</strong></td>
+                <td class="small-text"><b>
                     @php
                         $average = isset($countByTerm[$termId]) && $countByTerm[$termId] > 0 ? $total / $countByTerm[$termId] : 0;
                         $avgpercentage = is_numeric($total) ? $grade->calculatePercentage($average, $total) : 0;
@@ -91,8 +91,8 @@
             <tr>
                 <td></td>
                 <td></td>
-                <td><strong>Grade Average</strong></td>
-                <td><b>{{$grade->calculateGrade($avgpercentage)}}</b></td>
+                <td class="small-text"><strong>Grade Average</strong></td>
+                <td class="small-text"><b>{{$grade->calculateGrade($avgpercentage)}}</b></td>
             </tr>
         @endforeach
     </tbody>

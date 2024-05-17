@@ -441,6 +441,11 @@ class AdminController extends Controller
             // Find the class section by ID
             $classSection = SchoolClassSection::findOrFail($id);
     
+            // Detach the main form teacher if provided in the request
+            if ($request->has('main_form_teacher')) {
+                $classSection->formTeachers()->detach();
+            }
+    
             // Update the class section with the validated data
             $classSection->update($validatedData);
     
@@ -449,12 +454,10 @@ class AdminController extends Controller
                 $mainFormTeacherId = $request->input('main_form_teacher');
                 $classSection->main_form_teacher_id = $mainFormTeacherId;
                 $classSection->save();
-            }
     
-            // If main_form_teacher is not provided in the request, detach any existing form teacher
-            // if (!$request->has('main_form_teacher')) {
-            //     $classSection->formTeachers()->detach();
-            // }
+                // Sync the teacher to the formClass
+                $classSection->formTeachers()->sync([$mainFormTeacherId]);
+            }
     
             // Return the updated class section as a JSON response
             return response()->json($classSection, 200);
@@ -465,6 +468,7 @@ class AdminController extends Controller
             return response()->json(['error' => 'Failed to update the Class Section.' . $e->getMessage()], 500);
         }
     }
+    
     
     public function deleteSection($id)
     {

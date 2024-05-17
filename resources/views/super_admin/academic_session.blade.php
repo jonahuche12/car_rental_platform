@@ -7,8 +7,11 @@
 @endsection
 @section('breadcrumb2', "School Academic Session")
 
+@section('sidebar')
+    @include('sidebar')
+@endsection
 @section('content')
-@include('sidebar')
+
 <div class="">
             <button class="btn btn-primary" data-toggle="modal" data-target="#createAcademicSessionModal">Create New Academic Session</button>
         </div>
@@ -287,7 +290,7 @@
 
 
                     // Add success message to the .message div
-                    $('.message').removeClass('alert-danger').addClass('alert-success').html('Academic Session created successfully.').show();
+                    $('.message').removeClass('alert-danger').addClass('alert-success p-2').html('Academic Session created successfully.').show();
 
                     // Reload the page after 3 seconds
                     setTimeout(function () {

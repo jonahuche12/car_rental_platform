@@ -19,4 +19,9 @@ class Curriculum extends Model
     {
         return $this->topics()->get();
     }
+
+    public static function getUniqueClassLevels()
+    {
+        return self::select('class_level')->distinct()->pluck('class_level');
+    }
 }

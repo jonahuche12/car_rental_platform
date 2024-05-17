@@ -1,6 +1,9 @@
 @extends('layouts.app')
+@section('title', "CSS - Verify Email")
+
 
 @section('content')
+@include('sidebar')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">

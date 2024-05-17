@@ -104,21 +104,21 @@ class SearchController extends Controller
                             ->orWhere('middle_name', 'like', "%$keyword%")
                             ->orWhere('last_name', 'like', "%$keyword%")
                             ->orWhere('email', 'like', "%$keyword%")
-                            ->take(1)
+                            ->take(6)
                             ->get();
                 $results['users'] = $results['users']->merge($users);
 
                 // Search lessons
                 $lessons = Lesson::where('title', 'like', "%$keyword%")
                                 ->orWhere('description', 'like', "%$keyword%")
-                                ->take(1)
+                                ->take(6)
                                 ->get();
                 $results['lessons'] = $results['lessons']->merge($lessons);
 
                 // Search events
                 $events = Event::where('title', 'like', "%$keyword%")
                                 ->orWhere('description', 'like', "%$keyword%")
-                                ->take(2)
+                                ->take(6)
                                 ->get();
                 $results['events'] = $results['events']->merge($events);
             }

@@ -40,6 +40,7 @@ class CreateCoursesTable extends Migration
             $table->id();
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('class_section_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
 

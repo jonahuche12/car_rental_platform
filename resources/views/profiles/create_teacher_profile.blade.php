@@ -39,10 +39,10 @@
     <section class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-6">
 
             <!-- Profile Image -->
-            <div class="card card-purple card-outline">
+            <div class="card card-primary card-outline">
               <div class="card-body box-profile">
                 <div class="text-center position-relative">
                     @if(auth()->user()->profile->profile_picture)
@@ -88,7 +88,7 @@
                             <i class="ion ion-edit text-info float-right" id="phone_number-icon" style="vertical-align: middle;"><span style="vertical-align: middle; margin-right: 5px;"></span></i>
                                 <span class="edit-field" id="" style="display:none; vertical-align: middle;">
                                     <input type="text" style="width:100%" class='form-control' id="phone_number_input" placeholder="Enter phone number">
-                                    <button class="btn btn-small bg-purple" id="phone_number-button" onclick="saveData('phone_number')">Save</button>
+                                    <button class="btn btn-small bg-primary" id="phone_number-button" onclick="saveData('phone_number')">Save</button>
                                 </span>
                             @endif
                             <div class="alert alert-danger phone_number-error" style="display:none; float:clear; margin:0"></div>
@@ -108,7 +108,7 @@
                                     <option>Male</option>
                                     <option>Female</option>
                                 </select>
-                                <button class="btn btn-small bg-purple gender-button" id="gender-button" onclick="saveData('gender')">Save</button>
+                                <button class="btn btn-small bg-primary gender-button" id="gender-button" onclick="saveData('gender')">Save</button>
                             </span>
                             
                             <div class="alert alert-danger gender-error" style="display:none"></div>
@@ -157,7 +157,7 @@
                                 </select>
                             </div>
                             <input type="text" class='form-control' id="address_field_input" value="{{auth()->user()->profile->address}}" placeholder="Enter Your Address">
-                            <button class="btn btn-small bg-purple" id="address-button" onclick="saveData('address')">Save</button>
+                            <button class="btn btn-small bg-primary" id="address-button" onclick="saveData('address')">Save</button>
                         </span>
                         
                         <div class="alert alert-danger address-error" style="display:none"></div>
@@ -175,7 +175,7 @@
                           @if(auth()->user()->profile->date_of_birth == null)
                               <span class="edit-field" style="display:none; vertical-align: middle;">
                                   <input type="date" class='form-control' id="date_of_birth_input" placeholder="Enter Your Date Of Birth">
-                                  <button class="btn btn-sm bg-purple" id="date_of_birth-button" onclick="saveData('date_of_birth')">Save</button>
+                                  <button class="btn btn-sm bg-primary" id="date_of_birth-button" onclick="saveData('date_of_birth')">Save</button>
                               </span>
                           @endif
                           <div class="alert alert-danger date_of_birth-error" style="display:none"></div>
@@ -192,18 +192,18 @@
 
                               @if (auth()->user()->profile->teacher_confirmed)
                                 
-                                  <a href="#" class="badge bg-purple badge-sm">Teacher Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-primary badge-sm">Teacher Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
 
                               @if (auth()->user()->profile->student_confirmed)
                                   
-                                  <a href="#" class="badge bg-purple badge-sm">Student Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-primary badge-sm">Student Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
 
 
                               @if (auth()->user()->profile->admin_confirmed)
                                   
-                                  <a href="#" class="badge bg-purple badge-sm">Admin Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-primary badge-sm">Admin Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
                           </div>
                         </a>
@@ -234,7 +234,7 @@
                           <input type="text" class="form-control" id="school_search" placeholder="Search for a School" data-type="school">
                           <input type="text" class="form-control" id="school_input" style="display:none" name="school_input">
 
-                              <button class="btn btn-small bg-purple gender-button" id="school-button" onclick="saveData('school')">Save</button>
+                              <button class="btn btn-small bg-primary gender-button" id="school-button" onclick="saveData('school')">Save</button>
                           </span>
                           
                           <div class="alert alert-danger school-error" style="display:none"></div>
@@ -253,7 +253,7 @@
                               <span class="class-display">{{ auth()->user()->schoolClass()->name }}</span>
                               @if (auth()->user()->profile->class_confirmed)
                                 
-                                  <a href="#" class="badge bg-purple badge-sm">Class Confirmed <i class="fas fa-check-circle"></i></a>
+                                  <a href="#" class="badge bg-primary badge-sm">Class Confirmed <i class="fas fa-check-circle"></i></a>
                               @endif
                               
                           </div>
@@ -282,7 +282,7 @@
                             <!-- Hide the input field -->
                             <input type="text" class="form-control" id="class_search" style="display:none;" placeholder="Search for a Class">
 
-                              <button class="btn btn-small bg-purple gender-button" id="school-button" onclick="saveData('class')">Save</button>
+                              <button class="btn btn-small bg-primary gender-button" id="school-button" onclick="saveData('class')">Save</button>
                           </span>
                           
                           <div class="alert alert-danger class-error" style="display:none"></div>
@@ -320,9 +320,9 @@
                                 <span class="user-package-display badge {{ $badgeColor }}">{{ $package->name }}</span>
 
                                 @if (!$user->active_package)
-                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge bg-purple badge-sm">Activate</a>
+                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge bg-primary badge-sm">Activate</a>
                                 @elseif ($expired)
-                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge bg-purple badge-sm">Renew</a>
+                                    <a href="{{ route('payment.activate', ['package_id' => $package->id]) }}" class="badge bg-primary badge-sm">Renew</a>
                                 @endif
                             </div>
                         @else
@@ -346,7 +346,7 @@
                                   </option>
                               @endforeach
                             </select>
-                              <button class="btn btn-small bg-purple user_package-button" id="user_package-button" onclick="saveData('user_package')">Save</button>
+                              <button class="btn btn-small bg-primary user_package-button" id="user_package-button" onclick="saveData('user_package')">Save</button>
                           </span>
                           
                           <div class="alert alert-danger user_package-error" style="display:none"></div>
@@ -360,7 +360,7 @@
                 </ul>
 
 
-                <!-- <a href="#" class="btn bg-purple btn-block"><b>Follow</b></a> -->
+                <!-- <a href="#" class="btn bg-primary btn-block"><b>Follow</b></a> -->
               </div>
               <!-- /.card-body -->
             </div>
@@ -379,7 +379,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn bg-purple" onclick="proceedWithUserPackage()">Continue</button>
+                    <button type="button" class="btn bg-primary" onclick="proceedWithUserPackage()">Continue</button>
                   </div>
                 </div>
               </div>
@@ -399,7 +399,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn bg-purple" onclick="proceedWithSchoolUpdate()">Continue</button>
+                    <button type="button" class="btn bg-primary" onclick="proceedWithSchoolUpdate()">Continue</button>
                   </div>
                 </div>
               </div>
@@ -421,15 +421,20 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn bg-purple" onclick="proceedWithClassUpdate()">Continue</button>
+                    <button type="button" class="btn bg-primary" onclick="proceedWithClassUpdate()">Continue</button>
                   </div>
                 </div>
               </div>
             </div>
 
 
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+          <div class="col-md-6">
+            
             <!-- About Me Box -->
-            <div class="card card-purple">
+            <div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">About You</h3>
               </div>
@@ -480,7 +485,7 @@
                           </div>
                       </div>
                       
-                      <button type="button" class="btn btn-sm bg-purple" onclick="addQualification()">
+                      <button type="button" class="btn btn-sm bg-primary" onclick="addQualification()">
                           <i class="icon ion-md-add"></i> Add More
                       </button>
                       <button type="button" class="btn btn-success" onclick="submitQualification()">Submit</button>
@@ -489,331 +494,8 @@
 
                 <span class="mb-3"></span>
 
-                <hr>
-
-                <!-- <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
-
-                <p class="text-muted">Malibu, California</p>
-
-                <hr>
-
-                <strong><i class="fas fa-pencil-alt mr-1"></i> Skills</strong>
-
-                <p class="text-muted">
-                  <span class="tag tag-danger">UI Design</span>
-                  <span class="tag tag-success">Coding</span>
-                  <span class="tag tag-info">Javascript</span>
-                  <span class="tag tag-warning">PHP</span>
-                  <span class="tag tag-primary">Node.js</span>
-                </p>
-
-                <hr>
-
-                <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
-
-                <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p> -->
-              </div>
+                 </div>
               <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col -->
-          <div class="col-md-8">
-            <div class="card">
-              <div class="card-header p-2">
-                <ul class="nav nav-pills">
-                  <li class="nav-item small-text"><a class="nav-link " href="#courses" data-toggle="tab">Courses</a></li>
-                  <li class="nav-item small-text"><a class="nav-link" href="#lessons" data-toggle="tab">lessons</a></li>
-                  <li class="nav-item small-text"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
-                  <li class="nav-item small-text"><a class="nav-link active" href="#analytics" data-toggle="tab">Analytics</a></li>
-                </ul>
-              </div><!-- /.card-header -->
-              <div class="card-body">
-                <div class="tab-content">
-                  <div class=" tab-pane" id="courses">
-                    <!-- Post -->
-                    <div class="post">
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="card">
-                            <div class="card-header">
-                              <h3 class="card-title">Courses You handle </h3>
-                            </div>
-                            <!-- ./card-header -->
-                            <div class="card-body table-responsive">
-                              <table class="table table-bordered table-hover">
-                                <thead>
-                                  <tr class="bg-dark" >
-                                    <th>#</th>
-                                    <th>Course</th>
-                                    <!-- <th>Class</th> -->
-                                    <!-- <th>No of Students</th> -->
-                                    <th>Compulsory</th>
-                                    <th>Description</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                @foreach(auth()->user()->teacher_courses()->get() as $course)
-                                <tr data-widget="expandable-table"  aria-expanded="false">
-                                    <td>{{$loop->iteration }}</td>
-                                    <td><a class="text-purple"> {{$course->name}}</a></td>
-                                    <td class="text-success">
-                                        @if($course->compulsory)
-                                            <span class=""><i class="fa fa-check"></i>compulsory</span>
-                                        @else
-                                            <span class="text-secondary"><i class="fa fa-check"></i>elective</span>
-                                        @endif
-                                    </td>
-                                    <td>{{$course->description}}</td>
-                                </tr>
-                                <tr class="expandable-body">
-                                    <td colspan="5">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Class Name</th>
-                                                    <th>Number of Students</th>
-                                                    <th>Records</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($course->class_sections()->wherePivot('teacher_id', auth()->id())->get() as $class)
-                                                    <tr>
-                                                        <td>{{$class->name}}</td>
-                                                        <td>{{$class->students->count()}}</td>
-                                                        <td>
-                                                            <div class="btn-group">
-                                                                <a href="{{ route('assignment', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-sm bg-purple">
-                                                                    <i class="fas fa-file"></i><span class="d-none d-sm-inline"> Assignment</span>
-                                                                </a>
-                                                                <a href="{{ route('assessment', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-sm bg-purple">
-                                                                    <i class="fas fa-tasks"></i><span class="d-none d-sm-inline"> Assessment</span>
-                                                                </a>
-                                                                <a href="{{ route('exam', ['courseId' => $course->id, 'classSectionId' => $class->id, 'teacherId' => auth()->id()]) }}" class="btn btn-sm bg-purple">
-                                                                    <i class="fas fa-book"></i><span class="d-none d-sm-inline"> Exam</span>
-                                                                </a>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            @endforeach
-
-
-                                </tbody>
-                              </table>
-                            </div>
-                            <!-- /.card-body -->
-                          </div>
-                          <!-- /.card -->
-                        </div>
-                      </div>
-                    </div>
-                    <!-- /.post -->
-                  </div>
-                  <!-- /.tab-pane -->
-                  <div class="tab-pane" id="lessons">
-                    @include('partials.create_lesson')
-                    <div class="lessons-container">
-                      <div class="row">
-                          @php
-                              // Retrieve lessons associated with the authenticated user, ordered by creation date in descending order
-                              $lessons = auth()->user()->lessons()->orderBy('created_at', 'desc')->get();
-                          @endphp
-
-                          @foreach ($lessons as $lesson)
-                              <div class="col-md-4">
-                                  <div class="card lesson-card">
-                                  <div class="dropdown">
-                                    <button class="btn btn-sm btn-clear dropdown-toggle" type="button" id="lessonActionsDropdown{{ $lesson->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="lessonActionsDropdown{{ $lesson->id }}">
-                                        <!-- Button to trigger Edit Lesson Modal -->
-                                        <!-- Button to trigger Edit Lesson Modal -->
-                                        <a class="dropdown-item edit-lesson-btn" href="#" data-lesson-id="{{ $lesson->id }}">Edit</a>
-
-
-                                        @if ($lesson->user_id == auth()->id())
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#removelessonModal{{ $lesson->id }}">Remove lesson</a>
-
-                                        @endif
-                                    </div>
-                                </div><br>
-
-                                     
-                                      <!-- Display lesson thumbnail if available -->
-                                      <div class="thumbnail-container">
-                                        <a href="{{ route('lessons.show', $lesson) }}">
-                                            @if ($lesson->thumbnail)
-                                                <!-- Display the lesson thumbnail with play icon overlay -->
-                                                <div class="thumbnail-with-play">
-                                                    <img src="{{ asset($lesson->thumbnail) }}" alt="{{ $lesson->title }}" class="img-fluid lesson-thumbnail">
-                                                    <div class="play-icon-overlay">
-                                                        <i class="fas fa-play"></i>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <!-- Display default thumbnail with play icon -->
-                                                <div class="no-thumbnail">
-                                                    <div class="video-icon">
-                                                        <i class="fas fa-video"></i>
-                                                    </div>
-                                                    <div class="overlay"></div>
-                                                    <img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">
-                                                </div>
-                                            @endif
-                                        </a>
-                                     </div>
-                                     <h5><small>{{ \Illuminate\Support\Str::limit($lesson->title, 15) }}</small></h5>
-
-                                      <p><small>{{ \Illuminate\Support\Str::limit($lesson->description, 200) }}</small></p>
-                                      <!-- Add more details as needed -->
-                                  </div>
-                              </div>
-
-                              <!-- Remove lesson Modal -->
-                              <div class="modal fade" id="removelessonModal{{ $lesson->id }}" tabindex="-1" role="dialog" aria-labelledby="removelessonModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="removelessonModalLabel">Remove lesson</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="alert alert-success lesson-message"  style="display:none;"></div>
-                                          <div class="alert alert-danger" id="lesson-error" style="display:none;"></div>
-                                        <div class="modal-body">
-                                          
-                                            Are you sure you want to Delete <b>{{ $lesson->title }} </b> ?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-danger" id="removeLessonBtn" onclick="removelesson({{ $lesson->id }})">Remove</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                          @endforeach
-                      </div>
-                  </div>
-                  </div>
-                  <!-- /.tab-pane -->
-                  <div class="active tab-pane" id="analytics">
-                      <canvas id="lessonAnalyticsChart" style="height: 400px; width: 100%;"></canvas>
-
-                      <div id="lessonSummary" class="table-responsive">
-    <h5 class="mb-4">
-        Lesson Analytics
-        <button class="btn btn-sm btn-link text-decoration-none" type="button" data-toggle="collapse" data-target="#lessonTableCollapse" aria-expanded="false" aria-controls="lessonTableCollapse" onclick="toggleCollapseIcon(this)">
-            <i id="collapseIcon" class="fas fa-chevron-down text-purple"></i> <!-- Icon for collapse -->
-        </button>
-    </h5>
-    <div class="collapse" id="lessonTableCollapse">
-        @if ($lessonAnalyticsData->isEmpty())
-            <p>No lessons found.</p>
-        @else
-            <table class="table table-striped">
-                <thead class="bg-purple">
-                    <tr>
-                        <th class="small-text" scope="col">Lesson Title</th>
-                        <th class="small-text" scope="col">Views</th>
-                        <th class="small-text" scope="col">Lesson Earnings</th>
-                        <th class="small-text" scope="col">Teacher Earnings</th>
-                        <th class="small-text" scope="col">School Earnings</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($lessonAnalyticsData as $lesson)
-                        <tr>
-                            <td class="small-text">{{ $lesson['title'] }}</td>
-                            <td class="small-text">{{ $lesson['views'] }}</td>
-                            <td class="small-text">${{ number_format($lesson['lesson_earnings'], 2) }}</td>
-                            <td class="small-text">${{ number_format($lesson['teacher_earnings'], 2) }}</td>
-                            <td class="small-text">${{ number_format($lesson['school_earnings'], 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </div>
-</div>
-
-
-
-                  </div>
-
-                  <!-- /.tab-pane -->
-                </div>
-
-
-
-
-                  <!-- Edit Lesson Modal -->
-                  <div class="modal fade" id="editLessonModal" tabindex="-1" role="dialog" aria-labelledby="editLessonModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editLessonModalLabel">Edit Lesson</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                <form id="editLessonForm" enctype="multipart/form-data">
-                                          <div class="alert alert-success" id="success-edit-message" style="display:none;"></div>
-                                          <div class="alert alert-danger" id="error-edit-message" style="display:none;"></div>
-                                  <div class="form-group">
-                                      <label for="editLessonTitle">Title</label>
-                                      <input type="text" class="form-control" id="editLessonTitle" name="edit_title">
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="editLessonSubject">Subject</label>
-                                      <select name="edit_subject" class="form-control" id="editLessonSubject"></select>
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="editLessonClassLevel">Class Level</label>
-                                      <select name="edit_class_level" class="form-control" id="editLessonClassLevel"></select>
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="editLessonDescription">Description</label>
-                                      <textarea class="form-control" id="editLessonDescription" name="edit_description"></textarea>
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="lessonEditThumbnail" class="file-label">
-                                          <i class="fas fa-image"></i> Thumbnail
-                                      </label>
-                                      <input type="file" class="form-control-file" id="lessonEditThumbnail" name="edit_thumbnail" onchange="previewEditThumbnail('lessonEditThumbnail', 'thumbnailEditPreview')" accept="image/*">
-                                      <span class="file-info">Upload a thumbnail (Max size: 2MB)</span>
-                                      <div id="thumbnailEditPreviewContainer">
-                                          <img id="thumbnailEditPreview" src="#" alt="Thumbnail Preview" style="max-width: 100%; max-height: 100%; display: none;">
-                                          <button type="button" class="btn btn-link" onclick="$('#lessonEditThumbnail').click();">
-                                              <i class="fas fa-edit"></i> Change Thumbnail
-                                          </button>
-                                      </div>
-                                  </div>
-                                  <!-- Hidden field to store lesson ID -->
-                                  <input type="hidden" id="editLessonId" name="lesson_id">
-                              </form>
-
-
-
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn bg-purple" id="saveLessonChangesBtn">Save Changes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <!-- /.tab-content -->
-              </div><!-- /.card-body -->
             </div>
             <!-- /.card -->
           </div>

@@ -81,7 +81,7 @@ CSS - {{$class->name}}
                       <!-- The timeline -->
                       <ul class="users-list clearfix">
                         @foreach ($students as $student)
-                            <li class="col-md-4 col-6">
+                            <li class="col-md-4 col-">
                                 <div class="card people-card" data-people-id="{{ $student->id }}" data-people-name="{{ $student->profile->full_name }}">
                                     <div class="card-body">
                                         <div class="user-profile">
@@ -112,7 +112,7 @@ CSS - {{$class->name}}
                         <div class="card-body">
                             <ul class="course-list clearfix">
                                 @forelse ($school->courses as $course)
-                                <li class="col-md-3 col-6">
+                                <li class="col-md-3 col-">
                                     <div class="card admin-card" data-admin-id="{{ $course->id }}" data-admin-name="{{ $course->name }}">
                                         <div class="card-body">
                                             <div class="user-profile shadow p-3 mb-5 bg-white rounded">
@@ -486,7 +486,7 @@ CSS - {{$class->name}}
         }
 
         function createPeopleHtml(person) {
-            var html = '<li class="col-md-4 col-6">';
+            var html = '<li class="col-md-4 col-">';
             html += '<div class="card people-card" data-people-id="' + person.id + '" data-people-name="' + person.full_name + '">';
             html += '<div class="card-body">';
             html += '<div class="user-profile">';

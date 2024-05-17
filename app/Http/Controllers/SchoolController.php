@@ -8,6 +8,8 @@ use App\Models\AcademicSession;
 use App\Models\Term;
 use App\Models\School;
 use App\Models\SchoolClass;
+use App\Models\SchoolClassSection;
+use App\Models\StudentResult;
 use App\Models\Course;
 use App\Models\User;
 use App\Models\Grade; // Import the Grade model at the top of your controller
@@ -44,10 +46,25 @@ class SchoolController extends Controller
             // Retrieve the school based on the provided school ID
             $school = School::findOrFail($request->school_id);
     
-            // Archive all assignments, assessments, and exams associated with the school
-            $school->assignments()->update(['archived' => true]);
-            $school->assessments()->update(['archived' => true]);
-            $school->exams()->update(['archived' => true]);
+            // Check if the school has a term
+            if ($school->term()->exists()) {
+                // Get the current term
+                $currentTerm = $school->term;
+    
+                // Check if all students have results for the current term
+                $studentsWithoutResults = $school->students()->whereDoesntHave('studentResults', function ($query) use ($currentTerm) {
+                    $query->where('term_id', $currentTerm->id);
+                })->count();
+    
+                if ($studentsWithoutResults > 0) {
+                    return response()->json(['error' => 'Some students do not have results for the current term. Please ensure all students have results before updating the academic session.'], 400);
+                }
+    
+                // Archive all assignments, assessments, and exams associated with the school
+                $school->assignments()->update(['archived' => true]);
+                $school->assessments()->update(['archived' => true]);
+                $school->exams()->update(['archived' => true]);
+            }
     
             // Perform the update operation for academic session
             // Update the school's academic session to the latest one
@@ -64,7 +81,6 @@ class SchoolController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    
     public function updateTerm(Request $request)
     {
         try {
@@ -72,23 +88,38 @@ class SchoolController extends Controller
             $request->validate([
                 'school_id' => 'required|exists:schools,id',
             ]);
-    
+
             // Retrieve the school based on the provided school ID
             $school = School::findOrFail($request->school_id);
-    
-            // Archive all assignments, assessments, and exams associated with the school
-            $school->assignments()->update(['archived' => true]);
-            $school->assessments()->update(['archived' => true]);
-            $school->exams()->update(['archived' => true]);
-    
+
+            // Get the current term
+            $currentTerm = $school->term;
+
+            // Check if the school has a term
+            if ($currentTerm) {
+                // Check if all students have results for the current term
+                $studentsWithoutResults = $school->students()->whereDoesntHave('studentResults', function ($query) use ($currentTerm) {
+                    $query->where('term_id', $currentTerm->id);
+                })->count();
+
+                if ($studentsWithoutResults > 0) {
+                    return response()->json(['error' => 'Some students do not have results for the current term. Please ensure all students have results before updating the term. --'. $studentsWithoutResults], 400);
+                }
+
+                // Archive all assignments, assessments, and exams associated with the school
+                $school->assignments()->update(['archived' => true]);
+                $school->assessments()->update(['archived' => true]);
+                $school->exams()->update(['archived' => true]);
+            }
+
             // Perform the update operation for term
             // Update the school's term to the latest one
             $latestTerm = Term::latest()->first();
             $school->term()->associate($latestTerm);
-    
+
             // Save the changes
             $school->save();
-    
+
             // Return a success response
             return response()->json(['message' => 'Term updated successfully']);
         } catch (\Exception $e) {
@@ -96,8 +127,6 @@ class SchoolController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-
 
     public function createSchool()
     {
@@ -641,8 +670,8 @@ class SchoolController extends Controller
             return response()->json(['error' => 'Failed to retrieve terms.'], 500);
         }
     }
-    public function getGradeDistribution(Request $request, $courseCode)
-    {
+    public function getGradeDistribution(Request $request, $courseCode){
+
         $classId = $request->get('classId');
         $assessmentType = $request->get('assessmentType');
         $academicSessionId = $request->get('academicSessionId');
