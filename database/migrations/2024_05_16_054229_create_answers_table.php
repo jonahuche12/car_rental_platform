@@ -18,6 +18,7 @@ class CreateAnswersTable extends Migration
             $table->unsignedBigInteger('question_id');
             $table->string('answer');
             $table->boolean('is_correct');
+            $table->integer('score_point')->default(0);
             $table->text('images')->nullable(); // Add this line
             $table->timestamps();
 

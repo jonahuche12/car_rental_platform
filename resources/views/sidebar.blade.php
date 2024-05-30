@@ -80,6 +80,7 @@
                         $totalCurriculumCount = App\Models\Curriculum::count();
                         $totalAcademicSessionCount = App\Models\AcademicSession::count();
                         $totalTestCount = App\Models\Test::count();
+                        $totalScholarshipCount = App\Models\Scholarship::count();
                     @endphp
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_school_packages') }}" class="nav-link">
@@ -109,6 +110,13 @@
                         <a href="{{ route('manage_tests') }}" class="nav-link">
                             <i class="fas fa-calendar-alt nav-icon"></i>
                             <p class="small-text">Tests ({{ $totalTestCount }})</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item ml-3">
+                        <a href="{{ route('manage_scholarship') }}" class="nav-link">
+                            <i class="fas fa-calendar-alt nav-icon"></i>
+                            <p class="small-text">Scholarship ({{ $totalScholarshipCount }})</p>
                         </a>
                     </li>
                 @endif

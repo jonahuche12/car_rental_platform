@@ -24,6 +24,14 @@ class SchoolClass extends Model
         return $this->belongsTo(School::class);
     }
 
+    public function scholarships()
+    {
+        return Scholarship::where('academic_session_id', $this->school->academicSession->id)
+            ->where('term_id', $this->school->term->id)
+            ->where('class_level', $this->class_level)
+            ->get();
+    }
+
     public function schoolClassSections()
     {
         return $this->hasMany(SchoolClassSection::class, 'class_id');
@@ -119,6 +127,7 @@ class SchoolClass extends Model
         // Retrieve unique courses based on collected course IDs
         return Course::whereIn('id', $courseIds)->get();
     }
+   
 
 
 }

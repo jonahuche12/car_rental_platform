@@ -53,7 +53,7 @@
 
     </style>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+<body class="hold-transition sidebar-mini dark-mode control-sidebar-slide-open layout-fixed layout-navbar-fixed">
 <div class="wrapper">
 
     <!-- Preloader -->

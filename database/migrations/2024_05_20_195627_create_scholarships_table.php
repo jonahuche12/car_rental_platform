@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTestsTable extends Migration
+class CreateScholarshipsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,15 @@ class CreateTestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tests', function (Blueprint $table) {
+        Schema::create('scholarships', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->text('description');
+            $table->boolean('published')->default(false);
+            $table->boolean('ended')->default(false);
             $table->string('class_level');
-            $table->integer('max_no_of_questions')->default(50);
-            $table->integer('complete_score')->default(100);
-            $table->integer('duration')->default(100);
-            $table->enum('type', ['cognitive', 'class_level']);
-            $table->unsignedBigInteger('academic_session_id');
-            $table->unsignedBigInteger('term_id');
+            $table->foreignId('academic_session_id')->constrained()->onDelete('cascade');
+            $table->foreignId('term_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -34,6 +33,6 @@ class CreateTestsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tests');
+        Schema::dropIfExists('scholarships');
     }
 }

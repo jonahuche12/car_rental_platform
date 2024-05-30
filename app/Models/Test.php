@@ -9,7 +9,7 @@ class Test extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'type', 'academic_session_id', 'class_level', 'term_id', 'max_no_of_questions','complete_score'];
+    protected $fillable = ['title', 'type', 'academic_session_id', 'class_level', 'term_id', 'max_no_of_questions', 'complete_score','duration'];
 
     public function questions()
     {
@@ -25,5 +25,15 @@ class Test extends Model
     {
         return $this->belongsTo(Term::class);
     }
-}
 
+    public function scholarshipCategories()
+    {
+        return $this->belongsToMany(ScholarshipCategory::class, 'scholarship_category_test')
+                    ->withTimestamps();
+    }
+    public function testGrades()
+    {
+        return $this->hasMany(TestGrade::class);
+    }
+
+}

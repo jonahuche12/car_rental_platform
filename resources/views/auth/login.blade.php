@@ -1,7 +1,10 @@
 @extends('layouts.app')
 @section('title', "Central School System - Login")
-@section('content')
+@section('sidebar')
+
 @include('sidebar')
+@endsection
+@section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">

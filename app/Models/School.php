@@ -205,5 +205,6 @@ class School extends Model
         return $this->hasMany(Exam::class);
     }
 
+  
     
 }

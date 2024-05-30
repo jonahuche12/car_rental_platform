@@ -114,8 +114,21 @@
       <div class="container-fluid">
         <div class="row">
          
+        @php
+            $student = auth()->user();
+            $school = auth()->user()->school;
+            $school_session = $school->academicSession;
+            $school_term = $school->term;
+
+            
+          @endphp
           <!-- /.col -->
-          <a href="" class="btn btn-primary btn-sm">Enter Scholarship Program</a>
+          @if($student->schoolClass() && $previous_class_level != null)
+            <a href="{{ route('scholarship_program', ['class_level' => $previous_class_level]) }}" class="btn btn-primary btn-sm">Enter Scholarship Program</a>
+          @endif
+          <div>
+         
+          </div>
           <div class="col-md-12">
             <div class="card">
               <div class="card-header p-2">
@@ -171,12 +184,7 @@
     <div class="card-header">
         <h3 class="card-title small-text">Courses Offered By <b>{{auth()->user()->profile->full_name}}</b></h3>
     </div>
-    @php
-        $student = auth()->user();
-        $school = auth()->user()->school;
-        $school_session = $school->academicSession;
-        $school_term = $school->term;
-    @endphp
+   
     <!-- ./card-header -->
 
     <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">

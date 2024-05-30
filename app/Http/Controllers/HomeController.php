@@ -96,6 +96,7 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // dd(auth()->user()->schoolClass()->scholarships());
         $showRoleSelectionModal = session('showRoleSelectionModal', false);
         $totalPackagesCount = SchoolPackage::all()->count();
         $totalSchoolsCount = School::all()->count();
@@ -167,14 +168,9 @@ class HomeController extends Controller
         ));
     }
 
-
     public function dashboard()
     {
         $user = auth()->user();
-        $viewed_lessons = $user->enrolledLessons()->latest()->take(6)->get();
-        $fav_lessons = $user->favoriteLessons()->latest()->take(2)->get();
-
-        // dd($viewed_lessons);
 
         if (!$user) {
             return redirect('login');
@@ -186,65 +182,92 @@ class HomeController extends Controller
             return redirect('home');
         }
 
-        $role = $profile->role;
-        $dashboardpage = "dashboard.$role"."_dashboard";
+        // Initialize common data
+        $viewed_lessons = $user->enrolledLessons()->latest()->take(6)->get();
+        $fav_lessons = $user->favoriteLessons()->latest()->take(2)->get();
+        $school = $user->school;
+        $uniqueSubjectNames = Course::getAllUniqueSubjects();
 
-        $uniqueSubjectNames = Course::getAllUniqueSubjects(); // Retrieve unique subject names
+        $data = [
+            'school' => $school,
+            'viewed_lessons' => $viewed_lessons,
+            'fav_lessons' => $fav_lessons,
+            'uniqueSubjectNames' => $uniqueSubjectNames,
+        ];
+
+        // Check if the user has a class and get the previous class level
+        $classAndPrevClassLevelDict = [
+            'jss_two' => 'jss_one',
+            'jss_three' => 'jss_two',
+            'sss_one' => 'jss_three',
+            'sss_two' => 'sss_one',
+            'sss_three' => 'sss_two',
+        ];
+
+        if ($user->schoolClass()) {
+            $currentClassLevel = $user->schoolClass()->class_level;
+            $previousClassLevel = $classAndPrevClassLevelDict[$currentClassLevel] ?? null;
+            $data['previous_class_level'] = $previousClassLevel;
+            // dd($previousClassLevel);
+        }
+
+        $role = $profile->role;
+        $dashboardpage = "dashboard.$role" . "_dashboard";
 
         if ($role === 'teacher' || $role === 'admin') {
             $lessons = $user->lessons()->withCount('enrolledUsers')->get();
 
             $lessonAnalyticsData = $lessons->map(function ($lesson) use ($user) {
-                $schoolConnectsHistory = $lesson->schoolConnectsHistory();
-
-                $lessonEarnings = 0;
-
-                foreach ($schoolConnectsHistory as $index => $change) {
-                    if ($index > 0) {
-                        $previousRequired = $schoolConnectsHistory[$index - 1]['school_connects_required'];
-                        $currentRequired = $change['school_connects_required'];
-
-                        $earnedSchoolConnects = $currentRequired - $previousRequired;
-                        $lessonEarnings += $earnedSchoolConnects * 9; // Each school_connect is worth 9 units
-                    }
-                }
-
-                $teacherEarnings = 0;
-                $schoolEarnings = $lessonEarnings * 0.20; // School earns 20%
-
-                if ($user->wallet) {
-                    $teacherEarnings = $lessonEarnings * 0.40; // Teacher earns 40%
-                }
-
-                return [
-                    'title' => $lesson->title,
-                    'views' => $lesson->enrolled_users_count,
-                    'lesson_earnings' => $lessonEarnings,
-                    'teacher_earnings' => $teacherEarnings,
-                    'school_earnings' => $schoolEarnings,
-                    'viewed_lessons'=> $view_lessons,
-                    'fav_lessons'=> $fav_lessons,
-                ];
+                return $this->calculateLessonAnalytics($lesson, $user);
             });
 
-            $school = $user->school;
+            $data['lessonAnalyticsData'] = $lessonAnalyticsData;
 
-            return view($dashboardpage, compact('school', 'lessonAnalyticsData', 'uniqueSubjectNames'));
         } elseif ($role === 'school_owner') {
-            // Retrieve schools owned by the user
             $schools = $user->ownedSchools()->get();
-    
-            // Retrieve the latest academic session and term
             $latest_academic_session = AcademicSession::latest()->first();
             $latest_term = Term::latest()->first();
-    
-            return view($dashboardpage, compact('schools', 'viewed_lessons','fav_lessons', 'uniqueSubjectNames', 'latest_academic_session', 'latest_term'));
-        }
-        // For roles other than 'teacher', pass the profile, school (if exists), and uniqueSubjectNames to the view
-        $school = $user->school;
 
-        return view($dashboardpage, compact('school','viewed_lessons','fav_lessons', 'uniqueSubjectNames'));
+            $data['schools'] = $schools;
+            $data['latest_academic_session'] = $latest_academic_session;
+            $data['latest_term'] = $latest_term;
+        }
+
+        return view($dashboardpage, $data);
     }
+
+    private function calculateLessonAnalytics($lesson, $user)
+    {
+        $schoolConnectsHistory = $lesson->schoolConnectsHistory();
+    
+        $lessonEarnings = 0;
+    
+        foreach ($schoolConnectsHistory as $index => $change) {
+            if ($index > 0) {
+                $previousRequired = $schoolConnectsHistory[$index - 1]['school_connects_required'];
+                $currentRequired = $change['school_connects_required'];
+    
+                $earnedSchoolConnects = $currentRequired - $previousRequired;
+                $lessonEarnings += $earnedSchoolConnects * 9; // Each school_connect is worth 9 units
+            }
+        }
+    
+        $teacherEarnings = 0;
+        $schoolEarnings = $lessonEarnings * 0.20; // School earns 20%
+    
+        if ($user->wallet) {
+            $teacherEarnings = $lessonEarnings * 0.40; // Teacher earns 40%
+        }
+    
+        return [
+            'title' => $lesson->title,
+            'views' => $lesson->enrolled_users_count,
+            'lesson_earnings' => $lessonEarnings,
+            'teacher_earnings' => $teacherEarnings,
+            'school_earnings' => $schoolEarnings,
+        ];
+    }
+    
 
     private function calculateLessonRank($lesson, $school, $userRole, $user)
     {
@@ -412,66 +435,66 @@ class HomeController extends Controller
         ]);
     }
     public function loadMoreViewedLessons(Request $request)
-{
-    $user = auth()->user();
-    $page = $request->get('page', 0);
-    $perPage = 2;
+    {
+        $user = auth()->user();
+        $page = $request->get('page', 0);
+        $perPage = 2;
 
-    $displayedViewedLessonIds = $request->get('displayedLessonIds', []);
+        $displayedViewedLessonIds = $request->get('displayedLessonIds', []);
 
-    $lessons = $user->enrolledLessons()
-        ->whereNotIn('lessons.id', $displayedViewedLessonIds)
-        // ->skip($page * $perPage)
-        ->take($perPage)
-        ->get();
+        $lessons = $user->enrolledLessons()
+            ->whereNotIn('lessons.id', $displayedViewedLessonIds)
+            // ->skip($page * $perPage)
+            ->take($perPage)
+            ->get();
 
-    $transformedLessons = $lessons->map(function ($lesson) {
-        return [
-            'id' => $lesson->id,
-            'thumbnail' => $lesson->thumbnail,
-            'title' => $lesson->title,
-            'created_at' => $lesson->created_at->diffForHumans(),
-            'description' => $lesson->description,
-            'teacher_name' => $lesson->teacher->profile->full_name,
-            'school_connects_required' => $lesson->school_connects_required,
-        ];
-    });
+        $transformedLessons = $lessons->map(function ($lesson) {
+            return [
+                'id' => $lesson->id,
+                'thumbnail' => $lesson->thumbnail,
+                'title' => $lesson->title,
+                'created_at' => $lesson->created_at->diffForHumans(),
+                'description' => $lesson->description,
+                'teacher_name' => $lesson->teacher->profile->full_name,
+                'school_connects_required' => $lesson->school_connects_required,
+            ];
+        });
 
-    return response()->json([
-        'lessons' => $transformedLessons,
-    ]);
-}
+        return response()->json([
+            'lessons' => $transformedLessons,
+        ]);
+    }
 
-public function loadMoreFavLessons(Request $request)
-{
-    $user = auth()->user();
-    $page = $request->get('page', 0);
-    $perPage = 2;
+    public function loadMoreFavLessons(Request $request)
+    {
+        $user = auth()->user();
+        $page = $request->get('page', 0);
+        $perPage = 2;
 
-    $displayedFavLessonIds = $request->get('displayedLessonIds', []);
+        $displayedFavLessonIds = $request->get('displayedLessonIds', []);
 
-    $lessons = $user->favoriteLessons()
-        ->whereNotIn('lessons.id', $displayedFavLessonIds)
-        // ->skip($page * $perPage)
-        ->take($perPage)
-        ->get();
+        $lessons = $user->favoriteLessons()
+            ->whereNotIn('lessons.id', $displayedFavLessonIds)
+            // ->skip($page * $perPage)
+            ->take($perPage)
+            ->get();
 
-    $transformedLessons = $lessons->map(function ($lesson) {
-        return [
-            'id' => $lesson->id,
-            'thumbnail' => $lesson->thumbnail,
-            'title' => $lesson->title,
-            'created_at' => $lesson->created_at->diffForHumans(),
-            'description' => $lesson->description,
-            'teacher_name' => $lesson->teacher->profile->full_name,
-            'school_connects_required' => $lesson->school_connects_required,
-        ];
-    });
+        $transformedLessons = $lessons->map(function ($lesson) {
+            return [
+                'id' => $lesson->id,
+                'thumbnail' => $lesson->thumbnail,
+                'title' => $lesson->title,
+                'created_at' => $lesson->created_at->diffForHumans(),
+                'description' => $lesson->description,
+                'teacher_name' => $lesson->teacher->profile->full_name,
+                'school_connects_required' => $lesson->school_connects_required,
+            ];
+        });
 
-    return response()->json([
-        'lessons' => $transformedLessons,
-    ]);
-}
+        return response()->json([
+            'lessons' => $transformedLessons,
+        ]);
+    }
 
 
     

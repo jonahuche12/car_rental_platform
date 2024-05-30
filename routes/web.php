@@ -14,6 +14,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ScholarshipController;
 
 
 Auth::routes(['verify' => true]);
@@ -171,7 +172,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/ward/confirm/{token}', [HomeController::class, 'confirmGuardian'])->name('ward.confirm');      
 
     Route::get('/student/{student_id}/progress', [HomeController::class, 'viewStudentProgress'])->name('student.progress');
+    Route::get('/scholarship-program/{class_level}', [ScholarshipController::class, 'showScholarshipProgram'])->name('scholarship_program');
+    Route::post('/scholarship/enroll/{category_id}', [ScholarshipController::class, 'enrollScholarship'])->name('enroll.scholarship');
 
+
+    Route::get('scholarship_categories/{category}', [ScholarshipController::class, 'showScholarshipCategoryPage'])->name('scholarship_categories.show_page');
+    Route::get('start_test/{category}', [ScholarshipController::class, 'startTest'])->name('start_test');
+
+    Route::any('/test_page/{test}', [ScholarshipController::class, 'showTestPage'])->name('test_page');
+    // New AJAX route
+    Route::post('/test/{test}/next-question', [ScholarshipController::class, 'fetchNextQuestion'])->name('fetch_next_question');
+    Route::post('/tests/{test}/submit', [TestController::class, 'submitTest'])->name('test.submit');
+
+
+    Route::get('/tests/{test}/results', [ScholarshipController::class, 'showResults'])->name('test_results');
+
+    Route::get('/test/{test}/question/{questionIndex?}', [ScholarshipController::class, 'showTestPage'])->name('test_page.show');
+    Route::post('/test/{test}/question/{questionIndex}', [ScholarshipController::class, 'updateTestpage'])->name('test_page.update');
 
 });
 
@@ -208,6 +225,7 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
 
     Route::get('/create-academic_session', [SuperAdminController::class, 'manageAcademicSession'])->name('manage_academic_sessions');
     Route::get('/create-test', [SuperAdminController::class, 'manageTest'])->name('manage_tests');
+   
     Route::post('/academic_sessions', [SuperAdminController::class, 'createAcademicSession']);
     Route::post('/academic_sessions/{id}/edit', [SuperAdminController::class, 'editAcademicSession'])->name('academic_sessions.edit');
     
@@ -225,8 +243,44 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
     // In web.php
 
     Route::post('/tests', [SuperAdminController::class, 'storeTest'])->name('tests.store');
+    Route::get('/tests/{test}', [SuperAdminController::class, 'showTest'])->name('tests.show');
+    Route::put('/tests/{test}', [SuperAdminController::class, 'updateTest'])->name('tests.update');
+    Route::delete('/tests/{test}', [SuperAdminController::class, 'destroyTest'])->name('tests.destroy');
+    
+    Route::post('/questions', [SuperAdminController::class, 'storeQuestion'])->name('questions.store');           
+    Route::post('/answers', [SuperAdminController::class, 'storeAnswer'])->name('answers.store');  
+   
+    Route::put('/questions/{question}', [SuperAdminController::class, 'updateQuestion'])->name('questions.update');
+    Route::get('questions/{question}/images', [SuperAdminController::class, 'getQuestionImages']);
+    Route::get('answers/{answer}/images', [SuperAdminController::class, 'getAnswerImages']);
+  
+    Route::delete('questions/{question}/images', [SuperAdminController::class, 'removeQuestionImage']);
+    Route::delete('/questions/{question}', [SuperAdminController::class, 'destroyQuestion'])->name('questions.destroy');
+    Route::delete('/answers/{answer}', [SuperAdminController::class, 'destroyAnswer'])->name('answers.destroy');
+    Route::post('/answers', [SuperAdminController::class, 'storeAnswer'])->name('answers.store');
 
-    // Add other routes for competitions, quizzes, etc.
+    Route::delete('answers/{answer}/images', [SuperAdminController::class, 'removeAnswerImage']);
+
+    Route::put('/answer/{answer}', [SuperAdminController::class, 'updateAnswer'])->name('answers.update');
+
+    Route::get('/manage-scholarship', [ScholarshipController::class, 'manageScholarship'])->name('manage_scholarship');
+    Route::post('/scholarships', [ScholarshipController::class, 'storeScholarship'])->name('scholarships.store');
+    Route::any('/scholarships/{scholarship}', [ScholarshipController::class, 'showScholarship'])->name('scholarships.show');
+    Route::put('/scholarships/{scholarship}', [ScholarshipController::class, 'updateScholarship'])->name('scholarships.update');
+    Route::delete('/scholarships/{scholarship}', [ScholarshipController::class, 'destroyScholarships'])->name('scholarships.destroy');
+    Route::post('/scholarship_categories', [ScholarshipController::class, 'storeCategory'])->name('scholarship_categories.store');  
+    Route::delete('/categories/{id}', [ScholarshipController::class, 'destroyCategory'])->name('categories.destroy');
+    Route::put('/categories/{id}', [ScholarshipController::class, 'updateCategory'])->name('categories.update');
+
+    
+    Route::get('/api/tests/latest', [ScholarshipController::class, 'getLatestTests'])->name('tests.latest');
+
+    Route::post('/categories/add-tests', [ScholarshipController::class, 'addTestsToCategory'])->name('categories.add_test');
+    Route::post('/categories/toggle-test', [ScholarshipController::class, 'toggleTestInCategory'])->name('categories.toggle_test');
+    Route::get('/scholarship-category/{category}/students', [ScholarshipController::class, 'showEnrolledStudents'])->name('scholarshipCategory.students');
+    Route::put('/scholarship_categories/{category}', [ScholarshipController::class, 'updateCategoryPublish'])->name('scholarship_categories.update');
+
+
 });
 
 Route::middleware(['auth', 'school_owner'])->group(function () {

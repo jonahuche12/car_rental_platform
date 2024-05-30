@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Mail\ActivationEmail;
 use App\Models\SchoolPackage;
 use App\Models\Test;
+use App\Models\Answer;
+use App\Models\Question;
 use App\Models\School;
 use App\Models\AcademicSession;
 use App\Models\Term;
@@ -879,63 +881,366 @@ class SuperAdminController extends Controller
     }
     
 
-    public function createTest(Request $request)
-    {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'name' => 'required|string',
-        ]);
-    
-        // Create the academic session
-        $academicSession = AcademicSession::create($validatedData);
-        // $academicSession = AcademicSession::first();
-    
-        // Retrieve all school owners
-        $schoolOwners = User::whereHas('profile', function ($query) {
-            $query->where('role', 'school_owner');
-        })->get();
-    
-        // Dispatch email jobs to send notifications to school owners
-        foreach ($schoolOwners as $owner) {
-            // dd($owner);
-            SendAcademicSessionNotification::dispatch($owner, $academicSession);
-        }
-    
-        // Return the response
-        return response()->json([
-            'message' => "Academic Session Created Successfully",
-        ], 201);
-    }
 
     public function storeTest(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'title' => 'required|string|max:255',
-        'type' => 'required|string|in:cognitive,class_level',
-        'class_level' => 'required|string|max:255',
-        'max_no_of_questions' => 'required|integer',
-        'complete_score' => 'required|integer',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'type' => 'required|string|in:cognitive,class_level',
+            'class_level' => 'required|string|max:255',
+            'max_no_of_questions' => 'required|integer',
+            'complete_score' => 'required|integer',
+            'duration' => 'required|integer',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+    
+        $latestAcademicSession = AcademicSession::latest()->first();
+        $latestTerm = Term::latest()->first();
+    
+        // Check for existing test with the same type and term_id
+        $existingTest = Test::where('type', $request->type)
+                            ->where('academic_session_id', $latestAcademicSession->id)
+                            ->where('class_level', $request->class_level)
+                            ->where('term_id', $latestTerm->id)
+                            ->first();
+    
+        if ($existingTest) {
+            return response()->json(['message' => "You have already created a $request->type Test For this Term"], 400);
+        }
+    
+        $test = new Test();
+        $test->title = $request->title;
+        $test->type = $request->type;
+        $test->class_level = $request->class_level;
+        $test->max_no_of_questions = $request->max_no_of_questions;
+        $test->complete_score = $request->complete_score;
+        $test->duration = $request->duration;
+        $test->academic_session_id = $latestAcademicSession->id;
+        $test->term_id = $latestTerm->id;
+        $test->save();
+    
+        return response()->json(['message' => 'Test created successfully.']);
+    }
+    public function showTest($id)
+    {
+        $test = Test::findOrFail($id);
+        return view('super_admin.show_test', compact('test'));
+    }
+    public function storeQuestion(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'test_id' => 'required|exists:tests,id',
+            'question' => 'required|string',
+            'answer_type' => 'required|string|in:radio,checkbox',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+    
+        $question = new Question();
+        $question->test_id = $request->test_id;
+        $question->question = $request->question;
+        $question->answer_type = $request->answer_type;
+    
+        if ($request->hasFile('images')) {
+            $imagePaths = [];
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('questions', 'public');
+                $imagePaths[] = $path;
+            }
+            $question->images = $imagePaths; // The mutator will handle conversion to a comma-separated string
+        }
+    
+        $question->save();
+    
+        return response()->json(['message' => 'Question added successfully.'], 200);
+    }
+    
+    public function updateQuestion(Request $request, $id)
+    {
+        // Find the question or fail if not found
+        $question = Question::findOrFail($id);
 
-    if ($validator->fails()) {
-        return response()->json(['message' => $validator->errors()->first()], 422);
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'question' => 'required|string',
+            'answer_type' => 'required|string|in:radio,checkbox',
+            'new_images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        // If validation fails, return a 400 response with the first error message
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+
+        // Update the question's text and answer type
+        $question->question = $request->question;
+        $question->answer_type = $request->answer_type;
+
+        // Get existing images as an array
+        $existingImages = $question->images;
+
+        // Handle new images upload
+        if ($request->hasFile('new_images')) {
+            foreach ($request->file('new_images') as $image) {
+                $path = $image->store('questions', 'public');
+                $existingImages[] = $path;
+            }
+            // Update the question's images
+            $question->images = $existingImages;
+        }
+
+        // Save the updated question
+        $question->save();
+
+        // Return a success response
+        return response()->json(['message' => 'Question updated successfully.', 'images' => $question->images], 200);
     }
 
-    $latestAcademicSession = AcademicSession::latest()->first();
-    $latestTerm = Term::latest()->first();
-
-    $test = new Test();
-    $test->title = $request->title;
-    $test->type = $request->type;
-    $test->class_level = $request->class_level;
-    $test->max_no_of_questions = $request->max_no_of_questions;
-    $test->complete_score = $request->complete_score;
-    $test->academic_session_id = $latestAcademicSession->id;
-    $test->term_id = $latestTerm->id;
-    $test->save();
-
-    return response()->json(['message' => 'Test created successfully.']);
-}
-
     
+    public function getQuestionImages($id)
+    {
+        $question = Question::findOrFail($id);
+        return response()->json(['images' => $question->images], 200);
+    }
+    public function getAnswerImages($id)
+    {
+        $answer = Answer::findOrFail($id);
+        return response()->json(['images' => $answer->images], 200);
+    }
+    public function removeQuestionImage(Request $request, $id)
+    {
+        // Find the question by ID, or fail with a 404 error if not found
+        $question = Question::findOrFail($id);
+    
+        // Validate the incoming request to ensure 'image' is present and is a string
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|string'
+        ]);
+    
+        // If validation fails, return a 400 error with the first validation error message
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+    
+        // Get the image to remove from the request
+        $imageToRemove = $request->image;
+    
+        // Get the existing images of the question as an array
+        $existingImages = $question->images;
+    
+        // Check if the image to remove exists in the existing images array
+        if (($key = array_search($imageToRemove, $existingImages)) !== false) {
+            // Remove the image from the array
+            unset($existingImages[$key]);
+            // Reindex the array to maintain the proper structure
+            $existingImages = array_values($existingImages);
+    
+            // Delete the image from the storage
+            Storage::disk('public')->delete($imageToRemove);
+    
+            // Update the question's images with the new array
+            $question->images = $existingImages;
+    
+            // Save the updated question to the database
+            $question->save();
+    
+            // Return a success response
+            return response()->json(['message' => 'Image removed successfully.', 'images' => $question->images], 200);
+        }
+    
+        // If the image was not found in the existing images array, return a 404 error
+        return response()->json(['message' => 'Image not found.'], 404);
+    }
+    public function destroyQuestion($id)
+    {
+        $question = Question::findOrFail($id);
+        
+        // Delete associated images
+        foreach ($question->images as $image) {
+            Storage::disk('public')->delete($image); // Ensure you're using the correct disk
+        }
+        
+        $question->delete();
+        
+        return response()->json(['message' => 'Question and associated images deleted successfully.']);
+    }
+
+    public function storeAnswer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'question_id' => 'required|exists:questions,id',
+            'answer' => 'required|string',
+            'is_correct' => 'required|boolean',
+            'score_point'=>'nullable|integer',
+            'answer_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+
+        $answer = new Answer();
+        $answer->question_id = $request->question_id;
+        $answer->answer = $request->answer;
+        $answer->score_point = $request->score_point;
+        $answer->is_correct = $request->is_correct;
+
+        if ($request->hasFile('answer_images')) {
+            $imagePaths = [];
+            foreach ($request->file('answer_images') as $image) {
+                $path = $image->store('answers', 'public');
+                $imagePaths[] = $path;
+            }
+            $answer->images = $imagePaths;
+        }
+
+        $answer->save();
+
+        return response()->json(['message' => 'Answer added successfully.'], 200);
+    }
+
+
+    public function removeAnswerImage(Request $request, $id)
+    {
+        // Find the question by ID, or fail with a 404 error if not found
+        $answer = Answer::findOrFail($id);
+    
+        // Validate the incoming request to ensure 'image' is present and is a string
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|string'
+        ]);
+    
+        // If validation fails, return a 400 error with the first validation error message
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+    
+        // Get the image to remove from the request
+        $imageToRemove = $request->image;
+    
+        // Get the existing images of the question as an array
+        $existingImages = $answer->images;
+    
+        // Check if the image to remove exists in the existing images array
+        if (($key = array_search($imageToRemove, $existingImages)) !== false) {
+            // Remove the image from the array
+            unset($existingImages[$key]);
+            // Reindex the array to maintain the proper structure
+            $existingImages = array_values($existingImages);
+    
+            // Delete the image from the storage
+            Storage::disk('public')->delete($imageToRemove);
+    
+            // Update the question's images with the new array
+            $answer->images = $existingImages;
+    
+            // Save the updated question to the database
+            $answer->save();
+    
+            // Return a success response
+            return response()->json(['message' => 'Image removed successfully.', 'images' => $answer->images], 200);
+        }
+    
+        // If the image was not found in the existing images array, return a 404 error
+        return response()->json(['message' => 'Image not found.'], 404);
+    }
+
+    public function updateAnswer(Request $request, $id)
+    {
+        $answer = Answer::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'answer' => 'required|string',
+            'edit_is_correct' => 'required|boolean',
+            'edit_score_point'=>'nullable|integer',
+            'new_answer_images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+
+        $answer->answer = $request->answer;
+        $answer->score_point = $request->edit_score_point;
+        $answer->is_correct = $request->edit_is_correct;
+
+        $existingImages = $answer->images;
+
+        if ($request->hasFile('new_answer_images')) {
+            foreach ($request->file('new_answer_images') as $image) {
+                $path = $image->store('answers', 'public');
+                $existingImages[] = $path;
+            }
+            $answer->images = $existingImages;
+        }
+
+        $answer->save();
+
+        return response()->json(['message' => 'Answer updated successfully.', 'images' => $answer->images], 200);
+    }
+
+    public function destroyAnswer($id)
+    {
+        $answer = Answer::findOrFail($id);
+        
+        // Delete associated images
+        foreach ($answer->images as $image) {
+            Storage::disk('public')->delete($image); // Ensure you're using the correct disk
+        }
+        
+        $answer->delete();
+        
+        return response()->json(['message' => 'Answer and associated images deleted successfully.']);
+    }
+
+    public function updateTest(Request $request, Test $test)
+    {
+        // Validate the request data
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|string|in:cognitive,class_level',
+            'max_no_of_questions' => 'required|integer|min:1',
+            'complete_score' => 'required|integer|min:1',
+            'duration' => 'required|integer|min:1',
+        ]);
+
+        // Update the test with the new data
+        $test->update([
+            'title' => $request->input('title'),
+            'type' => $request->input('type'),
+            'max_no_of_questions' => $request->input('max_no_of_questions'),
+            'complete_score' => $request->input('complete_score'),
+            'duration' => $request->input('duration'),
+        ]);
+
+        // Return a JSON response indicating success
+        return response()->json([
+            'message' => 'Test updated successfully!',
+            'test' => $test,
+        ]);
+    }
+    public function destroyTest(Test $test)
+    {
+        // Delete related questions and answers
+        $test->questions->each(function($question) {
+            $question->answers()->delete();
+            $question->delete();
+        });
+
+        // Delete the test
+        $test->delete();
+
+        // Return a JSON response indicating success
+        return response()->json([
+            'message' => 'Test deleted successfully!',
+        ]);
+    }
+    
+
 }

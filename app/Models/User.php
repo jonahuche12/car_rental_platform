@@ -37,6 +37,19 @@ class User extends Authenticatable implements MustVerifyEmail
         'expected_expiration'
     ];
 
+    public function scholarshipCategories()
+    {
+        return $this->belongsToMany(ScholarshipCategory::class, 'scholarship_category_user')
+                    ->withTimestamps();
+    }
+    
+
+    public function enrolledLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_user', 'user_id', 'lesson_id')
+                    ->withPivot('role') // Include the 'role' column from the pivot table if needed
+                    ->withTimestamps(); // Include timestamps for pivot table
+    }
 
     public function ownedSchools()
     {
@@ -385,12 +398,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Lesson::class);
     }
 
-    public function enrolledLessons()
-    {
-        return $this->belongsToMany(Lesson::class, 'lesson_user', 'user_id', 'lesson_id')
-                    ->withPivot('role') // Include the 'role' column from the pivot table if needed
-                    ->withTimestamps(); // Include timestamps for pivot table
-    }
 
     public function wallet()
     {
@@ -443,6 +450,17 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(StudentResult::class, 'student_id');
     }
-   
+
+    public function isEnrolledInCategory($categoryId)
+    {
+        return $this->scholarshipCategories()->where('scholarship_category_id', $categoryId)->exists();
+    }
+
+  
+    public function SchoCatTestGrades()
+    {
+        return $this->hasMany(TestGrade::class);
+    }
+
     
 }
