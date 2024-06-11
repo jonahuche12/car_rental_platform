@@ -8,10 +8,16 @@ use App\Models\ScholarshipCategory;
 use App\Models\Curriculum;
 use App\Models\AcademicSession;
 use App\Models\Term;
+use App\Models\TestGrade;
 use App\Models\Test;
 use App\Mail\ScholarshipCategoryUpdatedMail;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\AccountUpdated;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Mail\RewardMail;
+use App\Mail\GeneralRewardMail;
+use App\Notifications\ScholarshipRewardNotification;
 
 class ScholarshipController extends Controller
 {
@@ -264,11 +270,49 @@ class ScholarshipController extends Controller
     
         return response()->json(['success' => 'You have successfully enrolled in the scholarship category.']);
     }
+    
+
     public function showEnrolledStudents(ScholarshipCategory $category)
     {
-        // Paginate and sort students alphabetically by name
-        $students = $category->students()->orderBy('first_name')->paginate(10);
+        // Paginate and sort students by average score in descending order and include the pivot fields
+        $students = $category->students()
+                            ->withPivot('avg_score', 'passed', 'reward_completed', 'created_at')
+                            ->orderByDesc('pivot_avg_score')
+                            ->paginate(15);
+
         return view('super_admin.scholarship_students', compact('students', 'category'));
+    }
+
+
+    public function markAsPaid(Request $request)
+    {
+        $isBulk = $request->input('is_bulk') === 'true';
+        $categoryId = $request->input('category_id');
+        $category = ScholarshipCategory::find($categoryId);
+    
+        if ($isBulk) {
+            // Get all students in the category
+            $students = $category->students()->wherePivot('reward_completed', false)->get();
+            // Mark all students as paid
+            $category->students()->updateExistingPivot($students->pluck('id')->toArray(), ['reward_completed' => true]);
+    
+            // Queue notifications for each student
+            foreach ($students as $student) {
+                $student->notify(new ScholarshipRewardNotification($student, $category));
+            }
+        } else {
+            $studentId = $request->input('student_id');
+            // Get the specific student
+            $student = $category->students()->wherePivot('reward_completed', false)->find($studentId);
+            if ($student) {
+                // Mark the specific student as paid
+                $category->students()->updateExistingPivot($studentId, ['reward_completed' => true]);
+                // Queue notification for the student
+                $student->notify(new ScholarshipRewardNotification($student, $category));
+            }
+        }
+    
+        return response()->json(['success' => 'Payment status updated successfully.']);
     }
     
     public function updateCategoryPublish(Request $request, ScholarshipCategory $category)
@@ -293,7 +337,6 @@ class ScholarshipController extends Controller
     
         return response()->json(['success' => 'Scholarship category updated successfully.']);
     }
-   
     public function showScholarshipCategoryPage(ScholarshipCategory $category)
     {
         $user = Auth::user();
@@ -303,8 +346,16 @@ class ScholarshipController extends Controller
             return redirect()->route('home')->with('error', 'You are not registered for the scholarship category.');
         }
     
+        // Eager load the tests and grades for the user
+        $category->load(['tests' => function ($query) use ($user) {
+            $query->with(['testGrades' => function ($subQuery) use ($user) {
+                $subQuery->where('user_id', $user->id);
+            }]);
+        }]);
+    
         return view('scholarship.show_test', compact('category'));
     }
+    
 
     public function startTest(ScholarshipCategory $category)
     {
@@ -385,39 +436,102 @@ class ScholarshipController extends Controller
     
         return response()->json(['error' => 'Question not found.'. $questionIndex], 404);
     }
-    
-    public function submitTest(Request $request, $testId)
+    public function submitTest(Request $request, $test)
     {
-        $test = Test::findOrFail($testId);
+        $test = Test::findOrFail($test);
         $user = Auth::user();
-    
-        // Check if the user is enrolled
+
+        // Check if the student is enrolled in the scholarship category for this test
         $enrolled = $test->scholarshipCategories->pluck('id')->intersect($user->scholarshipCategories->pluck('id'))->isNotEmpty();
-    
         if (!$enrolled) {
-            return redirect()->route('home')->with('error', 'You are not enrolled in the scholarship category for this test.');
+            return response()->json(['success' => false, 'message' => 'You are not enrolled in the scholarship category for this test.']);
         }
-    
-        // Calculate the total grade based on the submitted answers
+
         $answers = $request->input('answers', []);
         $totalScore = 0;
-    
-        foreach ($answers as $questionId => $answerScores) {
-            if (is_array($answerScores)) {
-                $totalScore += array_sum($answerScores);
-            } else {
-                $totalScore += $answerScores;
+        $totalPossibleScore = 0;
+
+        // Calculate the total score and total possible score
+        foreach ($test->questions as $question) {
+            $maxScoreForQuestion = $question->answers->max('score_point');
+            $totalPossibleScore += $maxScoreForQuestion;
+
+            if (isset($answers[$question->id])) {
+                if (is_array($answers[$question->id])) {
+                    $totalScore += array_sum($answers[$question->id]);
+                } else {
+                    $totalScore += $answers[$question->id];
+                }
             }
         }
-    
-        // Save the grade
+
+        // Check if the student has already taken this test
+        $existingTestGrade = TestGrade::where('user_id', $user->id)->where('test_id', $test->id)->first();
+        if ($existingTestGrade) {
+            return response()->json(['success' => false, 'message' => "You have already taken this test. But your current score is $totalScore"]);
+        }
+
+        // Determine if the student passed
+        $passingScore = 0.7 * $totalPossibleScore;
+        $passed = $totalScore >= $passingScore;
+
+        // Save the test grade
         TestGrade::create([
             'user_id' => $user->id,
             'test_id' => $test->id,
-            'grade' => $totalScore,
+            'score' => $totalScore,
+            'passed' => $passed,
         ]);
-    
-        return redirect()->route('home')->with('success', 'Test submitted successfully. Your grade: ' . $totalScore);
+
+        $isLastTest = false;
+        $isCategoryPassed = false;
+
+        // Check if this is the last test without a grade in any of the scholarship categories the test belongs to
+        foreach ($test->scholarshipCategories as $scholarshipCategory) {
+            $remainingTests = $scholarshipCategory->tests()
+                ->whereDoesntHave('testGrades', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })->count();
+
+            if ($remainingTests == 0) {
+                $isLastTest = true;
+
+                // Calculate the average score for all tests in this category for the student
+                $categoryTests = $scholarshipCategory->tests;
+                $totalScoreAllTests = 0;
+                $totalTests = $categoryTests->count();
+
+                foreach ($categoryTests as $categoryTest) {
+                    $testGrade = $categoryTest->testGrades->where('user_id', $user->id)->first();
+                    if ($testGrade) {
+                        $totalScoreAllTests += $testGrade->score;
+                    }
+                }
+
+                $avgScore = $totalScoreAllTests / $totalTests;
+
+                // Check if the student passed the overall category
+                $overallPassingScore = 0.7 * ($totalTests * $test->questions->sum(function($question) {
+                    return $question->answers->max('score_point');
+                }));
+                $overallPassed = $totalScoreAllTests >= $overallPassingScore;
+                $isCategoryPassed = $overallPassed;
+
+                // Save the average score in the pivot table
+                $user->scholarshipCategories()->updateExistingPivot($scholarshipCategory->id, ['avg_score' => $avgScore, 'passed' => $overallPassed]);
+            }
+        }
+
+        // Send the test result email
+        \Mail::to($user->email)->send(new \App\Mail\TestResultMail($user, $test, $totalScore, $passed));
+
+        return response()->json([
+            'success' => true,
+            'grade' => $totalScore,
+            'passed' => $passed,
+            'isLastTest' => $isLastTest,
+            'isCategoryPassed' => $isCategoryPassed,
+        ]);
     }
 
 
@@ -425,10 +539,101 @@ class ScholarshipController extends Controller
     {
         $test = Test::findOrFail($testId);
         $score = $request->input('score', 0);
-
-        return view('scholarship.test_result', compact('test', 'score'));
+        $passed = $request->input('passed', false);
+        $isLastTest = $request->input('isLastTest', false);
+        $isCategoryPassed = $request->input('isCategoryPassed', false);
+    
+        return view('scholarship.test_result', compact('test', 'score', 'passed', 'isLastTest', 'isCategoryPassed'));
     }
 
+    public function processCategory(ScholarshipCategory $category)
+    {
+        DB::transaction(function () use ($category) {
+            $students = $category->students()->wherePivot('passed', true)->get();
+    
+            foreach ($students as $student) {
+                $student->profile->increment('school_connects', 1000);
+                // Send general reward email
+                Mail::to($student->email)->queue(new GeneralRewardMail($student));
+            }
+    
+            $topStudents = $students->sortByDesc('pivot.avg_score')->take(15);
+    
+            foreach ($topStudents as $student) {
+                $student->pivot->update([
+                    'full_reward' => true
+                ]);
+    
+                // Send email with a link to update account details
+                Mail::to($student->email)->queue(new RewardMail($student, $category));
+            }
+            
+            // Mark the category as processed
+            $category->processed = true;
+            $category->save();
+        });
+    
+        return response()->json(['success' => 'Category processed successfully.']);
+    }
+    
+    
+    public function showAccountUpdateForm($category_id)
+    {
+        $category = ScholarshipCategory::findOrFail($category_id);
+        $user = Auth::user();
 
+        // Check if the user is enrolled in the category
+        $isEnrolled = $user->scholarshipCategories()->where('scholarship_category_id', $category_id)->exists();
+
+        if (!$isEnrolled) {
+            return redirect()->route('home')->with('error', 'You are not enrolled in this scholarship category.');
+        }
+
+        // Check if the user has passed
+        $hasPassed = $user->scholarshipCategories()
+            ->where('scholarship_category_id', $category_id)
+            ->wherePivot('passed', true)
+            ->exists();
+
+        if (!$hasPassed) {
+            return redirect()->route('home')->with('error', 'You have not passed this scholarship category.');
+        }
+
+        return view('scholarship.account_update', compact('category'));
+    }
+
+    
+    public function updateAccount(Request $request, $category_id)
+    {
+        $request->validate([
+            'bank_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+            'account_name' => 'required|string|max:255',
+        ]);
+    
+        $user = Auth::user();
+    
+        // Check if the user is enrolled in the category and has passed
+        $category = ScholarshipCategory::findOrFail($category_id);
+        $enrolled = $user->scholarshipCategories()->where('scholarship_category_id', $category_id)->wherePivot('passed', true)->exists();
+    
+        if (!$enrolled) {
+            return response()->json(['message' => 'You are not enrolled or have not passed in this category.'], 403);
+        }
+    
+        // Update profile details
+        $user->profile->update([
+            'bank_name' => $request->input('bank_name'),
+            'account_number' => $request->input('account_number'),
+            'account_name' => $request->input('account_name'),
+        ]);
+    
+        // Send notification to the user
+        $user->notify(new AccountUpdated());
+    
+        return response()->json(['success' => 'Account details updated successfully.']);
+    }
+    
+    
     
 }

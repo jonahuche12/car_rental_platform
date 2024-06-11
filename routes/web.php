@@ -7,6 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\WalletController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AdminController;
@@ -182,13 +184,21 @@ Route::middleware('auth')->group(function () {
     Route::any('/test_page/{test}', [ScholarshipController::class, 'showTestPage'])->name('test_page');
     // New AJAX route
     Route::post('/test/{test}/next-question', [ScholarshipController::class, 'fetchNextQuestion'])->name('fetch_next_question');
-    Route::post('/tests/{test}/submit', [TestController::class, 'submitTest'])->name('test.submit');
+    Route::post('/tests/{test}/submit', [ScholarshipController::class, 'submitTest'])->name('test.submit');
 
 
     Route::get('/tests/{test}/results', [ScholarshipController::class, 'showResults'])->name('test_results');
 
     Route::get('/test/{test}/question/{questionIndex?}', [ScholarshipController::class, 'showTestPage'])->name('test_page.show');
     Route::post('/test/{test}/question/{questionIndex}', [ScholarshipController::class, 'updateTestpage'])->name('test_page.update');
+
+    Route::post('/scholarship_categories/{category}/process', [ScholarshipController::class, 'processCategory'])->name('scholarship_categories.process');
+    Route::get('/account/update/{category_id}', [ScholarshipController::class, 'showAccountUpdateForm'])->name('account.update');
+    Route::post('/account/update/{category_id}', [ScholarshipController::class, 'updateAccount'])->name('account.update.submit');
+    Route::get('/user/package', [HomeController::class, 'userPackage'])->name('user.package');
+    Route::get('/school/{schoolId}/wallet', [WalletController::class, 'schoolWallet'])->name('school.wallet');
+    Route::get('/user/{userId}/wallet', [WalletController::class, 'userWallet'])->name('user.wallet');
+
 
 });
 
@@ -240,7 +250,6 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
 
     Route::get('/manage_all_schools', [SuperAdminController::class, 'manageAllSchools'])->name('manage_all_schools');
 
-    // In web.php
 
     Route::post('/tests', [SuperAdminController::class, 'storeTest'])->name('tests.store');
     Route::get('/tests/{test}', [SuperAdminController::class, 'showTest'])->name('tests.show');
@@ -279,6 +288,9 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
     Route::post('/categories/toggle-test', [ScholarshipController::class, 'toggleTestInCategory'])->name('categories.toggle_test');
     Route::get('/scholarship-category/{category}/students', [ScholarshipController::class, 'showEnrolledStudents'])->name('scholarshipCategory.students');
     Route::put('/scholarship_categories/{category}', [ScholarshipController::class, 'updateCategoryPublish'])->name('scholarship_categories.update');
+ 
+    Route::post('/scholarship_students/mark_as_paid', [ScholarshipController::class, 'markAsPaid'])->name('scholarship_students.mark_as_paid');
+
 
 
 });

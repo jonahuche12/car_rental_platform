@@ -458,7 +458,7 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
 
 </script>
 <script>
-    $(document).ready(function() {
+$(document).ready(function() {
     var canLoadMore = true;
     var currentPageLessons = 0;
     var currentPageEvents = 0;
@@ -590,9 +590,12 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
     }
 
     function createLessonHtml(item) {
-        var html = '<div class="col-md-4">';
+        var truncatedDescription = item.description.length > 200 ? item.description.substring(0, 200) + '...' : item.description;
+        var showMoreLink = item.description.length > 200 ? '<a href="#" class="show-more" data-lesson-id="' + item.id + '">Show more</a>' : '';
+
+        var html = '<div class="col-md-4 position-relative">';
         html += '<div class="card lesson-card">';
-        html += '<a href="#" class="lesson-link text-dark" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
+        html += '<a href="#" class="lesson-link text-white" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
 
         if (item.is_enrolled == true) {
             html += '<span class="badge bg-primary" style="position: absolute; top: 10px; left: 10px; z-index: 99;"><i class="fas fa-check"></i></span>';
@@ -615,8 +618,15 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
 
         html += '<p><small><b>' + item.teacher_name + '</b></small></p>';
         html += '<h5><small>' + item.title + '</small></h5>';
-        html += '<p><small>' + item.description + '</small></p>';
+        html += '<p class="lesson-description"><small>' + truncatedDescription + '</small>' + showMoreLink + '</p>';
         html += '</a>';
+        html += '</div>';
+        html += '<div class="full-description-overlay" id="fullDescription' + item.id + '">';
+        html += '<div class="full-description-content">';
+        html += '<h5 class="lesson-title">' + item.title + '</h5>';
+        html += '<p>' + item.description + '</p>';
+        html += '<a href="#" class="show-less" data-lesson-id="' + item.id + '">Show less</a>';
+        html += '</div>';
         html += '</div>';
         html += '</div>';
 
@@ -654,8 +664,6 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
         return html;
     }
 
-
-
     $(document).on('click', '.lesson-link', function(e) {
         e.preventDefault();
         const lessonId = $(this).data('lesson-id');
@@ -663,7 +671,19 @@ var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
         const schoolConnectsRequired = $(this).data('school-connects-required');
         checkLessonEnrollment(lessonId, lessonName, schoolConnectsRequired);
     });
-});
 
+    $(document).on('click', '.show-more', function(event) {
+        event.preventDefault();
+        var lessonId = $(this).data('lesson-id');
+        document.getElementById('fullDescription' + lessonId).style.display = 'block';
+    });
+
+    $(document).on('click', '.show-less', function(event) {
+        event.preventDefault();
+        var lessonId = $(this).data('lesson-id');
+        document.getElementById('fullDescription' + lessonId).style.display = 'none';
+    });
+});
 </script>
+
 @endsection

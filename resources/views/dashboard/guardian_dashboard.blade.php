@@ -88,7 +88,7 @@
         <div class="row">
          
           <!-- /.col -->
-          <div class="col-md-8">
+          <div class="col-md-12">
             <div class="card">
               <div class="card-header p-2">
                 <ul class="nav nav-pills">

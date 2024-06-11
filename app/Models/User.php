@@ -36,6 +36,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'user_package_id',
         'expected_expiration'
     ];
+    public function SchoCatTestGrades()
+    {
+        return $this->hasMany(TestGrade::class);
+    }
+
+    
 
     public function scholarshipCategories()
     {
@@ -457,10 +463,4 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
   
-    public function SchoCatTestGrades()
-    {
-        return $this->hasMany(TestGrade::class);
-    }
-
-    
 }

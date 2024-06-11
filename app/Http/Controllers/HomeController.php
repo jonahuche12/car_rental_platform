@@ -13,6 +13,7 @@ use App\Models\StudentResult;
 use App\Models\Attendance;
 use App\Models\StudentResultComment;
 use App\Models\Lesson;
+use App\Models\LessonTransaction;
 use App\Models\Curriculum;
 use App\Models\AcademicSession;
 use App\Models\Term;
@@ -167,34 +168,36 @@ class HomeController extends Controller
             'uniqueSubjectNames'
         ));
     }
-
     public function dashboard()
     {
         $user = auth()->user();
-
+    
         if (!$user) {
             return redirect('login');
         }
-
+    
         $profile = $user->profile;
-
+    
         if (!$profile) {
             return redirect('home');
         }
-
+    
         // Initialize common data
         $viewed_lessons = $user->enrolledLessons()->latest()->take(6)->get();
         $fav_lessons = $user->favoriteLessons()->latest()->take(2)->get();
         $school = $user->school;
         $uniqueSubjectNames = Course::getAllUniqueSubjects();
-
+    
         $data = [
+            'user'=>$user,
             'school' => $school,
             'viewed_lessons' => $viewed_lessons,
             'fav_lessons' => $fav_lessons,
             'uniqueSubjectNames' => $uniqueSubjectNames,
+            'wallet_balance' => $user->wallet ? $user->wallet->balance : 0, // Add wallet balance to data
+            'has_wallet' => $user->wallet ? true : false, // Add has_wallet flag
         ];
-
+    
         // Check if the user has a class and get the previous class level
         $classAndPrevClassLevelDict = [
             'jss_two' => 'jss_one',
@@ -203,71 +206,67 @@ class HomeController extends Controller
             'sss_two' => 'sss_one',
             'sss_three' => 'sss_two',
         ];
-
+    
         if ($user->schoolClass()) {
             $currentClassLevel = $user->schoolClass()->class_level;
             $previousClassLevel = $classAndPrevClassLevelDict[$currentClassLevel] ?? null;
             $data['previous_class_level'] = $previousClassLevel;
-            // dd($previousClassLevel);
         }
-
+    
         $role = $profile->role;
         $dashboardpage = "dashboard.$role" . "_dashboard";
-
+    
         if ($role === 'teacher' || $role === 'admin') {
             $lessons = $user->lessons()->withCount('enrolledUsers')->get();
-
+    
             $lessonAnalyticsData = $lessons->map(function ($lesson) use ($user) {
                 return $this->calculateLessonAnalytics($lesson, $user);
             });
-
+    
             $data['lessonAnalyticsData'] = $lessonAnalyticsData;
-
+    
         } elseif ($role === 'school_owner') {
             $schools = $user->ownedSchools()->get();
             $latest_academic_session = AcademicSession::latest()->first();
             $latest_term = Term::latest()->first();
-
+    
             $data['schools'] = $schools;
             $data['latest_academic_session'] = $latest_academic_session;
             $data['latest_term'] = $latest_term;
         }
-
+    
         return view($dashboardpage, $data);
     }
+    
+    
 
     private function calculateLessonAnalytics($lesson, $user)
     {
-        $schoolConnectsHistory = $lesson->schoolConnectsHistory();
-    
-        $lessonEarnings = 0;
-    
-        foreach ($schoolConnectsHistory as $index => $change) {
-            if ($index > 0) {
-                $previousRequired = $schoolConnectsHistory[$index - 1]['school_connects_required'];
-                $currentRequired = $change['school_connects_required'];
-    
-                $earnedSchoolConnects = $currentRequired - $previousRequired;
-                $lessonEarnings += $earnedSchoolConnects * 9; // Each school_connect is worth 9 units
-            }
-        }
-    
-        $teacherEarnings = 0;
-        $schoolEarnings = $lessonEarnings * 0.20; // School earns 20%
-    
-        if ($user->wallet) {
-            $teacherEarnings = $lessonEarnings * 0.40; // Teacher earns 40%
-        }
-    
+        // Fetch the total earnings from LessonTransaction for the lesson
+        $totalEarnings = LessonTransaction::where('lesson_id', $lesson->id)
+            ->sum('amount');
+
+        // Fetch the teacher's earnings from LessonTransaction for the lesson
+        $teacherEarnings = LessonTransaction::where('lesson_id', $lesson->id)
+            ->where('user_id', $lesson->user_id)
+            ->where('type', 'teacher_earnings')
+            ->sum('amount');
+
+        // Fetch the school's earnings from LessonTransaction for the lesson
+        $schoolEarnings = LessonTransaction::where('lesson_id', $lesson->id)
+            ->where('school_id', $lesson->school_id)
+            ->where('type', 'school_earnings')
+            ->sum('amount');
+
         return [
             'title' => $lesson->title,
             'views' => $lesson->enrolled_users_count,
-            'lesson_earnings' => $lessonEarnings,
+            'lesson_earnings' => $totalEarnings,
             'teacher_earnings' => $teacherEarnings,
             'school_earnings' => $schoolEarnings,
         ];
     }
-    
+
 
     private function calculateLessonRank($lesson, $school, $userRole, $user)
     {
@@ -1255,6 +1254,11 @@ class HomeController extends Controller
         return view('student.student_progress', compact('student', 'studentResults', 'courseNames', 'school', 'averageScores', 'courseGrades', 'classPosition', 'classSectionPosition'));
     }
 
+    public function userPackage()
+    {
+        $userPackages = UserPackage::all();
+        return view('user_package', compact('userPackages'));
+    }
    
 
 }

@@ -57,6 +57,9 @@ class Profile extends Model
         'permission_confirm_staff',
         'class_id',
         'school_connects',
+        'bank_name',
+        'account_name',
+        'account_number',
     ];
     
     public function user()

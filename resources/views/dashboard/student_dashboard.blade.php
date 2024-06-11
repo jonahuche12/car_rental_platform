@@ -119,7 +119,6 @@
             $school = auth()->user()->school;
             $school_session = $school->academicSession;
             $school_term = $school->term;
-
             
           @endphp
           <!-- /.col -->
@@ -131,6 +130,21 @@
           </div>
           <div class="col-md-12">
             <div class="card">
+            @if ($user->userPackage && $user->userPackage->name === 'Basic Package')
+                    <div class="alert alert-warning alert-dismissible fade show small-text" role="alert">
+                        You are on the Basic Package. Please <a href="{{ route('user.package') }}" class="alert-link">upgrade your account</a> to Unlock more Features.
+                        <button type="button" class="close text-light" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @elseif ($user->userPackage && $user->userPackage->name !== 'Premium Package')
+                    <div class="alert alert-info alert-dismissible fade show small-text" role="alert">
+                        Upgrade to our <a href="{{ route('user.package') }}" class="text-light badge bg-success p-2">Premium package</a> to unlock more features.
+                        <button type="button" class="close text-light" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
 

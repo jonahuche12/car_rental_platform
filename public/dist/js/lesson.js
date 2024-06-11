@@ -57,8 +57,6 @@ videoInput.addEventListener('change', checkVideoFields);
 checkVideoFields();
 
 
-
-
 // Function to preview file and enable continue button if successful
 function previewFile(inputId, previewId, loaderId) {
     const fileInput = document.getElementById(inputId);
@@ -75,6 +73,7 @@ function previewFile(inputId, previewId, loaderId) {
 
     // Show loader spinner and clear any previous error
     videoLoader.style.display = 'block';
+    replaceVideoBtn.style.display = 'block';
     videoError.innerText = '';
     plusIcon.style.display = 'none'; // Hide plus icon
     spinner.style.display = 'inline-block'; // Display spinner
@@ -92,10 +91,11 @@ function previewFile(inputId, previewId, loaderId) {
                 videoError.innerText = '';
 
                 // Enable continue button
-                // continueButton.disabled = false;
+                continueButton.disabled = false;
 
                 // Show "Replace Video" button
                 replaceVideoBtn.style.display = 'block';
+                console.log('Replace Video Button Displayed'); // Debugging line
             } else {
                 videoError.innerText = 'This video is too long. It should not exceed 10 minutes.';
                 plusIcon.style.display = 'inline-block'; // Display plus icon
@@ -120,6 +120,7 @@ function previewFile(inputId, previewId, loaderId) {
         plusIcon.style.display = 'inline-block'; // Display plus icon
         spinner.style.display = 'none'; // Hide spinner
         continueButton.disabled = true; // Disable continue button
+        replaceVideoBtn.style.display = 'none'; // Hide replace video button
     }
 }
 

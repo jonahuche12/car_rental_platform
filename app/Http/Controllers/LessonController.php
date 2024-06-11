@@ -134,6 +134,7 @@ class LessonController extends Controller
         }
     }
 
+
     public function show(Lesson $lesson)
     {
         // Get the lesson details
@@ -371,11 +372,11 @@ class LessonController extends Controller
 
             // Calculate teacher's earnings (40% of lesson earnings)
             $teacherEarnings = $lessonEarnings * 0.40;
+            // dd($lesson->user);
 
             // Update teacher's wallet if exists
-            // Update teacher's wallet if exists
-            if ($lesson->user && $lesson->user->wallet) {
-                $lesson->user->wallet->increment('balance', $teacherEarnings);
+            if ($lesson->teacher && $lesson->teacher->wallet) {
+                $lesson->teacher->wallet->increment('balance', $teacherEarnings);
 
                 // Record teacher's earnings Lessontransaction
                 $lessonTransaction = new LessonTransaction();
@@ -414,11 +415,9 @@ class LessonController extends Controller
             $baseSchoolConnectsRequired = $lesson->school_connects_required;
             $enrolledUsersCount = $lesson->enrolledUsers()->count(); // Get the count of enrolled users
 
-            // Define the enrollment factor (adjust based on your requirements)
-            $enrollmentFactor = 0.1; // Example: Increase school_connects_required by 10% for each enrolled user
-
-            // Calculate new value for school_connects_required
-            $newSchoolConnectsRequired = $baseSchoolConnectsRequired * (1 + $enrollmentFactor * $enrolledUsersCount);
+            $newSchoolConnectsRequired = ceil($baseSchoolConnectsRequired * log($enrolledUsersCount + 1, 2)); // Round up to nearest whole number
+            $lesson->school_connects_required = $newSchoolConnectsRequired;
+            $lesson->save();
 
             // Update lesson's school_connects_required attribute
             $lesson->school_connects_required = $newSchoolConnectsRequired;

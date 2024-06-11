@@ -62,6 +62,10 @@ class PaymentController extends Controller
                 if( $request->input('id_paid_for')){
                     $payment_session['id_paid_for'] = $request->input('id_paid_for');
                  }
+                 if( $request->input('package_id')){
+                    $payment_session['package_id'] = $request->input('package_id');
+                 }
+                 
                  
      
     
@@ -138,6 +142,7 @@ class PaymentController extends Controller
                 'paid_for'=> $paymentSession['paid_for'],
                 'payment_session_id' => $paymentSession['payment_session_id'],
                 'id_paid_for' => $paymentSession['id_paid_for'],
+                'package_id'=>$paymentSession['package_id'],
                 'payment_marked' => true,
                 'payment_confirmed' => false,
                 'confirmation_link'=> $confirmationLink,

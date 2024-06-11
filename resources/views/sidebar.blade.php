@@ -8,7 +8,7 @@
     <!-- Brand Logo -->
     <a href="/" class="brand-link">
         <img src="{{ asset('dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light">CSS</span>
+        <span class="brand-text font-weight-dark">Central School System</span>
     </a>
 
     <!-- Sidebar -->
@@ -52,21 +52,21 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item ml-3 small-text">
+                        <li class="nav-item ml-3 ">
                             <a href="{{ route('dashboard') }}" class="nav-link">
-                                <i class="fas fas fa-tachometer-alt nav-icon small-text"></i>
+                                <i class="fas fas fa-tachometer-alt nav-icon "></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
-                        <li class="nav-item ml-3 small-text">
+                        <li class="nav-item ml-3 ">
                             <a href="{{ route('home') }}" class="nav-link">
-                                <i class="fas fa-home nav-icon small-text"></i>
+                                <i class="fas fa-home nav-icon "></i>
                                 <p>Home</p>
                             </a>
                         </li>
-                        <li class="nav-item ml-3 small-text">
+                        <li class="nav-item ml-3 ">
                             <a href="{{ route('profile') }}" class="nav-link">
-                                <i class="fas fa-user nav-icon small-text"></i>
+                                <i class="fas fa-user nav-icon "></i>
                                 <p>Profile</p>
                             </a>
                         </li>
@@ -85,38 +85,38 @@
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_school_packages') }}" class="nav-link">
                             <i class="fas fa-box nav-icon"></i>
-                            <p class="small-text">Manage Packages ({{ $totalPackagesCount }})</p>
+                            <p class="">Manage Packages ({{ $totalPackagesCount }})</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_curriculum') }}" class="nav-link">
                             <i class="fas fa-book nav-icon"></i>
-                            <p class="small-text">Curriculum ({{ $totalCurriculumCount }})</p>
+                            <p class="">Curriculum ({{ $totalCurriculumCount }})</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_all_schools') }}" class="nav-link">
                             <i class="fas fa-school nav-icon"></i>
-                            <p class="small-text">All Schools ({{ $totalSchoolsCount }})</p>
+                            <p class="">All Schools ({{ $totalSchoolsCount }})</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_academic_sessions') }}" class="nav-link">
                             <i class="fas fa-calendar-alt nav-icon"></i>
-                            <p class="small-text">Academic Sessions ({{ $totalAcademicSessionCount }})</p>
+                            <p class="">Academic Sessions ({{ $totalAcademicSessionCount }})</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_tests') }}" class="nav-link">
                             <i class="fas fa-calendar-alt nav-icon"></i>
-                            <p class="small-text">Tests ({{ $totalTestCount }})</p>
+                            <p class="">Tests ({{ $totalTestCount }})</p>
                         </a>
                     </li>
 
                     <li class="nav-item ml-3">
                         <a href="{{ route('manage_scholarship') }}" class="nav-link">
                             <i class="fas fa-calendar-alt nav-icon"></i>
-                            <p class="small-text">Scholarship ({{ $totalScholarshipCount }})</p>
+                            <p class="">Scholarship ({{ $totalScholarshipCount }})</p>
                         </a>
                     </li>
                 @endif
@@ -128,7 +128,7 @@
                     @if(auth()->check() && $admin || $admin->role == 'school_owner')
                         <a href="#" class="nav-link active">
                             <i class="nav-icon fas fa-school"></i>
-                            <p class="small-text">
+                            <p class="">
                                 {{ \Illuminate\Support\Str::limit($school->name, 21) }}
                                 <i class="right fas fa-angle-left"></i>
                             </p>
@@ -144,7 +144,7 @@
                                         @endphp
                                         <a href="{{ $schoolClass ? route('class.show', ['class' => $schoolClass->id]) : '#' }}" class="nav-link">
                                             <i class="fas fa-chalkboard nav-icon"></i>
-                                            <p class="small-text">{{ \Illuminate\Support\Str::limit($classCode, 21) }}</p>
+                                            <p class="">{{ \Illuminate\Support\Str::limit($classCode, 21) }}</p>
                                         </a>
                                     </li>
                                     @endif
@@ -158,7 +158,7 @@
                                     <li class="nav-item ml-3">
                                         <a href="{{ route('manage-classes', ['schoolId' => $school->id]) }}" class="nav-link">
                                             <i class="fas fa-chalkboard nav-icon"></i>
-                                            <p class="small-text">Manage Classes ({{ $school->classes->count() }}) </p>
+                                            <p class="">Manage Classes ({{ $school->classes->count() }}) </p>
                                         </a>
                                     </li>
                                 @endif
@@ -166,7 +166,7 @@
                                     <li class="nav-item ml-3">
                                         <a href="{{ route('manage-courses', ['schoolId' => $school->id]) }}" class="nav-link">
                                             <i class="fas fa-book nav-icon"></i>
-                                            <p class="small-text">Manage Courses ({{ $school->courses->count() }}) </p>
+                                            <p class="">Manage Courses ({{ $school->courses->count() }}) </p>
                                         </a>
                                     </li>
                                 @endif
@@ -174,7 +174,7 @@
                                     <li class="nav-item ml-3">
                                         <a href="{{ route('manage-events', ['schoolId' => $school->id]) }}" class="nav-link">
                                             <i class="fas fa-calendar-alt nav-icon"></i>
-                                            <p class="small-text">Manage Events ({{ $school->events->count() }}) </p>
+                                            <p class="">Manage Events ({{ $school->events->count() }}) </p>
                                         </a>
                                     </li>
                                 @endif
@@ -182,7 +182,7 @@
                                     <li class="nav-item ml-3">
                                         <a href="{{ route('manage-students', ['schoolId' => $school->id]) }}" class="nav-link">
                                             <i class="fas fa-user-graduate nav-icon"></i>
-                                            <p class="small-text">Manage Students ({{ $school->confirmedStudents->count() }})</p>
+                                            <p class="">Manage Students ({{ $school->confirmedStudents->count() }})</p>
                                         </a>
                                     </li>
                                 @endif
@@ -190,7 +190,7 @@
                                     <li class="nav-item ml-3">
                                         <a href="{{ route('manage-teachers', ['schoolId' => $school->id]) }}" class="nav-link">
                                             <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                                            <p class="small-text">Manage Teachers ({{ $school->confirmedTeachers->count() }})</p>
+                                            <p class="">Manage Teachers ({{ $school->confirmedTeachers->count() }})</p>
                                         </a>
                                     </li>
                                 @endif
@@ -200,14 +200,14 @@
                                 <li class="nav-item ml-3">
                                     <a href="{{ route('manage-form_classes', ['teacherId' => $admin->id]) }}" class="nav-link">
                                         <i class="fas fa-chalkboard nav-icon"></i>
-                                        <p class="small-text">Form Class(es) ({{ $admin->user->formClasses->count() }})</p>
+                                        <p class="">Form Class(es) ({{ $admin->user->formClasses->count() }})</p>
                                     </a>
                                 </li>
 
                                 <li class="nav-item ml-3">
                                     <a href="{{ route('dashboard') }}" class="nav-link">
                                         <i class="fas fa-book-open nav-icon"></i>
-                                        <p class="small-text">Lessons ({{ $admin->user->lessons->count() }})</p>
+                                        <p class="">Lessons ({{ $admin->user->lessons->count() }})</p>
                                     </a>
                                 </li>
                             @endif
@@ -221,17 +221,17 @@
                     <div class="dropdown-toggle d-flex align-items-center" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         @auth
                             <i class="fas fa-cog text-light nav-icon mr-1"></i>
-                            <span class="small-text"></span>
+                            <span class=""></span>
                         @else
                             <i class="fas fa-cog text-light nav-icon mr-1"></i>
-                            <span class="small-text text-light">{{ __('Login/Register') }}</span>
+                            <span class=" text-light">{{ __('Login/Register') }}</span>
                         @endauth
                     </div>
                     <div class="dropdown-menu" style="border:none" aria-labelledby="dropdownMenuLink">
                         @auth
                             <a class="dropdown-item text-" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt nav-icon"></i>
-                                <span class="small-text text-sm">{{ __('Logout') }}</span>
+                                <span class=" text-sm">{{ __('Logout') }}</span>
                             </a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                 @csrf
@@ -239,11 +239,11 @@
                         @else
                             <a class="dropdown-item text-" href="{{ route('login') }}">
                                 <i class="fas fa-sign-in-alt nav-icon"></i>
-                                <span class="small-text">{{ __('Login') }}</span>
+                                <span class="">{{ __('Login') }}</span>
                             </a>
                             <a class="dropdown-item text-black" href="{{ route('register') }}">
                                 <i class="fas fa-user-plus nav-icon"></i>
-                                <span class="small-text">{{ __('Register') }}</span>
+                                <span class="">{{ __('Register') }}</span>
                             </a>
                         @endauth
                     </div>

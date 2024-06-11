@@ -16,14 +16,14 @@
     }
 
     .qualification-container {
-        border: 1px solid #ccc;
+        border: 1px solid #000;
         padding: 10px;
         margin-bottom: 10px;
     }
 
     .admin-card {
         margin-bottom: 20px;
-        border: 1px solid #ccc;
+        border: 1px solid #000;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }

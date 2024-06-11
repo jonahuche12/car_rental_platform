@@ -433,7 +433,9 @@ class SuperAdminController extends Controller
             if ($paid_for === 'user_activation') {
                 // Activate user package
                 $user = User::findOrFail($transfer->id_paid_for);
-                // dd($user);
+                // Update the user package
+                $user->user_package_id = $transfer->package_id;
+                $user->profile->increment('school_connects', 200);
                 $user->active_package = true;
                 $user->expected_expiration = now()->addDays($user->userPackage->duration_in_days);
                 $user->save();
@@ -443,9 +445,11 @@ class SuperAdminController extends Controller
                 $wallet->user_id = $user->id;
                 $wallet->balance = 0; // Set initial balance as 0 or any default value
                 $wallet->save();
+    
             } elseif ($paid_for === 'school_activation') {
                 // Activate school package
                 $school = School::findOrFail($transfer->id_paid_for);
+                $school->school_package_id = $transfer->package_id;
                 $school->is_active = true;
                 $school->school_expected_expiration = now()->addDays($school->schoolPackage->duration_in_days);
                 $school->save();
@@ -455,26 +459,24 @@ class SuperAdminController extends Controller
                 $wallet->school_id = $school->id;
                 $wallet->balance = 0; // Set initial balance as 0 or any default value
                 $wallet->save();
-            }
-            elseif ($paid_for === 'school_connects') {
+    
+            } elseif ($paid_for === 'school_connects') {
                 // Activate school package
                 $user = User::findOrFail($transfer->id_paid_for);
                 if ($transfer->amount == 500) {
                     $connect = 90;
                 } elseif ($transfer->amount == 1000) {
                     $connect = 210;
-                }elseif ($transfer->amount == 2000) {
+                } elseif ($transfer->amount == 2000) {
                     $connect = 450;
-                }
-                elseif ($transfer->amount == 3000) {
+                } elseif ($transfer->amount == 3000) {
                     $connect = 1000;
-                }else{
+                } else {
                     $connect = 2000;
-                } 
-                         // dd($user);
+                }
+                // Update user's school connects
                 $user->profile->school_connects += $connect;
                 $user->profile->save();
-    
             }
     
             // Record payment details in payments table
@@ -489,7 +491,6 @@ class SuperAdminController extends Controller
                 'ip_addr' => $request->ip(),
                 'successful' => true,
                 'reference_id' => $transfer->id_paid_for,
-                // Add other fields as needed
             ]);
     
             // Retrieve the payment instance
@@ -510,6 +511,7 @@ class SuperAdminController extends Controller
             return redirect()->back()->with('error', 'Payment not successful');
         }
     }
+    
 
     public function manageUserPackage()
     {

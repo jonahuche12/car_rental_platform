@@ -6,6 +6,7 @@
 
 @section('style')
 <style>
+    
     .complete_profile {
         display: none;
     }
@@ -18,14 +19,14 @@
     }
 
     .qualification-container {
-        border: 1px solid #ccc;
+        border: 1px solid #000;
         padding: 10px;
         margin-bottom: 10px;
     }
 
     .admin-card {
         margin-bottom: 20px;
-        border: 1px solid #ccc;
+        border: 1px solid #000;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
@@ -37,7 +38,7 @@
     .user-permissions {
         display: flex;
         flex-direction: column;
-        background-color: #f8f9fa;
+        /* background-color: #f8f9fa; */
         padding: 15px;
         border-radius: 8px;
         margin-top: 10px;
@@ -58,7 +59,7 @@
     .toggle-details-btn {
         margin-top: 10px;
         padding: 8px 12px;
-        background-color: #17a2b8; /* Your desired button color */
+       
         color: #fff;
         border: none;
         border-radius: 5px;
@@ -110,12 +111,13 @@
 
                 <div class="card-tools">
                     <span class="badge badge-danger">{{ $school->getConfirmedAdmins()->count(). '/'. $school->schoolPackage->max_admins . ' admin(s)' }}</span>
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <button type="button" class="btn btn-tool text-light" data-card-widget="collapse">
                         <i class="fas fa-minus"></i>
                     </button>
                    <!-- Button to add admin -->
+                   @if($school->getConfirmedAdmins()->count() < $school->schoolPackage->max_admins)
                    <div class="btn-group">
-                    <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
+                    <button type="button" class="btn btn-tool dropdown-toggle text-light" data-toggle="dropdown">
                        <sup class="text-success">{{$school->getPotentialAdmins()->count()}}</sup> <i class="fas fa-user-plus"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right" role="menu" style="width: 250px;">
@@ -161,6 +163,7 @@
                     </div>
 
                 </div>
+                @endif
 
 
                 </div>

@@ -315,7 +315,7 @@
                                     : 'badge-warning';
                                 $expired = $user->active_package && $user->expected_expiration && $user->expected_expiration->isPast();
                             @endphp
-
+                            
                             <div class="d-flex float-right flex-column align-items-start">
                                 <span class="user-package-display badge {{ $badgeColor }}">{{ $package->name }}</span>
 

@@ -18,6 +18,7 @@ class CreateTestGradesTable extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('test_id')->constrained()->onDelete('cascade');
             $table->integer('score');
+            $table->integer('passed');
             $table->timestamps();
         });
     }

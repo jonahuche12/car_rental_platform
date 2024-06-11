@@ -50,7 +50,7 @@
 @section('content')
 @include('sidebar')
 
-<div class="col-md-8">
+<div class="col-md-12">
     <div class="card">
         <div class="card-header p-2">
         <ul class="nav nav-pills">
@@ -79,7 +79,7 @@
         <div class="active tab-pane" id="academic">
             <!-- Box header -->
             <div class="dropdown" style="position: relative;">
-                <button class="btn btn-link dropdown-toggle" type="button" id="academicDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button class="btn btn-primary dropdown-toggle text-white" type="button" id="academicDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {{$student->profile->full_name}} Study Connects: <i class="fas fa-graduation-cap"></i>{{ $student->profile->school_connects ?? 0}}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="academicDropdown">
@@ -414,7 +414,7 @@
                         @endforeach
 
                         @if($academicSessions->isEmpty())
-                            <p>No Result Available for {{ auth()->user()->profile->full_name }}</p>
+                            <p>No Result Available for {{ $student->profile->full_name }}</p>
                         @endif
                     </div>
                     <!-- /.your_results -->

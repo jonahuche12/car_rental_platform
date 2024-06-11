@@ -34,12 +34,15 @@
                     @elseif(now() >= $category->start_date && now() < $category->end_date)
                     <!-- Start Button -->
                     <div class="text-center">
-                        <button id="start-button" class="btn btn-primary btn-lg" style="font-size: 50px;">Start Test</button>
+                        <button id="start-button" class="btn bg-primary btn-lg btn-block" style="">Continue</button>
                     </div>
                     @else
                     <!-- Event has ended -->
                     <div class="text-center">
                         <h2 class="mb-4" style="font-weight: bold;">The Scholarship has ended.</h2>
+                        <div class="text-center">
+                        <button id="start-button" class="btn bg-primary btn-lg btn-block" style="">Continue</button>
+                    </div>
                     </div>
                     @endif
                 </div>

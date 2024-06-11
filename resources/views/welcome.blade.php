@@ -1,734 +1,316 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
+@section('title', "Central School System - Welcome")
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+@section('breadcrumb2')
+<a href="{{route('home')}}">Home</a>
+@endsection
+@section('breadcrumb3')
+<a href="{{route('/')}}">Welcome</a>
+@endsection
+@section('page_title', "Central School System")
+@section('sidebar')
+@include('sidebar')
+@endsection
 
-  <title>Car rental platform</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+@section('style')
+<!-- Additional CSS for styling improvements -->
+<style>
+    .card {
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+    .icon {
+        color: #007bff;
+    }
+    .card-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    .card-text {
+        font-size: 1rem;
+        color: #fff;
+    }
+    .container h2 {
+        font-weight: bold;
+        color: #fff;
+    }
+</style>
+@endsection
 
-  <!-- Facebook Opengraph integration: https://developers.facebook.com/docs/sharing/opengraph -->
-  <meta property="og:title" content="">
-  <meta property="og:image" content="">
-  <meta property="og:url" content="">
-  <meta property="og:site_name" content="">
-  <meta property="og:description" content="">
+@section('content')
 
-  <!-- Twitter Cards integration: https://dev.twitter.com/cards/  -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:site" content="">
-  <meta name="twitter:title" content="">
-  <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="">
-
-  <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Raleway:400,500,700|Roboto:400,900" rel="stylesheet">
-
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-
-  <!-- Template Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
-
-  <!-- =======================================================
-  * Template Name: Bell
-  * Updated: Jan 09 2024 with Bootstrap v5.3.2
-  * Template URL: https://bootstrapmade.com/bell-free-bootstrap-4-template/
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
-</head>
-
-<body>
-
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero">
-    <div class="container text-center">
-      <div class="row">
-        <div class="col-md-12">
-          <a class="hero-brand" href="index.html" title="Home"><img alt="Bell Logo" src="assets/img/logo2.png"></a>
+<!-- Hero Section with Carousel -->
+<div id="heroCarousel" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="{{ asset('dist/img/cloudtech.png') }}" class="d-block w-100" alt="First slide">
+            <div class="carousel-caption d-none d-md-block">
+                <!-- <h5>Transforming Education with Cloud Technology</h5> -->
+                <!-- <p>Experience seamless data management and enhanced collaboration for your school.</p> -->
+            </div>
         </div>
-      </div>
-
-      <div class="col-md-12">
-        <h1>
-          Discover Freedom on Wheels.
-        </h1>
-
-        <p class="tagline">
-          Effortless Reservations, Exceptional Experiences
-        </p>
-        <a class="btn btn-full scrollto" href="{{route('login')}}">Get Started Now</a>
-      </div>
+        <div class="carousel-item">
+            <img src="{{ asset('dist/img/securecloudstogarge.png') }}" class="d-block w-100" alt="Second slide">
+            <div class="carousel-caption d-none d-md-block">
+                <!-- <h5>Secure Cloud Storage</h5> -->
+                <!-- <p>Keep all your school data safe and accessib/l/e from anywhere, anytime.</p> -->
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="{{ asset('dist/img/easydatamanagement.png') }}" class="d-block w-100" alt="Third slide">
+            <div class="carousel-caption d-none d-md-block">
+                <!-- <h5>Easy Data Management</h5> -->
+                <!-- <p>Simplify administrative tasks with our intuitive data management tools.</p> -->
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="{{ asset('dist/img/collaborativetoolsmain.png') }}" class="d-block w-100" alt="Fourth slide">
+            <div class="carousel-caption d-none d-md-block">
+                <!-- <h5>Collaborative Tools</h5> -->
+                <!-- <p>Enhance collaboration among teachers, students, and parents.</p> -->
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="{{ asset('dist/img/scalablesolutions.png') }}" class="d-block w-100" alt="Fifth slide">
+            <div class="carousel-caption d-none d-md-block">
+                <!-- <h5>Scalable Solutions</h5> -->
+                <!-- <p>Our platform grows with your school, offering scalable solutions for institutions of all sizes.</p> -->
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="{{ asset('dist/img/realtimeinsights.png') }}" class="d-block w-100" alt="Sixth slide">
+            <div class="carousel-caption d-none d-md-block">
+                <!-- <h5>Real-time Insights</h5> -->
+                <!-- <p>Get instant access to important metrics and reports to make informed decisions.</p> -->
+            </div>
+        </div>
     </div>
+    <a class="carousel-control-prev" href="#heroCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#heroCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>
 
-  </section><!-- End Hero -->
-
-  <!-- ======= Header ======= -->
-  <header id="header" class="d-flex align-items-center bg-dark text-white">
-    <div class="container d-flex align-items-center">
-
-      <div id="logo" class="me-auto">
-        <!-- <a href="index.html"><img src="assets/img/logo2.png" alt=""></a> -->
-        <!-- Uncomment below if you prefer to use a text image -->
-        <h1><a href="#hero">Car Rental</a></h1>
-      </div>
-
-      <nav id="navbar" class="navbar  order-last order-lg-0">
-        <ul>
-          <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
-          <li><a class="nav-link scrollto" href="#about">About</a></li>
-          <li><a class="nav-link scrollto" href="#features">Features</a></li>
-          <li><a class="nav-link scrollto " href="#portfolio">Portfolio</a></li>
-          <li><a class="nav-link scrollto" href="#team">Team</a></li>
-          <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down"></i></a>
-            <ul>
-              <li><a href="#">Drop Down 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-right"></i></a>
-                <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
-                  <li><a href="#">Deep Drop Down 2</a></li>
-                  <li><a href="#">Deep Drop Down 3</a></li>
-                  <li><a href="#">Deep Drop Down 4</a></li>
-                  <li><a href="#">Deep Drop Down 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Drop Down 2</a></li>
-              <li><a href="#">Drop Down 3</a></li>
-              <li><a href="#">Drop Down 4</a></li>
-            </ul>
-          </li>
-          <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
-
-      <div class="header-social-links d-flex align-items-center">
-        <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-        <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-        <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-        <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></i></a>
-      </div>
+<!-- Features Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Why Choose Central School System?</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-cloud fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Secure Cloud Storage</h5>
+                    <p class="card-text">Keep all your school data safe and accessible from anywhere, anytime.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-folder-open fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Easy Data Management</h5>
+                    <p class="card-text">Simplify administrative tasks with our intuitive data management tools.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-users fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Collaborative Tools</h5>
+                    <p class="card-text">Enhance collaboration among teachers, students, and parents.</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </header><!-- End Header -->
-
-  <main id="main">
-
-    <!-- ======= About Section ======= -->
-    <section class="about" id="about">
-
-      <div class="container text-center">
-        <h2>
-          About Us
-        </h2>
-
-        <p>
-          Voluptua scripserit per ad, laudem viderer sit ex. Ex alia corrumpit voluptatibus usu, sed unum convenire id. Ut cum nisl moderatius, per nihil dicant commodo an. Eum tacimates erroribus ad. Atqui feugiat euripidis ea pri, sed veniam tacimates ex. Menandri
-          temporibus an duo.
-        </p>
-
-        <div class="row stats-row">
-          <div class="stats-col text-center col-md-3 col-sm-6">
-            <div class="circle">
-              <!-- <span data-purecounter-start="0" data-purecounter-end="232" data-purecounter-duration="1" class="purecounter stats-no"></span> -->
-              Satisfied Customers
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-chart-bar fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Scalable Solutions</h5>
+                    <p class="card-text">Our platform grows with your school, offering scalable solutions for institutions of all sizes.</p>
+                </div>
             </div>
-          </div>
-
-          <div class="stats-col text-center col-md-3 col-sm-6">
-            <div class="circle">
-              <!-- <span data-purecounter-start="0" data-purecounter-end="79" data-purecounter-duration="1" class="purecounter stats-no"></span> -->
-              Seamless Booking
-            </div>
-          </div>
-
-          <div class="stats-col text-center col-md-3 col-sm-6">
-            <div class="circle">
-              <!-- <span data-purecounter-start="0" data-purecounter-end="1463" data-purecounter-duration="1" class="purecounter stats-no"></span> -->
-              Excellent Customer Support
-            </div>
-          </div>
-
-          <div class="stats-col text-center col-md-3 col-sm-6">
-            <div class="circle">
-              <!-- <span data-purecounter-start="0" data-purecounter-end="68" data-purecounter-duration="1" class="purecounter stats-no"></span> -->
-              <small>Book Your Dream Car Now</small>
-            </div>
-          </div>
         </div>
-      </div>
-
-    </section><!-- End About Section -->
-
-    <!-- ======= Welcome Section ======= -->
-    <section class="welcome text-center bg-dark">
-      <h2>Start Your Journey - Book Today.</h2>
-      <p>
-        Experience Reliability, Choose Car Rental
-      </p>
-      <img alt="Bell - A perfect theme" class="gadgets-img hidden-md-down" src="assets/img/carimg1.jpeg">
-    </section><!-- End Welcome Section -->
-
-    <!-- ======= Features Section ======= -->
-    <section class="features" id="features">
-
-      <div class="container">
-        <h2 class="text-center">
-          Features
-        </h2>
-
-        <div class="row">
-          <div class="feature-col col-lg-4 col-xs-12">
-            <div class="card card-block text-center">
-              <div>
-                <div class="feature-icon">
-                  <i class="bi bi-briefcase"></i>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-chart-line fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Real-time Insights</h5>
+                    <p class="card-text">Get instant access to important metrics and reports to make informed decisions.</p>
                 </div>
-              </div>
-
-              <div>
-                <h3>
-                  Exceptional Reservation System
-                </h3>
-
-                <p>
-                  Eque feugiat contentiones ei has. Id summo mundi explicari his, nec in maiorum scriptorem.
-                </p>
-              </div>
             </div>
-          </div>
-
-          <div class="feature-col col-lg-4 col-xs-12">
-            <div class="card card-block text-center">
-              <div>
-                <div class="feature-icon">
-                  <i class="bi bi-card-checklist"></i>
-                </div>
-              </div>
-
-              <div>
-                <h3>
-                  Real-Time Updates
-                </h3>
-
-                <p>
-                  Eque feugiat contentiones ei has. Id summo mundi explicari his, nec in maiorum scriptorem.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="feature-col col-lg-4 col-xs-12">
-            <div class="card card-block text-center">
-              <div>
-                <div class="feature-icon">
-                  <i class="bi bi-key"></i>
-                </div>
-              </div>
-
-              <div>
-                <h3>
-                  simple and secured payment
-                </h3>
-
-                <p>
-                  Eque feugiat contentiones ei has. Id summo mundi explicari his, nec in maiorum scriptorem.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <!-- <div class="row">
-          <div class="feature-col col-lg-4 col-xs-12">
-            <div class="card card-block text-center">
-              <div>
-                <div class="feature-icon">
-                  <i class="bi bi-binoculars"></i>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-headset fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">24/7 Support</h5>
+                    <p class="card-text">We're here to help you every step of the way with round-the-clock support.</p>
                 </div>
-              </div>
-
-              <div>
-                <h3>
-                  Good Documentation
-                </h3>
-
-                <p>
-                  Eque feugiat contentiones ei has. Id summo mundi explicari his, nec in maiorum scriptorem.
-                </p>
-              </div>
             </div>
-          </div>
-
-          <div class="feature-col col-lg-4 col-xs-12">
-            <div class="card card-block text-center">
-              <div>
-                <div class="feature-icon">
-                  <i class="bi bi-brightness-high"></i>
-                </div>
-              </div>
-
-              <div>
-                <h3>
-                  Excellent Features
-                </h3>
-
-                <p>
-                  Eque feugiat contentiones ei has. Id summo mundi explicari his, nec in maiorum scriptorem.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="feature-col col-lg-4 col-xs-12">
-            <div class="card card-block text-center">
-              <div>
-                <div class="feature-icon">
-                  <i class="bi bi-calendar4-week"></i>
-                </div>
-              </div>
-
-              <div>
-                <h3>
-                  Retina Ready
-                </h3>
-                <p>
-                  Eque feugiat contentiones ei has. Id summo mundi explicari his, nec in maiorum scriptorem.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-      </div> -->
+    </div>
+</div>
 
-    </section><!-- End Features Section -->
-
-    <!-- ======= Call to Action Section ======= -->
-    <section class="cta">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-9 col-sm-12 text-lg-start text-center">
-            <h2>
-              Reserve Your Ride Now.
-            </h2>
-
-            <p>
-              Lorem ipsum dolor sit amet, nec ad nisl mandamus imperdiet, ut corpora cotidieque cum. Et brute iracundia his, est eu idque dictas gubergren
-            </p>
-          </div>
-
-          <div class="col-lg-3 col-sm-12 text-lg-right text-center">
-            <a class="btn btn-ghost" href="#">Start Your Journey - Book Today.</a>
-          </div>
+<!-- Benefits Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Empowering Schools to Achieve More</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/improvedefficiency.png') }}" class="card-img-top" alt="Improved Efficiency">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Improved Efficiency</h5>
+                    <p class="card-text">Automate routine tasks and free up time for what matters most—teaching.</p>
+                </div>
+            </div>
         </div>
-      </div>
-    </section><!-- End Call to Action Section -->
-
-    <!-- ======= Portfolio Section ======= -->
-    <section class="portfolio" id="portfolio">
-
-      <div class="container text-center">
-        <h2>
-          Portfolio
-        </h2>
-
-        <p>
-          Voluptua scripserit per ad, laudem viderer sit ex. Ex alia corrumpit voluptatibus usu, sed unum convenire id. Ut cum nisl moderatius, Per nihil dicant commodo an.
-        </p>
-      </div>
-
-      <div class="portfolio-grid">
-        <div class="row">
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-1.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/carimg1.jpeg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/enhancedleaning.png') }}" class="card-img-top" alt="Enhanced Learning Experience">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Enhanced Learning Experience</h5>
+                    <p class="card-text">Leverage technology to provide a better learning experience for students.</p>
                 </div>
-              </a>
             </div>
-          </div>
-
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-2.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/carimg2.jpeg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-3.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/carimg3.jpeg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-4.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/carimg4.jpeg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
         </div>
-<!-- 
-        <div class="row">
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-5.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/porf-5.jpg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/seemlesscommunication.png') }}" class="card-img-top" alt="Seamless Communication">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Seamless Communication</h5>
+                    <p class="card-text">Keep everyone on the same page with streamlined communication tools.</p>
                 </div>
-              </a>
             </div>
-          </div>
-
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-6.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/porf-6.jpg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col-md-4 offset-md-2 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/datadrivendecisions.png') }}" class="card-img-top" alt="Data-Driven Decisions">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Data-Driven Decisions</h5>
+                    <p class="card-text">Make data-driven decisions with our comprehensive reporting and analytics features.</p>
                 </div>
-              </a>
             </div>
-          </div>
-
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-7.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/porf-7.jpg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/247support.png') }}" class="card-img-top" alt="24/7 Support">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">24/7 Support</h5>
+                    <p class="card-text">We're here to help you every step of the way with round-the-clock support.</p>
                 </div>
-              </a>
             </div>
-          </div>
+        </div>
+    </div>
+</div>
 
-          <div class="col-lg-3 col-sm-6 col-xs-12">
-            <div class="card card-block">
-              <a href="assets/img/porf-8.jpg" class="portfolio-lightbox" data-gallery="portfolioGallery"><img alt="" src="assets/img/porf-8.jpg">
-                <div class="portfolio-over">
-                  <div>
-                    <h3 class="card-title">
-                      The Dude Rockin'
-                    </h3>
-
-                    <p class="card-text">
-                      Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                    </p>
-                  </div>
+<!-- Scholarships Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Scholarships/Awards</h2>
+    <div class="row d-flex justify-content-center text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/studentscholarship.png') }}" class="card-img-top" alt="Student Scholarships">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Student Scholarships</h5>
+                    <p class="card-text">We offer regular scholarships to outstanding students to support their education.</p>
                 </div>
-              </a>
             </div>
-          </div>
+        </div>
+        <!-- Uncomment if needed
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="https://via.placeholder.com/300" class="card-img-top" alt="School Grants">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">School Grants</h5>
+                    <p class="card-text">Schools can apply for grants to improve infrastructure and learning resources.</p>
+                </div>
+            </div>
         </div> -->
-      </div>
-    </section><!-- End Portfolio Section -->
-
-    <!-- ======= Team Section ======= -->
-    <section class="team" id="team">
-      <div class="container">
-        <h2 class="text-center">
-          Meet our team
-        </h2>
-
-        <div class="row">
-          <div class="col-sm-3 col-xs-6">
-            <div class="card card-block">
-              <a href="#"><img alt="" class="team-img" src="assets/img/team-1.jpg">
-                <div class="card-title-wrap">
-                  <span class="card-title">Sergio Fez</span> <span class="card-text">Art Director</span>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/teacherawards.png') }}" class="card-img-top" alt="Teacher Awards">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Teacher Awards</h5>
+                    <p class="card-text">We recognize and reward teachers who contribute significantly to student success.</p>
                 </div>
-
-                <div class="team-over">
-                  <h4 class="hidden-md-down">
-                    Connect with me
-                  </h4>
-
-                  <nav class="social-nav">
-                    <a href="#"><i class="bi bi-twitter"></i></a> <a href="#"><i class="bi bi-facebook"></i></a> <a href="#"><i class="bi bi-linkedin"></i></a> <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                  </nav>
-
-                  <p>
-                    Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                  </p>
-                </div>
-              </a>
             </div>
-          </div>
-
-          <div class="col-sm-3 col-xs-6">
-            <div class="card card-block">
-              <a href="#"><img alt="" class="team-img" src="assets/img/team-2.jpg">
-                <div class="card-title-wrap">
-                  <span class="card-title">Sergio Fez</span> <span class="card-text">Art Director</span>
-                </div>
-
-                <div class="team-over">
-                  <h4 class="hidden-md-down">
-                    Connect with me
-                  </h4>
-
-                  <nav class="social-nav">
-                    <a href="#"><i class="bi bi-twitter"></i></a> <a href="#"><i class="bi bi-facebook"></i></a> <a href="#"><i class="bi bi-linkedin"></i></a> <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                  </nav>
-
-                  <p>
-                    Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-sm-3 col-xs-6">
-            <div class="card card-block">
-              <a href="#"><img alt="" class="team-img" src="assets/img/team-3.jpg">
-                <div class="card-title-wrap">
-                  <span class="card-title">Sergio Fez</span> <span class="card-text">Art Director</span>
-                </div>
-
-                <div class="team-over">
-                  <h4 class="hidden-md-down">
-                    Connect with me
-                  </h4>
-
-                  <nav class="social-nav">
-                    <a href="#"><i class="bi bi-twitter"></i></a> <a href="#"><i class="bi bi-facebook"></i></a> <a href="#"><i class="bi bi-linkedin"></i></a> <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                  </nav>
-
-                  <p>
-                    Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-sm-3 col-xs-6">
-            <div class="card card-block">
-              <a href="#"><img alt="" class="team-img" src="assets/img/team-4.jpg">
-                <div class="card-title-wrap">
-                  <span class="card-title">Sergio Fez</span> <span class="card-text">Art Director</span>
-                </div>
-
-                <div class="team-over">
-                  <h4 class="hidden-md-down">
-                    Connect with me
-                  </h4>
-
-                  <nav class="social-nav">
-                    <a href="#"><i class="bi bi-twitter"></i></a> <a href="#"><i class="bi bi-facebook"></i></a> <a href="#"><i class="bi bi-linkedin"></i></a> <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                  </nav>
-
-                  <p>
-                    Lorem ipsum dolor sit amet, eu sed suas eruditi honestatis.
-                  </p>
-                </div>
-              </a>
-            </div>
-          </div>
         </div>
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= Contact Section ======= -->
-    <section id="contact">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <h2 class="section-title">Contact Us</h2>
-          </div>
-        </div>
-
-        <div class="row justify-content-center">
-          <div class="col-lg-3 col-md-4">
-            <div class="info">
-              <div>
-                <i class="bi bi-geo-alt"></i>
-                <p>A108 Adam Street<br>New York, NY 535022</p>
-              </div>
-
-              <div>
-                <i class="bi bi-envelope"></i>
-                <p>info@example.com</p>
-              </div>
-
-              <div>
-                <i class="bi bi-phone"></i>
-                <p>+1 5589 55488 55s</p>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="col-lg-5 col-md-8">
-            <div class="form">
-              <form action="forms/contact.php" method="post" role="form" class="php-email-form">
-                <div class="form-group">
-                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
-                </div>
-                <div class="form-group mt-3">
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required>
-                </div>
-                <div class="form-group mt-3">
-                  <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required>
-                </div>
-                <div class="form-group mt-3">
-                  <textarea class="form-control" name="message" rows="5" placeholder="Message" required></textarea>
-                </div>
-                <div class="my-3">
-                  <div class="loading">Loading</div>
-                  <div class="error-message"></div>
-                  <div class="sent-message">Your message has been sent. Thank you!</div>
-                </div>
-                <div class="text-center"><button type="submit">Send Message</button></div>
-              </form>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section><!-- End Contact Section -->
-
-  </main><!-- End #main -->
-
-  <!-- ======= Footer ======= -->
-  <footer class="site-footer">
-    <div class="bottom">
-      <div class="container">
-        <div class="row">
-
-          <div class="col-lg-6 col-xs-12 text-lg-start text-center">
-            <p class="copyright-text">
-              &copy; Copyright <strong>Bell</strong>. All Rights Reserved
-            </p>
-            <div class="credits">
-              <!--
-              All the links in the footer should remain intact.
-              You can delete the links only if you purchased the pro version.
-              Licensing information: https://bootstrapmade.com/license/
-              Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=Bell
-            -->
-              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-            </div>
-          </div>
-
-          <div class="col-lg-6 col-xs-12 text-lg-right text-center">
-            <ul class="list-inline">
-              <li class="list-inline-item">
-                <a href="index.html">Home</a>
-              </li>
-
-              <li class="list-inline-item">
-                <a href="#about">About Us</a>
-              </li>
-
-              <li class="list-inline-item">
-                <a href="#features">Features</a>
-              </li>
-
-              <li class="list-inline-item">
-                <a href="#portfolio">Portfolio</a>
-              </li>
-
-              <li class="list-inline-item">
-                <a href="#team">Team</a>
-              </li>
-
-              <li class="list-inline-item">
-                <a href="#contact">Contact</a>
-              </li>
-            </ul>
-          </div>
-
-        </div>
-      </div>
     </div>
-  </footer><!-- End Footer -->
+</div>
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<!-- Earn from Lessons Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Earn from Lessons</h2>
+    <div class="row text-center">
+        <div class="col-md-8 offset-md-2 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <img src="{{ asset('dist/img/earnfromlessons.png') }}" class="card-img-top" alt="Earn from Lessons">
+                <div class="card-body">
+                    <h5 class="card-title font-weight-bold">Monetize Your Expertise</h5>
+                    <p class="card-text">Teachers can earn from the lessons they post on our platform. Share your knowledge and get rewarded.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
+<!-- Testimonials Section -->
+<div class="container mt-5">
+    <h2 class="text-center">Hear from Our Users</h2>
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <blockquote class="blockquote">
+                <p class="mb-0">"Central School System has revolutionized the way we manage our school data. It's user-friendly and incredibly reliable."</p>
+                <footer class="blockquote-footer">Director of Shammah Academy</footer>
+            </blockquote>
+        </div>
+        <div class="col-md-4">
+            <blockquote class="blockquote">
+                <p class="mb-0">"The collaborative tools have made communication with parents and students so much easier. Our productivity has significantly increased."</p>
+                <footer class="blockquote-footer">Teacher at Gaint Step Academy</footer>
+            </blockquote>
+        </div>
+        <div class="col-md-4">
+            <blockquote class="blockquote">
+                <p class="mb-0">"Having all our data securely stored in the cloud has given us peace of mind. We can access everything we need, anytime, anywhere."</p>
+                <footer class="blockquote-footer">Admin Manager at Australian Academy</footer>
+            </blockquote>
+        </div>
+    </div>
+</div>
 
-  <!-- Template Main JS File -->
-  <script src="assets/js/main.js"></script>
+<!-- Call to Action Section -->
+<div class="container mt-5 text-center">
+    <h2>Ready to Simplify Education?</h2>
+    <p>Join hundreds of schools that trust Central School System to manage their data.</p>
+    <a href="{{route('register')}}" class="btn bg-info btn-lg">Sign Up for Free</a>
+    <a href="{{route('login')}}" class="btn bg-primary btn-lg">Login</a>
+    <p class="mt-3">Contact us for more information.</p>
+</div>
 
-</body>
 
-</html>
+@endsection

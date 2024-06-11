@@ -22,6 +22,7 @@ class CreateScholarshipCategoriesTable extends Migration
             $table->integer('required_connects');
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
+            $table->boolean('processed')->default(false);
             $table->foreignId('scholarship_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

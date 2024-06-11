@@ -16,6 +16,10 @@ class CreateScholarshipCategoryUserTable extends Migration
         Schema::create('scholarship_category_user', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->decimal('avg_score',5,2)->default(0);
+            $table->boolean('passed')->default(false);
+            $table->boolean('full_reward')->default(false);
+            $table->boolean('reward_completed')->default(false);
             $table->foreignId('scholarship_category_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

@@ -18,6 +18,7 @@ class CreateTransfersTable extends Migration
             $table->string('email');
             $table->decimal('amount', 10, 2); 
             $table->unsignedBigInteger('id_paid_for');
+            $table->unsignedBigInteger('package_id');
             $table->string('payment_session_id')->nullable();
             $table->boolean('payment_marked')->default(false);
             $table->enum('paid_for',['school_activation','school_connects','user_activation']);

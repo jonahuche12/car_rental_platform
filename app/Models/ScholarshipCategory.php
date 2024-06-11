@@ -29,8 +29,10 @@ class ScholarshipCategory extends Model
     }
 
     public function students()
-    {
-        return $this->belongsToMany(User::class, 'scholarship_category_user')
-                    ->withTimestamps();
-    }
+{
+    return $this->belongsToMany(User::class, 'scholarship_category_user')
+                ->withPivot('avg_score', 'passed')
+                ->withTimestamps();
+}
+
 }

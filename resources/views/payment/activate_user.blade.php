@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Central School System - Super Admin Profile")
+@section('title', "Central School System - User Activation")
 
 @section('style')
 <style>
@@ -41,7 +41,7 @@
 
 
                     <!-- Button to Toggle Bank Transfer Section -->
-                    <button id="toggleBankTransfer" class="btn btn-purple btn-sm mb-3">
+                    <button id="toggleBankTransfer" class="btn btn-primary btn-sm mb-3">
                         {{ __('Pay Via Transfer') }}
                     </button>
 
@@ -62,6 +62,7 @@
                             <input type="hidden" name="email" id="email" class="form-control" value="{{ $user->email }}" required>
                             <input type="hidden" name="amount_input" id="amount" class="form-control" value="{{$package->price}}" required>
                             <input type="hidden" name="id_paid_for" id="id_paid_for" class="form-control" value="{{ $user->id }}" required>
+                            
                             <input type="hidden" name="paid_for" id="paid_for" class="form-control" value="user_activation" required>
 
                             <input type="hidden" name="package_id" value="{{ $package->id }}">

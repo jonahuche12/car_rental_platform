@@ -33,6 +33,26 @@
     .question-card.active {
         display: block; /* Display only the active question card */
     }
+    .question-form {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #ccc;
+        color:#000;
+    }
+    .answers-container .answer {
+        margin-bottom: 10px;
+    }
+    #question-container {
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #loading-spinner .spinner-border {
+        display: inline-block;
+        margin-left: 10px;
+    }
 </style>
 @endsection
 
@@ -43,49 +63,67 @@
         <div class="alert alert-info">{{ $message }}</div>
     @endif
     <div id="question-container" class="card mt-4">
-        <div class="card-header">
-            <h5>Question <span id="question-number">{{ $currentQuestionIndex + 1 }}</span> of {{ $test->questions->count() }}</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Question <span id="question-number">1</span> of {{ $test->questions->count() }}</h5>
+            <h5 id="timer"></h5> <!-- Countdown timer -->
         </div>
         <div class="card-body">
             <p class="alert alert-danger" id="question-error" style="display:none;"></p>
 
             @foreach($test->questions as $key => $question)
-            <div class="question-card {{ $key === $currentQuestionIndex ? 'active' : '' }}" data-question-index="{{ $key }}">
-                <p>{{ $question->question }}</p>
-                @if($question->images)
-                    @foreach($question->images as $image)
-                        <img src="{{ asset('storage/' . $image) }}" alt="Question Image" class="img-fluid img-thumbnail question-image">
-                    @endforeach
-                @endif
+            @php
+                $answers = $question->answers->toArray();
+                shuffle($answers);
+            @endphp
+            <div class="question-card {{ $key === 0 ? 'active' : '' }}" data-question-index="{{ $key }}">
+                <div class="question-content">
+                    <p>{{ $question->question }}</p>
+                    @if($question->images)
+                        @foreach($question->images as $image)
+                            <img src="{{ asset('storage/' . $image) }}" alt="Question Image" class="img-fluid img-thumbnail question-image">
+                        @endforeach
+                    @endif
+                </div>
                 <form class="question-form">
                     @csrf
-                    <input type="hidden" name="question" value="{{ $key }}">
+                    <input type="hidden" name="question" value="{{ $question->id }}">
 
-                    @foreach($question->answers as $answer)
-                        <div class="form-check">
-                            @if($question->answer_type === 'radio')
-                                <input class="form-check-input" type="radio" name="answer" id="answer{{ $answer->id }}" value="{{ $answer->id }}" data-score="{{ $answer->score_point }}">
-                            @elseif($question->answer_type === 'checkbox')
-                                <input class="form-check-input" type="checkbox" name="answer[]" id="answer{{ $answer->id }}" value="{{ $answer->id }}" data-score="{{ $answer->score_point }}">
-                            @endif
-                            <label class="form-check-label" for="answer{{ $answer->id }}">
-                                {{ $answer->answer }}
-                            </label>
-                        </div>
-                        @if($answer->images)
-                            @foreach($answer->images as $image)
-                                <img src="{{ asset('storage/' . $image) }}" alt="Answer Image" class="img-fluid img-thumbnail answer-image mt-2">
-                            @endforeach
-                        @endif
-                    @endforeach
+                    <div class="answers-container">
+                        @foreach($answers as $answer)
+                            <div class="answer-container mb-3">
+                                <div class="form-check answer ml-3">
+                                    @if($question->answer_type === 'radio')
+                                        <input class="form-check-input" type="radio" name="answer" id="answer{{ $answer['id'] }}" value="{{ $answer['id'] }}" data-score="{{ $answer['score_point'] }}">
+                                    @elseif($question->answer_type === 'checkbox')
+                                        <input class="form-check-input" type="checkbox" name="answer[]" id="answer{{ $answer['id'] }}" value="{{ $answer['id'] }}" data-score="{{ $answer['score_point'] }}">
+                                    @endif
+                                    <label class="form-check-label" for="answer{{ $answer['id'] }}">
+                                        {{ $answer['answer'] }}
+                                    </label>
+                                </div>
+                                @if($answer['images'])
+                                    <div class="answer-images mt-0 ml-3">
+                                        @foreach($answer['images'] as $image)
+                                            <img src="{{ asset('storage/' . $image) }}" alt="Answer Image" class="img-fluid img-thumbnail answer-image" width="150px">
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
 
-                    <div class="mt-4">
+                    <div class="mt-4 d-flex justify-content-between">
                         @if($key > 0)
                             <button type="button" class="btn btn-secondary prev-question">Previous</button>
                         @endif
                         @if($key < $test->questions->count() - 1)
                             <button type="button" class="btn btn-primary next-question">Next</button>
                         @else
+                            <div id="loading-spinner" class="d-none">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
                             <button type="submit" class="btn btn-success btn-finish">Finish</button>
                         @endif
                     </div>
@@ -99,79 +137,164 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const questionCards = document.querySelectorAll('.question-card');
-        let currentQuestionIndex = {{ $currentQuestionIndex }};
-        let answers = {};
+    $(document).ready(function() {
+    const questionCards = $('.question-card');
+    let currentQuestionIndex = 0;
+    let answers = {};
+    let interval;
+    let testSubmitted = false;
 
-        function updateQuestionNumber() {
-            document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+    // Shuffle answers
+    $('.answers-container').each(function() {
+        const answers = $(this).children('.answer').toArray();
+        for (let i = answers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [answers[i], answers[j]] = [answers[j], answers[i]];
         }
-
-        function showQuestion(index) {
-            questionCards.forEach((card, idx) => {
-                card.classList.toggle('active', idx === index);
-            });
-            updateQuestionNumber();
-        }
-
-        function collectAnswers() {
-            const activeCard = document.querySelector('.question-card.active');
-            const form = activeCard.querySelector('.question-form');
-            const questionIndex = activeCard.dataset.questionIndex;
-            const selectedAnswers = Array.from(form.querySelectorAll('.form-check-input:checked')).map(input => ({
-                id: input.value,
-                score: parseInt(input.dataset.score, 10)
-            }));
-            answers[questionIndex] = selectedAnswers;
-        // console.log(answers)
-        }
-
-        showQuestion(currentQuestionIndex);
-
-        document.querySelectorAll('.prev-question').forEach(button => {
-            button.addEventListener('click', function() {
-                collectAnswers();
-                if (currentQuestionIndex > 0) {
-                    currentQuestionIndex--;
-                    showQuestion(currentQuestionIndex);
-                }
-            });
-        });
-
-        document.querySelectorAll('.next-question').forEach(button => {
-            button.addEventListener('click', function() {
-                collectAnswers();
-                if (currentQuestionIndex < questionCards.length - 1) {
-                    currentQuestionIndex++;
-                    showQuestion(currentQuestionIndex);
-                }
-            });
-        });
-
-        document.querySelector('.btn-finish').addEventListener('click', function(event) {
-            collectAnswers();
-            event.preventDefault();
-
-            // Submit the answers via AJAX
-            fetch('{{ route('test.submit', ['test' => $test->id]) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ answers })
-            }).then(response => response.json())
-              .then(data => {
-                  // Handle response
-                  if (data.success) {
-                      window.location.href = '{{ route("home") }}';
-                  } else {
-                      // Handle error
-                      alert('There was an error submitting your test.');
-                  }
-              });
-        });
+        $(this).append(answers);
     });
+
+    // Test duration in minutes
+    const duration = {{ $test->duration }};
+    let timer;
+
+    function startTimer(duration, display) {
+        let timer = duration, minutes, seconds;
+        interval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.text(minutes + ":" + seconds);
+
+            if (--timer < 0) {
+                clearInterval(interval);
+                submitTest(); // Automatically submit the test when time is up
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(interval);
+    }
+
+    function updateQuestionNumber() {
+        $('#question-number').text(currentQuestionIndex + 1);
+    }
+
+    function showQuestion(index) {
+        questionCards.removeClass('active');
+        $(questionCards[index]).addClass('active');
+        updateQuestionNumber();
+    }
+
+    function collectAnswers() {
+        const activeCard = $('.question-card.active');
+        const form = activeCard.find('.question-form');
+        const questionIndex = activeCard.data('question-index');
+        const questionId = form.find('input[name="question"]').val();
+        const selectedAnswers = form.find('.form-check-input:checked').map(function() {
+            return {
+                id: $(this).val(),
+                score: parseInt($(this).data('score'), 10)
+            };
+        }).get();
+
+        if (form.find('.form-check-input:checked').first().attr('type') === 'checkbox') {
+            answers[questionId] = selectedAnswers.map(answer => answer.score);
+        } else {
+            answers[questionId] = selectedAnswers[0] ? selectedAnswers[0].score : 0;
+        }
+    }
+
+    function displayErrorMessage(message) {
+        $('#question-error').text(message).show();
+    }
+
+    function submitTest() {
+        if (testSubmitted) return; // Prevent multiple submissions
+        testSubmitted = true;
+        stopTimer(); // Stop the timer
+        collectAnswers();
+
+        const finishButton = $('.btn-finish');
+        const spinner = $('#loading-spinner');
+
+        // Show spinner and hide button
+        finishButton.hide();
+        spinner.removeClass('d-none');
+
+        $.ajax({
+            url: '{{ route('test.submit', ['test' => $test->id]) }}',
+            method: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: JSON.stringify({ answers: answers }),
+            success: function(data) {
+                if (data.success) {
+                    // Redirect to results page with the grade
+                    window.location.href = '{{ route('test_results', ['test' => $test->id]) }}?score=' + data.grade + '&passed=' + data.passed + '&isLastTest=' + data.isLastTest + '&isCategoryPassed=' + data.isCategoryPassed;
+                } else {
+                    displayErrorMessage(data.message);
+                }
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+                displayErrorMessage('There was an error submitting your test.');
+            },
+            complete: function() {
+                // Hide spinner and show button
+                spinner.addClass('d-none');
+                finishButton.show();
+            }
+        });
+    }
+
+    showQuestion(currentQuestionIndex);
+
+    $('.prev-question').click(function() {
+        collectAnswers();
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            showQuestion(currentQuestionIndex);
+        }
+    });
+
+    $('.next-question').click(function() {
+        collectAnswers();
+        if (currentQuestionIndex < questionCards.length - 1) {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        }
+    });
+
+    $('.btn-finish').click(function(event) {
+        event.preventDefault();
+        submitTest();
+    });
+
+    // Handle visibility change and beforeunload event
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            submitTest(); // Automatically submit the test if the tab is hidden
+        }
+    });
+
+    window.addEventListener('beforeunload', function(event) {
+        if (!testSubmitted) {
+            submitTest(); // Automatically submit the test if the user navigates away or closes the browser
+        }
+    });
+
+    // Start the countdown timer
+    const display = $('#timer');
+    startTimer(duration * 60, display); // Convert minutes to seconds
+});
+
 </script>
 @endsection

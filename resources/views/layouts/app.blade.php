@@ -34,24 +34,10 @@
 
     @yield('style')
 
-    <style>
-        /* Custom styles can be added here */
-        .small-text {
-            font-size: 12px; /* Adjust as needed */
-        }
-        .dropdown-menu a.dropdown-item:hover {
-    background-color: #007bff; /* Use your primary color here */
-    color: #fff; /* Set text color to white */
-}
-
-        /* Define smaller font size for small screens */
-        @media (max-width: 576px) {
-            .small-text {
-                font-size: 9px; /* Adjust as needed */
-            }
-        }
-
-    </style>
+    <!-- Additional CSS for styling improvements -->
+<style>
+   
+</style>
 </head>
 <body class="hold-transition sidebar-mini dark-mode control-sidebar-slide-open layout-fixed layout-navbar-fixed">
 <div class="wrapper">
@@ -112,10 +98,40 @@
     </div><!-- /.content-wrapper -->
 
     <!-- Main Footer -->
-    <footer class="main-footer">
-        <strong>Copyright &copy; 2024 <a href="{{ route('/') }}">Central School System</a>.</strong>
-        All rights reserved.
-    </footer>
+    <footer class="main-footer bg-dark text-light py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <strong>&copy; <span id="currentYear"></span> <a href="{{ route('/') }}" class="text-light">Central School System</a>.</strong>
+                All rights reserved.
+            </div>
+            <div class="col-md-6 text-md-right">
+                <p class="mb-2 mb-md-0">Contact us at: <a href="mailto:support@centralschoolsystem.com" class="text-light">support@centralschoolsystem.com</a></p>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com" target="_blank" class="text-light mr-3">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.twitter.com" target="_blank" class="text-light mr-3">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.linkedin.com" target="_blank" class="text-light mr-3">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.instagram.com" target="_blank" class="text-light">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<!-- JavaScript to update the year -->
+<script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
 
     <div class="modal fade" id="yStudyConnectModal" tabindex="-1" aria-labelledby="yourStudyConnectModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -491,6 +507,28 @@ function confirmRemoveWard(wardId, wardName, wardClass) {
             });
         });
     });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.show-more').forEach(function(showMoreLink) {
+        showMoreLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            var lessonId = this.getAttribute('data-lesson-id');
+            document.getElementById('fullDescription' + lessonId).style.display = 'block';
+        });
+    });
+
+    document.querySelectorAll('.show-less').forEach(function(showLessLink) {
+        showLessLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            var lessonId = this.getAttribute('data-lesson-id');
+            document.getElementById('fullDescription' + lessonId).style.display = 'none';
+        });
+    });
+});
+
 </script>
 </body>
 </html>

@@ -2,288 +2,326 @@
 
 @section('title', "Central School system - Manage Schools")
 
-@section('breadcrumb1')
-<a href="{{route('home')}}">Home</a>
+@section('breadcrumb2')
+<a href="{{ route('home') }}">Home</a>
 @endsection
-@section('breadcrumb2', "Manage School")
+
+@section('breadcrumb3')
+{{ $school->name }}
+@endsection
 
 @section('page_title')
- {{ $school->name }}
+{{ $school->name }}
 @endsection
 
 @section('style')
 <style>
-    /* Define a background color for expanded course items */
+   /* Define a background color for expanded course items */
     .course-item.expanded {
-        background-color: #e9ecef; /* Light grey background color for expanded items */
+        background-color: #e9ecef;
     }
 
+    /* Custom list group */
     .custom-list-group {
-        height: 400px; /* Fixed height */
-        overflow-y: auto; /* Enable vertical scrolling */
-        border: 1px solid #ddd; /* Add border for clarity */
-        border-radius: 8px; /* Rounded corners */
-        background-color: #f8f9fa; /* Light background color */
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    background-color: #f8f9fa;
     }
 
     .custom-list-group .list-group-item {
-        border-radius: 0; /* Remove default border-radius */
+        border-radius: 0;
+        color: #fff;
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
     }
 
     .custom-list-group .list-group-item:first-child {
-        border-top-left-radius: 8px; /* Rounded top corners for the first item */
+        border-top-left-radius: 8px;
         border-top-right-radius: 8px;
     }
 
     .custom-list-group .list-group-item:last-child {
-        border-bottom-left-radius: 8px; /* Rounded bottom corners for the last item */
+        border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
     }
 
-    .custom-list-group .list-group-item:hover {
-        background-color: #e9ecef; /* Light background color on hover */
-    }
-
+    .custom-list-group .list-group-item:hover,
     .custom-list-group .list-group-item.active {
-        background-color: #007bff; /* Active item background color */
-        color: #fff; /* Text color for active item */
+        /* background-color: #007bff; */
+        /* color: #fff; */
     }
 
     .custom-list-group .list-group-item.list-group-item-info {
-        background-color: #007bff; /* Header background color */
-        color: #fff; /* Text color for header */
-        font-weight: bold; /* Bold font for header */
-        border: none; /* Remove border for header */
+        font-weight: bold;
+        border: none;
     }
 
-    /* Style for details section */
+    /* Details section */
     .details-section {
-        max-height: 300px; /* Max height for details section */
-        overflow-y: auto; /* Enable vertical scrolling for details */
+        max-height: 300px;
+        overflow-y: auto;
         padding: 10px;
-        border: 1px solid #ccc;
+        border: 1px solid #000;
         border-radius: 5px;
         background-color: #f9f9f9;
+        color: #212529;
         margin-top: 10px;
+        display: none;
+        transition: all 0.3s ease-in-out;
     }
+
+    .details-section.show {
+        display: block;
+    }
+
+    /* Card header and footer */
+    .card-header,
+    .card-footer {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    /* Card title */
+    .card-title {
+        margin-bottom: 0;
+    }
+
+    /* Card body */
+    .card-body {
+        background-color: #f8f9fa;
+    }
+
+    /* Course item */
+    .course-item {
+        padding: 10px 0;
+    }
+
+    /* Course name link */
+    .course-link {
+        color: #fff;
+    }
+
+    /* Assessment types */
+    .assessment-type {
+        margin-right: 10px;
+    }
+
+
+
 </style>
-
-
-
 @endsection
 
 @section('content')
 @include('sidebar')
 <section class="content">
-      <div class="container-fluid">
+    <div class="container-fluid">
         <!-- Info boxes -->
         <div class="row">
-          <!-- Admins -->
-          <div class="col-12 col-sm-6 col-md-4">
-            <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'admin']) }}" class="text-decoration-none">
- 
+    <!-- Admins -->
+    <div class="col-12 col-sm-6 col-md-4">
+        <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'admin']) }}" class="text-decoration-none">
+            <div class="info-box bg-info">
+                <span class="info-box-icon bg-info elevation-1">
+                    <div class="inner mt-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Admins</span>
+                    <span class="info-box-number"><h5>{{ $school->getConfirmedAdmins()->count() }}</h5></span>
+                </div>
+            </div>
+        </a>
+    </div>
 
-                  <div class="info-box bg-info">
-                      <span class="info-box-icon bg-info elevation-1">
-                          <div class="inner mt-2">
-                              <i class="fas fa-users"></i>
-                          </div>
-                      </span>
-                      <div class="info-box-content">
-                          <span class="info-box-text">Admins</span>
-                          <span class="info-box-number"><h5> {{$school->getConfirmedAdmins()->count()}}</h5></span>
-                      </div>
-                  </div>
-              </a>
-          </div>
+    <!-- Teachers -->
+    <div class="col-12 col-sm-6 col-md-4">
+        <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'teachers']) }}" class="text-decoration-none">
+            <div class="info-box bg-info mb-3">
+                <span class="info-box-icon bg-purple elevation-1">
+                    <div class="inner mt-2">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Teachers</span>
+                    <span class="info-box-number"><h5>{{ $school->teachers()->count() }}</h5></span>
+                </div>
+            </div>
+        </a>
+    </div>
 
-          <!-- Teachers -->
-          <div class="col-12 col-sm-6 col-md-4">
-              <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'teachers']) }}" class="text-decoration-none">
+    <!-- Students -->
+    <div class="col-12 col-sm-6 col-md-4">
+        <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'students']) }}" class="text-decoration-none">
+            <div class="info-box bg-info mb-3">
+                <span class="info-box-icon bg-success elevation-1">
+                    <i class="fas fa-user-graduate"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Students</span>
+                    <span class="info-box-number">{{ $school->students->count() }}</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
 
-                  <div class="info-box bg-info mb-3">
-                      <span class="info-box-icon bg-purple elevation-1">
-                          <div class="inner mt-2">
-                              <i class="fas fa-chalkboard-teacher"></i>
-                          </div>
-                      </span>
-                      <div class="info-box-content">
-                          <span class="info-box-text">Teachers</span>
-                          <span class="info-box-number"><h5> {{$school->teachers()->count()}}</h5></span>
-                      </div>
-                  </div>
-              </a>
-          </div>
+<div class="row">
+    <!-- Classes -->
+    <div class="col-12 col-sm-6 col-md-3">
+        <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'classes']) }}" class="text-decoration-none">
+            <div class="info-box bg-info mb-3">
+                <span class="info-box-icon bg-secondary elevation-1">
+                    <i class="fas fa-school"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Classes</span>
+                    <span class="info-box-number">{{ $school->classes->count() }}</span>
+                </div>
+            </div>
+        </a>
+    </div>
 
-          <!-- Students -->
-          <div class="col-12 col-sm-6 col-md-4">
-              <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'students']) }}" class="text-decoration-none">
+    <!-- Events -->
+    <div class="col-12 col-sm-6 col-md-3">
+        <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'events']) }}" class="text-decoration-none">
+            <div class="info-box bg-info mb-3">
+                <span class="info-box-icon bg-warning elevation-1">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Events</span>
+                    <span class="info-box-number">{{ $school->events->count() }}</span>
+                </div>
+            </div>
+        </a>
+    </div>
 
-                  <div class="info-box bg-info mb-3">
-                      <span class="info-box-icon bg-success elevation-1">
-                          <i class="fas fa-user-graduate"></i>
-                      </span>
-                      <div class="info-box-content">
-                          <span class="info-box-text">Students</span>
-                          <span class="info-box-number"> {{ $school->students->count() }} </span>
-                      </div>
-                  </div>
-              </a>
-          </div>
+    <!-- Courses -->
+    <div class="col-12 col-sm-6 col-md-3">
+        <a href="{{ route('manage-courses', ['schoolId' => $school->id]) }}" class="text-decoration-none">
+            <div class="info-box bg-info mb-3">
+                <span class="info-box-icon bg-black elevation-1">
+                    <i class="fas fa-book"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Courses</span>
+                    <span class="info-box-number">{{ $school->courses->count() }}</span>
+                </div>
+            </div>
+        </a>
+    </div>
 
-          <!-- Classes -->
-          <div class="col-12 col-sm-6 col-md-4">
-              <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'classes']) }}" class="text-decoration-none">
+    <!-- Wallet Balance -->
+<div class="col-12 col-sm-6 col-md-3">
+    <a href="{{ route('school.wallet', ['schoolId' => $school->id]) }}" class="text-decoration-none">
+        <div class="info-box bg-info mb-3">
+            <span class="info-box-icon bg-dark elevation-1">
+                <i class="fas fa-wallet"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Wallet Balance</span>
+                <span class="info-box-number">₦{{ number_format($school->wallet->balance, 2) }}</span>
+            </div>
+        </div>
+    </a>
+</div>
 
-                  <div class="info-box bg-info mb-3">
-                      <span class="info-box-icon bg-secondary elevation-1">
-                          <i class="fas fa-school"></i>
-                      </span>
-                      <div class="info-box-content">
-                          <span class="info-box-text">Classes</span>
-                          <span class="info-box-number">{{ $school->classes->count() }}</span>
-                      </div>
-                  </div>
-              </a>
-          </div>
-
-          <!-- Events -->
-          <div class="col-12 col-sm-6 col-md-4">
-              <a href="{{ route('school.show', ['schoolId' => $school->id, 'view' => 'events']) }}" class="text-decoration-none">
-  
-                  <div class="info-box bg-info mb-3">
-                      <span class="info-box-icon bg-warning elevation-1">
-                          <i class="fas fa-calendar-alt"></i>
-                      </span>
-                      <div class="info-box-content">
-                          <span class="info-box-text">Events</span>
-                          <span class="info-box-number">{{ $school->events->count() }}</span>
-                      </div>
-                  </div>
-              </a>
-          </div>
-
-          <!-- Curriculum -->
-          <div class="col-12 col-sm-6 col-md-4">
-              <a href="{{ route('manage-courses', ['schoolId' => $school->id]) }}" class="text-decoration-none">
- 
-                  <div class="info-box bg-info mb-3">
-                      <span class="info-box-icon bg-black elevation-1">
-                          <i class="fas fa-book"></i>
-                      </span>
-                      <div class="info-box-content">
-                          <span class="info-box-text">Courses</span>
-                          <span class="info-box-number">{{ $school->courses->count() }}</span>
-                      </div>
-                  </div>
-              </a>
-          </div>
-      </div>
-
-
+</div>
 
         <!-- /.row -->
 
         <div class="row">
-          
-          <!-- /.col -->
-          <div class="col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title">Course Grade Analysis</h5>
-
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
-            </div>
-        </div>
-        <!-- /.card-header -->
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-8">
-                    <!-- Canvas for Grade Distribution Chart -->
-                    <canvas id="gradeDistributionChart" width="800" height="400"></canvas>
-                    <p id="gradeLabel"></p>
-                </div>
-                <!-- /.col -->
-                <div class="col-md-4">
-    <div class="list-group custom-list-group">
-        <!-- List of courses -->
-        <h5 class="list-group-item list-group-item-info text-center">Courses</h5>
-        @foreach($school->courses as $course)
-            <div class="course-item">
-                <!-- Course name link (click to show/hide details) -->
-                <a href="#" class="list-group-item list-group-item-action graph-option course-link custom-list-item" data-option="{{ $course->code }}" data-class="" data-assessment="" data-academic_session="" data-term="">
-                    <strong>{{ $course->name }}</strong>
-                </a>
-                <!-- Details section (initially hidden) -->
-                <div class="details-section p-2 ml-2" style="display: none;">
-                    <!-- Display classes as a select -->
-                    <select class="class-select form-control" data-course="{{ $course->code }}">
-                        <option value="">Select Class</option>
-                        @foreach($course->classes() as $class)
-                            <option value="{{ $class->id }}">{{ $class->code }}</option>
-                        @endforeach
-                    </select>
-                    <br>
-                    <!-- Display assessment types -->
-                    <div class="mt-0">
-                        <p><strong>Assessment Types:</strong></p>
-                        <label><input type="radio" class="assessment-type" name="assessment_type" value="assignment_id"> Assignment</label><br>
-                        <label><input type="radio" class="assessment-type" name="assessment_type" value="assessment_id"> Assessment</label><br>
-                        <label><input type="radio" class="assessment-type" name="assessment_type" value="exam_id"> Exam</label>
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Course Grade Analysis</h5>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
                     </div>
-
-                    <!-- Display academic sessions and terms -->
-                    <div class="mt-3">
-                        <strong>Academic Session:</strong><br>
-                        <select class="form-control academic-session-select" data-course="{{ $course->code }}">
-                            <option value="">Select Academic Session</option>
-                            @foreach($academicSessions as $academicSession)
-                                <option value="{{ $academicSession->id }}">{{ $academicSession->name }}</option>
-                            @endforeach
-                        </select>
-                        <br>
-                        <strong>Term:</strong><br>
-                        <select class="form-control term-select" data-academic-session="">
-                            <option value="">Select Term</option>
-                            <!-- Terms will be dynamically populated based on selected academic session -->
-                        </select>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Canvas for Grade Distribution Chart -->
+                                <canvas id="gradeDistributionChart" width="800" height="400"></canvas>
+                                <p id="gradeLabel"></p>
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-md-4">
+                                <div class="list-group custom-list-group">
+                                    <!-- List of courses -->
+                                    <h5 class="list-group-item list-group-item-info text-center">Courses</h5>
+                                    @foreach($school->courses as $course)
+                                    <div class="course-item">
+                                        <!-- Course name link (click to show/hide details) -->
+                                        <a href="#" class="list-group-item list-group-item-action graph-option course-link custom-list-item" data-option="{{ $course->code }}" data-class="" data-assessment="" data-academic_session="" data-term="">
+                                            <strong>{{ $course->name }}</strong>
+                                        </a>
+                                        <!-- Details section (initially hidden) -->
+                                        <div class="details-section p-2 ml-2" style="display: none;">
+                                            <!-- Display classes as a select -->
+                                            <select class="class-select form-control" data-course="{{ $course->code }}">
+                                                <option value="">Select Class</option>
+                                                @foreach($course->classes() as $class)
+                                                <option value="{{ $class->id }}">{{ $class->code }}</option>
+                                                @endforeach
+                                            </select>
+                                            <br>
+                                            <!-- Display assessment types -->
+                                            <div class="mt-0">
+                                                <p class="" style="color:#000;"><strong>Assessment Types:</strong></p>
+                                                <label><input type="radio" class="assessment-type" name="assessment_type" value="assignment_id"> Assignment</label><br>
+                                                <label><input type="radio" class="assessment-type" name="assessment_type" value="assessment_id"> Assessment</label><br>
+                                                <label><input type="radio" class="assessment-type" name="assessment_type" value="exam_id"> Exam</label>
+                                            </div>
+                                            <!-- Display academic sessions and terms -->
+                                            <div class="mt-3">
+                                                <strong>Academic Session:</strong><br>
+                                                <select class="form-control academic-session-select" data-course="{{ $course->code }}">
+                                                    <option value="">Select Academic Session</option>
+                                                    @foreach($academicSessions as $academicSession)
+                                                    <option value="{{ $academicSession->id }}">{{ $academicSession->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <br>
+                                                <strong>Term:</strong><br>
+                                                <select class="form-control term-select" data-academic-session="">
+                                                    <option value="">Select Term</option>
+                                                    <!-- Terms will be dynamically populated based on selected academic session -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <!-- /.col -->
+                        </div>
                     </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <div class="row">
+                            <!-- Add any additional footer content -->
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- /.card-footer -->
                 </div>
+                <!-- /.card -->
             </div>
-        @endforeach
+            <!-- /.col -->
+        </div>
     </div>
-</div>
-
-
-
-
-                <!-- /.col -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.card-body -->
-        <div class="card-footer">
-            <div class="row">
-                <!-- Add any additional footer content -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /.card-footer -->
-    </div>
-    <!-- /.card -->
-</div>
-
-        </div>
-        <!-- /.row -->
-
-      </div><!--/. container-fluid -->
-    </section>
-
-
+    <!-- /.container-fluid -->
+</section>
 @endsection
+
 
 @section('scripts')
 
@@ -356,6 +394,7 @@ function updateChart(courseCode, classId, assessmentType, academicSessionId, ter
         $("#gradeDistributionChart").hide();
         $("#gradeLabel").css({
             'background-color': '#f0f0f0', // Background color
+            'color': '#000',
             'padding': '10px',             // Padding
             'border-radius': '5px',        // Border radius
             'text-align': 'center',        // Text alignment
