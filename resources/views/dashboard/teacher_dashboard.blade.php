@@ -104,7 +104,9 @@ Central School System - {{ $user->profile->full_name}}
           <div class="col-md-12">
             <div class="card">
                 <div class="mb-4 p-2">
+                <a href="{{ route('user.wallet', ['userId' => $user->id]) }}" class="text-decoration-none">
                     <strong>Wallet Balance:</strong> ₦{{ number_format($wallet_balance, 2) }}
+                   </a>
                 </div>
                 @if (!$has_wallet)
                     <div class="alert alert-warning alert-dismissible fade show small-text" role="alert">

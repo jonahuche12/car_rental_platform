@@ -198,6 +198,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/package', [HomeController::class, 'userPackage'])->name('user.package');
     Route::get('/school/{schoolId}/wallet', [WalletController::class, 'schoolWallet'])->name('school.wallet');
     Route::get('/user/{userId}/wallet', [WalletController::class, 'userWallet'])->name('user.wallet');
+  
+    Route::post('school/{schoolId}/withdrawal', [WalletController::class, 'applyForWithdrawal'])->name('school.withdrawal_application');
+
+    Route::post('user/{userId}/withdrawal', [WalletController::class, 'applyForUserWithdrawal'])->name('user.withdrawal_application');
+
+    Route::get('withdrawal/update-account/{token}', [WalletController::class, 'updateAccount'])->name('withdrawal.updateAccount');
+
+    Route::post('/withdrawal/saveAccount', [WalletController::class, 'saveAccount'])->name('withdrawal.saveAccount');
+
+
+    Route::get('withdrawal/update-user-account/{token}', [WalletController::class, 'updateUserAccount'])->name('withdrawal.updateUserAccount');
+
+    Route::post('/withdrawal/saveUserAccount', [WalletController::class, 'saveUserAccount'])->name('withdrawal.saveUserAccount');
+
 
 
 });

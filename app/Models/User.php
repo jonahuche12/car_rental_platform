@@ -403,6 +403,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Lesson::class);
     }
+    public function lessonTransactions()
+    {
+        return $this->hasMany(LessonTransaction::class);
+    }
 
 
     public function wallet()

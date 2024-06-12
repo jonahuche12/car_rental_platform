@@ -32,6 +32,7 @@ class School extends Model
         'total_staff',
         'is_active',
         'school_package_id',
+        'school_owner_id',
     ];
 
     public function schoolClassSections()
@@ -204,6 +205,11 @@ class School extends Model
     {
         return $this->hasMany(Exam::class);
     }
+    public function lessonTransactions()
+    {
+        return $this->hasMany(LessonTransaction::class);
+    }
+
 
   
     

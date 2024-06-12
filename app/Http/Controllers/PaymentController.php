@@ -195,6 +195,7 @@ class PaymentController extends Controller
         if ($package->name === 'Basic Package') {
             // Activate the Basic package for the user
             $user->active_package = true;
+            $user->user_package_id = $package->id;
 
             // Set expected expiration based on package duration
             $user->expected_expiration = Carbon::now()->addDays($package->duration_in_days);
