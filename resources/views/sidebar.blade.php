@@ -74,52 +74,59 @@
                 </li>
                 <!-- End User Profile Section -->
                 @if($admin && $admin->role == "super_admin")
-                    @php
-                        $totalPackagesCount = App\Models\SchoolPackage::count();
-                        $totalSchoolsCount = App\Models\School::count();
-                        $totalCurriculumCount = App\Models\Curriculum::count();
-                        $totalAcademicSessionCount = App\Models\AcademicSession::count();
-                        $totalTestCount = App\Models\Test::count();
-                        $totalScholarshipCount = App\Models\Scholarship::count();
-                    @endphp
-                    <li class="nav-item ml-3">
-                        <a href="{{ route('manage_school_packages') }}" class="nav-link">
-                            <i class="fas fa-box nav-icon"></i>
-                            <p class="">Manage Packages ({{ $totalPackagesCount }})</p>
-                        </a>
-                    </li>
-                    <li class="nav-item ml-3">
-                        <a href="{{ route('manage_curriculum') }}" class="nav-link">
-                            <i class="fas fa-book nav-icon"></i>
-                            <p class="">Curriculum ({{ $totalCurriculumCount }})</p>
-                        </a>
-                    </li>
-                    <li class="nav-item ml-3">
-                        <a href="{{ route('manage_all_schools') }}" class="nav-link">
-                            <i class="fas fa-school nav-icon"></i>
-                            <p class="">All Schools ({{ $totalSchoolsCount }})</p>
-                        </a>
-                    </li>
-                    <li class="nav-item ml-3">
-                        <a href="{{ route('manage_academic_sessions') }}" class="nav-link">
-                            <i class="fas fa-calendar-alt nav-icon"></i>
-                            <p class="">Academic Sessions ({{ $totalAcademicSessionCount }})</p>
-                        </a>
-                    </li>
-                    <li class="nav-item ml-3">
-                        <a href="{{ route('manage_tests') }}" class="nav-link">
-                            <i class="fas fa-calendar-alt nav-icon"></i>
-                            <p class="">Tests ({{ $totalTestCount }})</p>
-                        </a>
-                    </li>
+    @php
+        $totalPackagesCount = App\Models\SchoolPackage::count();
+        $totalSchoolsCount = App\Models\School::count();
+        $totalCurriculumCount = App\Models\Curriculum::count();
+        $totalAcademicSessionCount = App\Models\AcademicSession::count();
+        $totalTestCount = App\Models\Test::count();
+        $totalScholarshipCount = App\Models\Scholarship::count();
+        $notCompletedWithdrawalsCount = App\Models\WithdrawalRequest::notCompleted()->count();
+    @endphp
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_school_packages') }}" class="nav-link">
+            <i class="fas fa-box nav-icon"></i>
+            <p class="">Manage Packages ({{ $totalPackagesCount }})</p>
+        </a>
+    </li>
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_curriculum') }}" class="nav-link">
+            <i class="fas fa-book nav-icon"></i>
+            <p class="">Curriculum ({{ $totalCurriculumCount }})</p>
+        </a>
+    </li>
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_all_schools') }}" class="nav-link">
+            <i class="fas fa-school nav-icon"></i>
+            <p class="">All Schools ({{ $totalSchoolsCount }})</p>
+        </a>
+    </li>
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_academic_sessions') }}" class="nav-link">
+            <i class="fas fa-calendar-alt nav-icon"></i>
+            <p class="">Academic Sessions ({{ $totalAcademicSessionCount }})</p>
+        </a>
+    </li>
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_tests') }}" class="nav-link">
+            <i class="fas fa-calendar-alt nav-icon"></i>
+            <p class="">Tests ({{ $totalTestCount }})</p>
+        </a>
+    </li>
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_scholarship') }}" class="nav-link">
+            <i class="fas fa-calendar-alt nav-icon"></i>
+            <p class="">Scholarship ({{ $totalScholarshipCount }})</p>
+        </a>
+    </li>
+    <li class="nav-item ml-3">
+        <a href="{{ route('manage_withdrawals') }}" class="nav-link">
+            <i class="fas fa-calendar-alt nav-icon"></i>
+            <p class="">New Withdrawals ({{ $notCompletedWithdrawalsCount }})</p>
+        </a>
+    </li>
+@endif
 
-                    <li class="nav-item ml-3">
-                        <a href="{{ route('manage_scholarship') }}" class="nav-link">
-                            <i class="fas fa-calendar-alt nav-icon"></i>
-                            <p class="">Scholarship ({{ $totalScholarshipCount }})</p>
-                        </a>
-                    </li>
-                @endif
                 
                 <!-- School Section -->
                 <li class="nav-item menu-close">
@@ -129,7 +136,7 @@
                         <a href="#" class="nav-link active">
                             <i class="nav-icon fas fa-school"></i>
                             <p class="">
-                                {{ \Illuminate\Support\Str::limit($school->name, 21) }}
+                                {{ \Illuminate\Support\Str::limit($school->name, 15) }}
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>

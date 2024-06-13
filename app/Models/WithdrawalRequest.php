@@ -14,6 +14,7 @@ class WithdrawalRequest extends Model
         'user_id',
         'amount',
         'token',
+        'completed',
         'processed_at'
     ];
 
@@ -21,8 +22,20 @@ class WithdrawalRequest extends Model
     {
         return $this->belongsTo(School::class);
     }
+    
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope a query to only include not completed withdrawal requests.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeNotCompleted($query)
+    {
+        return $query->where('completed', false);
     }
 }

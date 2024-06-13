@@ -17,6 +17,7 @@ use App\Mail\ConfirmTransferMail;
 use App\Models\Transfer;
 use App\Models\Wallet;
 use App\Models\Payment;
+use App\Models\WithdrawalRequest;
 use App\Models\Curriculum;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\SendAcademicSessionNotification;
@@ -1242,6 +1243,26 @@ class SuperAdminController extends Controller
         return response()->json([
             'message' => 'Test deleted successfully!',
         ]);
+    }
+    public function manageWithdrawals(Request $request)
+    {
+        $completedWithdrawals = WithdrawalRequest::where('completed', true)->paginate(4, ['*'], 'completed_page');
+        $notCompletedWithdrawals = WithdrawalRequest::where('completed', false)->paginate(4, ['*'], 'not_completed_page');
+    
+        // Set the default active tab based on the current page parameter
+        if ($request->has('not_completed_page')) {
+            $request->session()->put('active_tab', 'not-completed');
+        } else {
+            $request->session()->put('active_tab', 'completed');
+        }
+    
+        return view('super_admin.withdrawals', compact('completedWithdrawals', 'notCompletedWithdrawals'));
+    }
+    
+    public function updateActiveTab(Request $request)
+    {
+        $request->session()->put('active_tab', $request->input('active_tab'));
+        return response()->json(['status' => 'success']);
     }
     
 

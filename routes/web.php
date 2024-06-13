@@ -305,6 +305,9 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
  
     Route::post('/scholarship_students/mark_as_paid', [ScholarshipController::class, 'markAsPaid'])->name('scholarship_students.mark_as_paid');
 
+    Route::get('/manage-withdrawals', [SuperAdminController::class, 'manageWithdrawals'])->name('manage_withdrawals');
+
+    Route::post('/update-active-tab', [SuperAdminController::class, 'updateActiveTab'])->name('update-active-tab');
 
 
 });
