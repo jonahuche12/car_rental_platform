@@ -171,6 +171,41 @@
             </div>
         </div>
     </div>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-eye fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Progress Monitoring</h5>
+                    <p class="card-text">Parents can follow and monitor the progress of their wards and children.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-book-reader fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Daily Study Connects</h5>
+                    <p class="card-text">We offer free daily study connects for students to aid them in their studies.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-chart-pie fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title font-weight-bold">Comprehensive Analytics</h5>
+                    <p class="card-text">We provide comprehensive analytics for students, teachers, and schools.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Benefits Section -->

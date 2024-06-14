@@ -13,6 +13,7 @@ use App\Models\WithdrawalRequest;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class WalletController extends Controller
 {
@@ -179,20 +180,25 @@ class WalletController extends Controller
         return response()->json(['message' => 'Account details updated successfully.']);
     }
 
-    // updateUserAccount
-    
     public function updateUserAccount($token)
     {
-        $withdrawalRequest = WithdrawalRequest::where('token', $token)->firstOrFail();
-        $user = $withdrawalRequest->user;
-    
-       
-    
-        return view('teacher.update_account', compact('user','withdrawalRequest'));
-    }
-    
-    
+        try {
+            $withdrawalRequest = WithdrawalRequest::where('token', $token)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return redirect('home')->with('error', 'Invalid token.');
+        }
 
+        $user = $withdrawalRequest->user;
+
+        // Check if the authenticated user matches the user of the withdrawal request
+        if (Auth::id() !== $user->id) {
+            return redirect('home')->with('error', 'Unauthorized action.');
+        }
+
+        return view('teacher.update_account', compact('user', 'withdrawalRequest'));
+    }
+
+    
     public function saveUserAccount(Request $request)
     {
         // Validate the request data
@@ -207,7 +213,10 @@ class WalletController extends Controller
         $withdrawalRequest = WithdrawalRequest::where('token', $request->input('token'))->firstOrFail();
         $user = $withdrawalRequest->user;
     
-        
+        // Check if the authenticated user matches the user of the withdrawal request
+        if (Auth::id() !== $user->id) {
+            return redirect('home')->with('error', 'Unauthorized action.');
+        }
     
         // Update the withdrawal request with the new account details
         $withdrawalRequest->account_name = $request->input('account_name');

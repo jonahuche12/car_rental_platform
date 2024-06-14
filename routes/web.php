@@ -308,6 +308,9 @@ Route::middleware(['auth', 'superadmin'])->group(function () {
     Route::get('/manage-withdrawals', [SuperAdminController::class, 'manageWithdrawals'])->name('manage_withdrawals');
 
     Route::post('/update-active-tab', [SuperAdminController::class, 'updateActiveTab'])->name('update-active-tab');
+    // routes/web.php
+
+    Route::post('/withdrawal/complete', [SuperAdminController::class, 'markAsCompleted'])->name('withdrawal.complete');
 
 
 });

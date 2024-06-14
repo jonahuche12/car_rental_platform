@@ -18,8 +18,14 @@ use App\Models\Transfer;
 use App\Models\Wallet;
 use App\Models\Payment;
 use App\Models\WithdrawalRequest;
+use App\Events\WithdrawalFailedQueued; // Import the event class
+use Illuminate\Support\Str;
+
 use App\Models\Curriculum;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\WithdrawalCompleted;
+use App\Mail\UpdateAccountDetails;
+use App\Mail\WithdrawalFailed;
 use App\Jobs\SendAcademicSessionNotification;
 use App\Jobs\SendTermNotification;
 use Illuminate\Support\Facades\Storage;
@@ -1263,6 +1269,79 @@ class SuperAdminController extends Controller
     {
         $request->session()->put('active_tab', $request->input('active_tab'));
         return response()->json(['status' => 'success']);
+    }
+    
+    public function markAsCompleted(Request $request)
+    {
+        $ids = $request->ids;
+        $action = $request->action;
+    
+        if ($action == 'complete') {
+            foreach ($ids as $id) {
+                $withdrawal = WithdrawalRequest::find($id);
+                if ($withdrawal) {
+                    if (empty($withdrawal->account_name) || empty($withdrawal->account_number) || empty($withdrawal->bank_name)) {
+                        // Generate a unique token for updating account details
+                        $token = Str::random(60);
+                        $withdrawal->update(['token' => $token]);
+    
+                        // Queue the email notification to update account details
+                        if ($withdrawal->user_id) {
+                            Mail::to($withdrawal->user->email)->queue(new UpdateAccountDetails($withdrawal));
+                        } elseif ($withdrawal->school_id) {
+                            Mail::to($withdrawal->school->schoolOwner->email)->queue(new UpdateAccountDetails($withdrawal));
+                        }
+                    } else {
+                        $withdrawal->completed = true;
+                        $withdrawal->processed_at = now();
+                        $withdrawal->save();
+    
+                        // Queue the email notification
+                        if ($withdrawal->user_id) {
+                            Mail::to($withdrawal->user->email)->queue(new WithdrawalCompleted($withdrawal));
+                        } elseif ($withdrawal->school_id) {
+                            Mail::to($withdrawal->school->schoolOwner->email)->queue(new WithdrawalCompleted($withdrawal));
+                        }
+                    }
+                }
+            }
+            return response()->json(['status' => 'success', 'message' => 'Selected withdrawals have been processed.']);
+        } elseif ($action == 'fail') {
+            $withdrawals_id = [];
+            foreach ($ids as $id) {
+                $withdrawal = WithdrawalRequest::find($id);
+                if ($withdrawal) {
+                    // Add amount back to user or school wallet
+                    if ($withdrawal->user_id) {
+                        $user = User::find($withdrawal->user_id);
+                        $user->wallet->balance += $withdrawal->amount;
+                        $user->save();
+                        $user->wallet->save();
+    
+                        // Queue the email notification
+                        Mail::to($user->email)->queue(new WithdrawalFailed($withdrawal));
+                        event(new WithdrawalFailedQueued($withdrawal));
+                    } elseif ($withdrawal->school_id) {
+                        $school = School::find($withdrawal->school_id);
+                        $school->wallet->balance += $withdrawal->amount;
+                        $school->save();
+                        $school->wallet->save();
+    
+                        // Queue the email notification
+                        Mail::to($school->schoolOwner->email)->queue(new WithdrawalFailed($withdrawal));
+                        event(new WithdrawalFailedQueued($withdrawal));
+                    }
+                    $withdrawals_id[] = $withdrawal->id;
+                }
+            }
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Selected withdrawals have been marked as failed and amounts returned to wallets.',
+                'withdrawals_id' => $withdrawals_id
+            ]);
+        }
+    
+        return response()->json(['status' => 'error', 'message' => 'Invalid action.']);
     }
     
 
