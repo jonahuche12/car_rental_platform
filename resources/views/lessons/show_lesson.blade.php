@@ -1,77 +1,226 @@
 @extends('layouts.app')
 
 @section('title', 'CSS - ' . $lesson->title)
-
 @section('style')
 <style>
-    .video-container {
-        position: relative;
-        width: 100%;
-        max-width: 800px;
-    }
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    background-color: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
 
-    video {
-        width: 100%;
-        display: block;
-    }
+video {
+    width: 100%;
+    display: block;
+    border-radius: 10px;
+}
 
-    .custom-controls {
-        position: absolute;
-        bottom: 10px;
-        left: 0;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px;
-        color: white;
-    }
+.custom-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 0 0 10px 10px;
+    color: white;
+}
 
-    .control-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 36px;
-        color: white;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+.control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 36px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+}
 
-    .control-range {
-        width: 100px;
-    }
+.fullscreen-btn {
+    top: 10%;
+    left: 10%;
+}
 
-    .current-time, .duration {
-        font-size: 14px;
-    }
-    
-    .input-group {
-        position: relative;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: stretch;
-        width: 100%;
-    }
+.control-btn:hover {
+    opacity: 0.8;
+}
 
-    .input-group .form-control,
-    .input-group .btn {
-        position: relative;
-        flex: 1 1 auto; /* This makes both elements equally share the width */
-        height: auto; /* Reset height to auto to match content height */
-    }
+.control-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+    outline: none;
+}
 
-    .input-group-append {
-        display: flex;
-    }
+.control-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
 
-    /* Adjust button height and icon alignment */
-    .input-group-append .btn {
-        height: auto; /* Reset button height to match input height */
-        display: flex;
-        align-items: center;
-    }
+.control-range::-webkit-slider-thumb:hover {
+    background: #f1c40f;
+}
+
+.volume-container {
+    display: flex;
+    align-items: center;
+}
+
+.volume-range {
+    width: 100px;
+    margin-left: 10px;
+}
+
+.progress-range {
+    width: calc(100% - 250px);
+    margin: 0 10px;
+}
+
+.current-time, .duration {
+    font-size: 14px;
+}
+
+.lesson-details {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.lesson-details p {
+    margin: 5px 0;
+}
+
+.teacher-description-container {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-image {
+    margin-right: 20px;
+}
+
+.teacher-image img, .teacher-image i {
+    border: 2px solid #4a90e2;
+    padding: 5px;
+    border-radius: 50%;
+}
+
+.lesson-description {
+    flex-grow: 1;
+}
+
+.lesson-description h5 {
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.short-description, .full-description {
+    display: inline;
+    color: #000;
+}
+
+.show-more, .show-less {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 5px;
+}
+
+.like-link, .add-to-favorite-link, .link-black {
+    cursor: pointer;
+}
+
+.comment-section {
+    margin-top: 20px;
+}
+
+.comment-header, .comment-footer, .reply-header, .reply-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.input-group {
+    display: flex;
+}
+
+.input-group-append {
+    display: flex;
+    align-items: center;
+}
+
+.btn-clear {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.small-text {
+    font-size: 12px;
+}
+
+.alert {
+    margin-bottom: 10px;
+}
+
+.like-link, .add-to-favorite-link, .comments-link {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.like-link .fa-thumbs-up, .add-to-favorite-link .fa-heart, .comments-link .fa-comments {
+    margin-right: 5px;
+}
+
+.float-right {
+    display: inline-flex;
+    align-items: center;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+#comments-section {
+    margin-top: 10px;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+}
 </style>
 
 @endsection
@@ -88,117 +237,173 @@
 <section class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-8">
-                <h4>{{ $lesson->title }}</h4>
+        <div class="col-md-8">
+        <h4>{{ $lesson->title }}</h4>
 
-                <!-- Display the video -->
-                <div class="video-container">
-                    <video id="lessonVideo" width="100%">
-                        <source src="{{ asset('storage/' . $lesson->video_url) }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <button id="playPauseBtn" class="control-btn"><i class="fas fa-play"></i></button>
-                    <div class="custom-controls">
-                        <input id="volumeRange" type="range" class="control-range" min="0" max="1" step="0.1" value="1">
-                        <span id="currentTime" class="current-time">0:00</span>
-                        <input id="progressRange" type="range" class="control-range" min="0" max="100" step="0.1" value="0">
-                        <span id="duration" class="duration">0:00</span>
+<div class="video-container" id="videoContainer">
+    <video id="lessonVideo" width="100%">
+        <source src="{{ asset('storage/' . $lesson->video_url) }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <button id="playPauseBtn" class="control-btn play-pause-btn"><i class="fas fa-play"></i></button>
+    <div class="custom-controls">
+        <button id="fullscreenBtn" class="control-btn fullscreen-btn"><i class="fas fa-expand"></i></button>
+        <div class="volume-container">
+            <i class="fas fa-volume-up"></i>
+            <input id="volumeRange" type="range" class="control-range volume-range" min="0" max="1" step="0.1" value="1">
+        </div>
+        <span id="currentTime" class="current-time">0:00</span>
+        <input id="progressRange" type="range" class="control-range progress-range" min="0" max="100" step="0.1" value="0">
+        <span id="duration" class="duration">0:00</span>
+    </div>
+</div>
+
+<div class="lesson-details mt-2 mb-0">
+    <p><b>Teacher: <a href="{{route('user_page',['userId'=> $lesson->teacher->id, 'fullname'=> $lesson->teacher->profile->full_name])}}">{{$lesson->teacher->profile->full_name}}</a></b></p>
+    @if($lesson->school)
+    <p><b>School: <a href="{{route('school_page',['schoolId'=> $lesson->school->id, 'schoolname'=> $lesson->school->name])}}">{{$lesson->school->name}}</a></b></p>
+    @endif
+</div>
+
+<div class="teacher-description-container">
+    <div class="teacher-image">
+        @if($lesson->teacher)
+            @if($lesson->teacher->profile->profile_picture)
+                <img src="{{ asset('storage/' . $lesson->teacher->profile->profile_picture) }}" class="img-circle elevation-2" alt="{{ $lesson->teacher->profile->full_name }}" width="50px">
+            @else
+                <i class="fas fa-camera img-circle elevation-2"></i>
+            @endif
+        @else
+            <i class="fas fa-camera img-circle elevation-2"></i>
+        @endif
+    </div>
+
+    <div class="lesson-description">
+        <h5 class="mt-3"><b>Description</b></h5>
+        @if (strlen($lesson->description) > 15)
+            <span class="short-description">{{ substr($lesson->description, 0, 15) . '...' }}</span>
+            <span class="full-description" style="display:none;">{{ $lesson->description }}</span>
+            <span class="show-more" onclick="toggleDescription(this)">Show more</span>
+            <span class="show-less" style="display:none;" onclick="toggleDescription(this)">Show less</span>
+        @else
+            {{ $lesson->description }}
+        @endif
+    </div>
+</div>
+    <p class="mt-2">
+    @php
+        $lessonId = $lesson->id;
+        $isLiked = Auth::check() && Auth::user()->likedLessons()->where('lesson_id', $lessonId)->exists();
+        $likeCount = $lesson->likedUsers()->count();
+
+        $isFavorited = Auth::check() && Auth::user()->favoriteLessons()->where('lesson_id', $lessonId)->exists();
+        $favoriteCount = $lesson->favoritedByUsers()->count();
+    @endphp
+
+    <a href="#" class="like-link {{ $isLiked ? 'liked' : '' }}" data-lesson-id="{{ $lessonId }}">
+        <i class="{{ $isLiked ? 'fas' : 'far' }} fa-thumbs-up"></i>
+        <span class="sr-only">Like</span>
+        <span class="like-count">{{ $likeCount }}</span>
+    </a>
+
+    <a href="#" class="add-to-favorite-link {{ $isFavorited ? 'added-to-favorites' : '' }}" data-lesson-id="{{ $lessonId }}">
+        <i class="{{ $isFavorited ? 'fas' : 'far' }} fa-heart"></i>
+        <span class="sr-only">Add to Favorites</span>
+        <span class="favorite-count">{{ $favoriteCount }}</span>
+    </a>
+
+    @php
+        $totalComments = count($lesson->comments);
+    @endphp
+
+    <span class="float-right">
+        <a href="#" class="comments-link" id="toggle-comments">
+            <i class="far fa-comments"></i>
+            <span class="sr-only">Comments</span>
+            <span class="comment-count">{{ $totalComments }}</span>
+        </a>
+    </span>
+</p>
+
+<div id="comments-section" class="comment-section mt-4 mb-3" style="display: none;">
+    <!-- Comment Form -->
+    <p class="alert alert-danger p-1" id="comment-error" style="display: none;"></p>
+    <p class="alert alert-success p-1" id="comment-message" style="display: none;"></p>
+    <p class="alert alert-danger p-1" id="reply-error" style="display: none;"></p>
+    <p class="alert alert-success p-1" id="reply-message" style="display: none;"></p>
+    <form id="commentForm" action="{{ route('comment.store', ['lesson' => $lesson->id]) }}" method="POST" class="mt-4">
+        @csrf
+        <div class="input-group">
+            <input id="commentContent" type="text" name="comment_content" class="form-control form-control-sm" placeholder="Type a comment">
+            <div class="input-group-append">
+                <button id="submitComment" type="button" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </form>
+                        
+    <!-- Display existing comments -->
+    <div class="card">
+        <div class="card-body comments-section" style="height: 300px; overflow-y: auto;">
+            <h6>Comments</h6>
+
+            @foreach ($lesson->comments as $comment)
+                <div class="comment mb-3" data-comment-id="{{ $comment->id }}">
+                    <div class="comment-header">
+                        <strong>{{ $comment->user->profile->full_name }}</strong>
+                        <small class="text-muted"><b>{{ $comment->created_at->diffForHumans() }}</b></small>
                     </div>
-                </div>
-                <h5 class="mt-3"><b>Description</b></h5>
-                <p>{{ $lesson->description }}</p>
-                <p>{{ $lesson->class_level }}</p>
-                <p>
-                    <!-- <a href="#" class="text-sm text-purple mr-2 share-link"><i class="far fa-paper-plane mr-1"></i> Share</a> -->
-                    @php
-                        $lessonId = $lesson->id;
-                        $isLiked = Auth::check() && Auth::user()->likedLessons()->where('lesson_id', $lessonId)->exists();
-                        $likeCount = $lesson->likedUsers()->count();
+                    <div class="comment-body">
+                        {{ $comment->content }}
+                    </div>
+                    <div class="comment-footer">
+                        @if ($comment->replies->isNotEmpty())
+                            <button class="btn btn-sm btn-clear text-purple toggle-replies" data-comment-id="{{ $comment->id }}">
+                                <i class="fas fa-comment-alt"></i> {{ $comment->replies->count() }} Replies
+                            </button>
+                        @endif
+                        <button class="btn btn-sm btn-clear text-primary toggle-reply-form" data-comment-id="{{ $comment->id }}">
+                            <i class="fas fa-reply-all"></i> Reply
+                        </button>
+                    </div>
 
-                        $isFavorited = Auth::check() && Auth::user()->favoriteLessons()->where('lesson_id', $lessonId)->exists();
-                        $favoriteCount = $lesson->favoritedByUsers()->count();
-                    @endphp
-
-                    <!-- Like Link -->
-                    <a href="#" class="text-sm text-primary mr-3 like-link {{ $isLiked ? 'liked' : '' }}" data-lesson-id="{{ $lessonId }}">
-                        <i class="{{ $isLiked ? 'fas' : 'far' }} fa-thumbs-up mr-1"></i>
-                        <span id="liked">{{ $isLiked ? 'Liked' : 'Like' }}</span>
-                        <span class="ml-1">( <span id="like-count">{{ $likeCount }}</span> )</span>
-                    </a>
-
-                    <!-- Favorite Link -->
-                    <a href="#" class="text-sm text-success mr-3 add-to-favorite-link mr-2 {{ $isFavorited ? 'added-to-favorites' : '' }}" data-lesson-id="{{ $lessonId }}">
-                        <i class="{{ $isFavorited ? 'fas' : 'far' }} fa-heart mr-1"></i>
-                        <span id="favourite">{{ $isFavorited ? 'Added to Favorites' : 'Add to Favorites' }}</span>
-                        <span class="ml-1">( <span id="favourite-count">{{ $favoriteCount }}</span> )</span>
-                    </a>
-
-
-
-
-
-
-                        @php
-                            $totalComments = count($lesson->comments);
-                            $totalReplies = 0;
-
-                            $total = $totalComments + $totalReplies;
-                        @endphp
-
-                        <span class="float-right">
-                            <a href="#" class="link-black text-sm">
-                                <i class="far fa-comments mr-1"></i> Comments ( <span id="comment-count">{{ $total }}</span> )
-                            </a>
-                        </span>
-
-                      </p>
-
-                <!-- Add more details or information about the lesson -->
-                <div class="comment-section mt-4 mb-3">
-
-                        <!-- Comment Form -->
-                        <p class="alert alert-danger p-1" id="comment-error" style="display: none;"></p>
-                        <p class="alert alert-success p-1" id="comment-message" style="display: none;"></p>
-                        <p class="alert alert-danger p-1" id="reply-error" style="display: none;"></p>
-                        <p class="alert alert-success p-1" id="reply-message" style="display: none;"></p>
-                        <form id="commentForm" action="{{ route('comment.store', ['lesson' => $lesson->id]) }}" method="POST" class="mt-4">
-                            @csrf
-                            <div class="input-group">
-                                <input id="commentContent" type="text" name="comment_content" class="form-control form-control-sm" placeholder="Type a comment">
-                                <div class="input-group-append">
-                                    <button id="submitComment" type="button" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
-                                </div>
+                    <!-- Reply Form for this comment -->
+                    <form action="{{ route('comment.reply', ['comment' => $comment->id]) }}" method="POST" class="reply-form mt-2" id="comment-reply-{{$comment->id}}" style="display:none;">
+                        @csrf
+                        <div class="input-group">
+                            <input type="text" name="reply_content" class="form-control" placeholder="Type a reply">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn bg-purple"><i class="fas fa-paper-plane"></i></button>
                             </div>
-                        </form>
-                                        
-                    <!-- Display existing comments -->
-                    <div class="card">
-                        <div class="card-body comments-section" style="height: 300px; overflow-y: auto;">
-                            <h6>Comments</h6>
+                        </div>
+                    </form>
 
-                            @foreach ($lesson->comments as $comment)
-                                <div class="comment mb-3" data-comment-id="{{ $comment->id }}">
-                                    <div class="comment-header">
-                                        <strong>{{ $comment->user->profile->full_name }}</strong>
-                                        <small class="text-muted"><b>{{ $comment->created_at->diffForHumans() }}</b></small>
+                    <!-- Display replies to this comment -->
+                    <div class="replies-container" id="replies-container-{{$comment->id}}" style="display:none;">
+                        @foreach ($comment->replies as $reply)
+                            @if (!$reply->parent_reply_id)
+                                <div class="reply ml-4 mb-2" data-reply-id="{{ $reply->id }}">
+                                    <div class="reply-header">
+                                        <strong>{{ $reply->user->profile->full_name }}</strong>
+                                        <small class="text-muted small-text"><b>{{ $reply->created_at->diffForHumans() }}</b></small>
                                     </div>
-                                    <div class="comment-body">
-                                        {{ $comment->content }}
+                                    <div class="reply-body">
+                                        {{ $reply->content }}
                                     </div>
-                                    <div class="comment-footer">
-                                        @if ($comment->replies->isNotEmpty())
-                                            <button class="btn btn-sm btn-clear text-purple toggle-replies" data-comment-id="{{ $comment->id }}">
-                                                <i class="fas fa-comment-alt"></i> {{ $comment->replies->count() }} Replies
+                                    <div class="reply-footer">
+                                        @if ($reply->replies->isNotEmpty())
+                                            <button class="btn btn-sm btn-clear text-purple toggle-nested-replies" data-reply-id="{{ $reply->id }}">
+                                                <i class="fas fa-comment-alt"></i> {{ $reply->replies->count() }} Replies
                                             </button>
                                         @endif
-                                        <button class="btn btn-sm btn-clear text-primary toggle-reply-form" data-comment-id="{{ $comment->id }}">
+                                        <button class="btn btn-sm btn-clear text-primary toggle-reply-form" data-comment-id="{{ $comment->id }}" data-parent-reply-id="{{ $reply->id }}">
                                             <i class="fas fa-reply-all"></i> Reply
                                         </button>
                                     </div>
 
-                                    <!-- Reply Form for this comment -->
-                                    <form action="{{ route('comment.reply', ['comment' => $comment->id]) }}" method="POST" class="reply-form mt-2" id="comment-reply-{{$comment->id}}" style="display:none;">
+                                    <!-- Reply Form for this reply -->
+                                    <form action="{{ route('comment.reply', ['comment' => $comment->id]) }}" method="POST" class="reply-form mt-2" id="form-reply-{{$reply->id}}" style="display:none;">
                                         @csrf
+                                        <input type="hidden" name="parent_reply_id" value="{{ $reply->id }}">
                                         <div class="input-group">
                                             <input type="text" name="reply_content" class="form-control" placeholder="Type a reply">
                                             <div class="input-group-append">
@@ -207,57 +412,24 @@
                                         </div>
                                     </form>
 
-                                    <!-- Display replies to this comment -->
-                                    <div class="replies-container" id="replies-container-{{$comment->id}}" style="display:none;">
-                                        @foreach ($comment->replies as $reply)
-                                            @if (!$reply->parent_reply_id)
-                                                <div class="reply ml-4 mb-2" data-reply-id="{{ $reply->id }}">
-                                                    <div class="reply-header">
-                                                        <strong>{{ $reply->user->profile->full_name }}</strong>
-                                                        <small class="text-muted small-text"><b>{{ $reply->created_at->diffForHumans() }}</b></small>
-                                                    </div>
-                                                    <div class="reply-body">
-                                                        {{ $reply->content }}
-                                                    </div>
-                                                    <div class="reply-footer">
-                                                        @if ($reply->replies->isNotEmpty())
-                                                            <button class="btn btn-sm btn-clear text-purple toggle-nested-replies" data-reply-id="{{ $reply->id }}">
-                                                                <i class="fas fa-comment-alt"></i> {{ $reply->replies->count() }} Replies
-                                                            </button>
-                                                        @endif
-                                                        <button class="btn btn-sm btn-clear text-primary toggle-reply-form" data-comment-id="{{ $comment->id }}" data-parent-reply-id="{{ $reply->id }}">
-                                                            <i class="fas fa-reply-all"></i> Reply
-                                                        </button>
-                                                    </div>
-
-                                                    <!-- Reply Form for this reply -->
-                                                    <form action="{{ route('comment.reply', ['comment' => $comment->id]) }}" method="POST" class="reply-form mt-2" id="form-reply-{{$reply->id}}" style="display:none;">
-                                                        @csrf
-                                                        <input type="hidden" name="parent_reply_id" value="{{ $reply->id }}">
-                                                        <div class="input-group">
-                                                            <input type="text" name="reply_content" class="form-control" placeholder="Type a reply">
-                                                            <div class="input-group-append">
-                                                                <button type="submit" class="btn bg-purple"><i class="fas fa-paper-plane"></i></button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-
-                                                    <!-- Nested replies container -->
-                                                    <div class="nested-replies ml-4" id="nested-replies-{{$reply->id}}" style="display:none;">
-                                                        @include('partials.replies', ['replies' => $reply->replies])
-                                                    </div>
-                                                </div>
-                                            @endif
-                                        @endforeach
+                                    <!-- Nested replies container -->
+                                    <div class="nested-replies ml-4" id="nested-replies-{{$reply->id}}" style="display:none;">
+                                        @include('partials.replies', ['replies' => $reply->replies])
                                     </div>
                                 </div>
-                            @endforeach
-
-                        </div>
+                            @endif
+                        @endforeach
                     </div>
-
                 </div>
-            </div>
+            @endforeach
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+
             <div class="col-md-4">
     <h5>Related Lessons</h5>
 
@@ -353,9 +525,33 @@
 
 @section('scripts')
 <script>
+    function toggleDescription(element) {
+    const container = element.closest('.lesson-description');
+    const shortDescription = container.querySelector('.short-description');
+    const fullDescription = container.querySelector('.full-description');
+    const showMore = container.querySelector('.show-more');
+    const showLess = container.querySelector('.show-less');
+
+    if (fullDescription.style.display === 'none') {
+        shortDescription.style.display = 'none';
+        fullDescription.style.display = 'inline';
+        showMore.style.display = 'none';
+        showLess.style.display = 'inline';
+    } else {
+        shortDescription.style.display = 'inline';
+        fullDescription.style.display = 'none';
+        showMore.style.display = 'inline';
+        showLess.style.display = 'none';
+    }
+}
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
     const video = document.getElementById('lessonVideo');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const volumeRange = document.getElementById('volumeRange');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
     const currentTimeDisplay = document.getElementById('currentTime');
     const progressRange = document.getElementById('progressRange');
     const durationDisplay = document.getElementById('duration');
@@ -382,7 +578,7 @@
         progressRange.value = (video.currentTime / video.duration) * 100;
     });
 
-    // Seek video on progress bar click
+    // Seek video on progress bar input
     progressRange.addEventListener('input', function() {
         video.currentTime = (progressRange.value / 100) * video.duration;
     });
@@ -392,6 +588,19 @@
         durationDisplay.textContent = formatTime(video.duration);
     });
 
+    // Fullscreen functionality
+    fullscreenBtn.addEventListener('click', function () {
+        if (video.requestFullscreen) {
+            video.requestFullscreen();
+        } else if (video.mozRequestFullScreen) { // Firefox
+            video.mozRequestFullScreen();
+        } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
+            video.webkitRequestFullscreen();
+        } else if (video.msRequestFullscreen) { // IE/Edge
+            video.msRequestFullscreen();
+        }
+    });
+
     // Format time in MM:SS format
     function formatTime(seconds) {
         const minutes = Math.floor(seconds / 60);
@@ -399,9 +608,35 @@
         return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
     }
 
+    // Double-click to fast forward/reverse functionality
+    video.addEventListener('dblclick', function(event) {
+        const rect = video.getBoundingClientRect();
+        const clickPosition = event.clientX - rect.left;
+        const videoWidth = rect.width;
+        const jumpTime = 10; // Seconds to jump
+
+        if (clickPosition < videoWidth / 2) {
+            // Left side double-click: rewind
+            video.currentTime = Math.max(0, video.currentTime - jumpTime);
+        } else {
+            // Right side double-click: fast forward
+            video.currentTime = Math.min(video.duration, video.currentTime + jumpTime);
+        }
+    });
+
+    // Pause video on visibility change
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            video.pause();
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    });
+
     // Initialize video controls
     playPauseBtn.addEventListener('click', togglePlayPause);
+});
 </script>
+
 
 <script>
    $(document).ready(function() {
@@ -453,9 +688,9 @@
         }
     });
 
-    // Function to post comment via Ajax
     function postComment() {
         var commentContent = $('#commentContent').val();
+        var commentCountElement = $('.comment-count');
 
         if (commentContent.trim() === '') {
             $('#comment-error').text('Please enter a comment').fadeIn().delay(3000).fadeOut();
@@ -469,6 +704,8 @@
             success: function(response) {
                 $('#comment-message').text('Comment posted successfully').fadeIn().delay(3000).fadeOut();
                 $('#commentContent').val(''); // Clear input field after successful submission
+                var newCommentCount = response.comment_count;
+                commentCountElement.text(newCommentCount); // Update comment count
                 // Optional: Reload comments or update UI as needed
             },
             error: function(xhr, status, error) {
@@ -526,11 +763,11 @@
 </script>
 
 <script>
- $(document).ready(function() {
+    $(document).ready(function() {
     $('.add-to-favorite-link').click(function(e) {
         e.preventDefault();
         
-        var link = $(this); // Store the link element
+        var link = $(this);
         var lessonId = link.data('lesson-id');
         var token = $('meta[name="csrf-token"]').attr('content');
         
@@ -541,66 +778,98 @@
                 _token: token
             },
             success: function(response) {
-                // Toggle icon and text based on response
                 if (response.message === 'Lesson added to favorites') {
-                    link.find('i').removeClass('far fa-heart').addClass('fas fa-heart'); // Change heart icon to solid
-                    // link.removeClass('text-success').addClass('text-success'); // Change text color to success
-                    $('#favourite').text('Added to Favorites'); // Update link text
+                    link.find('i').removeClass('far fa-heart').addClass('fas fa-heart');
                 } else if (response.message === 'Lesson removed from favorites') {
-                    link.find('i').removeClass('fas fa-heart').addClass('far fa-heart'); // Change heart icon to empty
-                    // link.removeClass('text-success').addClass('text-dark'); // Change text color back to dark
-                    $('#favourite').text('Add to Favorites'); // Update link text
+                    link.find('i').removeClass('fas fa-heart').addClass('far fa-heart');
                 }
                 var newFavoriteCount = response.favorite_count;
-                console.log(newFavoriteCount)
-                $('#favourite-count').text('');
-                $('#favourite-count').text(newFavoriteCount);
+                link.find('.favorite-count').text(newFavoriteCount);
             },
             error: function(xhr) {
                 console.log(xhr.responseText);
-                // Handle errors
             }
         });
     });
-    });
 
-    $(document).ready(function() {
-        $('.like-link').click(function(e) {
-            e.preventDefault();
-            
-            var link = $(this); // Store the link element
-            var lessonId = link.data('lesson-id');
-            var token = $('meta[name="csrf-token"]').attr('content');
-            
-            $.ajax({
-                url: '/lessons/' + lessonId + '/like',
-                type: 'POST',
-                data: {
-                    _token: token
-                },
-                success: function(response) {
-                    if (response.liked) {
-                        link.addClass('liked');
-                        link.find('i').removeClass('far fa-thumbs-up').addClass('fas fa-thumbs-up'); // Change icon to solid thumbs-up
-                        $('#liked').text('Liked');
-                    } else {
-                        link.removeClass('liked');
-                        link.find('i').removeClass('fas fa-thumbs-up').addClass('far fa-thumbs-up'); // Change icon to regular thumbs-up
-                        $('#liked').text('Like');
-                    }
-                var newLikeCount = response.like_count;
-                    console.log(newLikeCount)
-                $('#like-count').text('');
-                $('#like-count').text(newLikeCount);
-                },
-                error: function(xhr) {
-                    console.log(xhr.responseText);
-                    // Handle errors
+    $('.like-link').click(function(e) {
+        e.preventDefault();
+        
+        var link = $(this);
+        var lessonId = link.data('lesson-id');
+        var token = $('meta[name="csrf-token"]').attr('content');
+        
+        $.ajax({
+            url: '/lessons/' + lessonId + '/like',
+            type: 'POST',
+            data: {
+                _token: token
+            },
+            success: function(response) {
+                if (response.liked) {
+                    link.addClass('liked');
+                    link.find('i').removeClass('far fa-thumbs-up').addClass('fas fa-thumbs-up');
+                } else {
+                    link.removeClass('liked');
+                    link.find('i').removeClass('fas fa-thumbs-up').addClass('far fa-thumbs-up');
                 }
-            });
+                var newLikeCount = response.like_count;
+                link.find('.like-count').text(newLikeCount);
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+            }
         });
     });
 
+    $('#toggle-comments').click(function(e) {
+        e.preventDefault();
+        $('#comments-section').toggle();
+    });
+
+      // Toggle reply form visibility on button click
+      $(document).on('click', '.toggle-repl-form', function() {
+            var commentId = $(this).data('comment-id');
+            $(`#comment-reply-${commentId}`).toggle();
+        });
+
+        // Submit reply using Ajax
+        $(document).on('submit', '.reply-for', function(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+
+            var replyForm = $(this); // Reference to the submitted form
+            var replyContent = replyForm.find('input[name="reply_content"]').val();
+
+            if (replyContent.trim() === '') {
+                $('#reply-error').text('Please enter a reply').fadeIn().delay(3000).fadeOut();
+                return;
+            }
+
+            // Get the comment ID from the form's hidden input field
+            var commentId = replyForm.find('input[name="comment_id"]').val();
+
+            // Update the form action URL with the correct comment ID
+            replyForm.attr('action', `{{ route('comment.reply', ['comment' => ':commentId']) }}`.replace(':commentId', commentId));
+
+            // Perform AJAX request
+            $.ajax({
+                url: replyForm.attr('action'),
+                method: replyForm.attr('method'),
+                data: replyForm.serialize(),
+                success: function(response) {
+                    // Display success message on the page
+                    $('#reply-message').text('Reply posted successfully').fadeIn().delay(3000).fadeOut();
+
+                    // Optional: Update UI to display the new reply
+                    replyForm.find('input[name="reply_content"]').val(''); // Clear reply input field
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error posting reply:', error);
+                    $('#reply-error').text('Error posting reply. Please try again.').fadeIn().delay(3000).fadeOut();
+                }
+            });
+        });
+});
 
 </script>
 
@@ -719,6 +988,8 @@
     });
 
 </script>
+
+
 <script>
      $('.lesson-link').click(function(e) {
         e.preventDefault(); // Prevent default link behavior
@@ -773,12 +1044,6 @@
         }, duration);
     }
 
-    // Function to display the connects selection form and hide the modal footer
-    // function displayConnectsSelectionForm() {
-    //     $('#connectsForm').show(); // Show the connects form
-    //     $('#conect-modal-footer').hide(); // Hide the modal footer
-    //     $('#schoolConnectsModal').modal('show'); // Show the modal
-    // }
 
     // Function to display school connects modal
     function displaySchoolConnectsModal(lessonName, requiredConnects, lessonId) {

@@ -129,7 +129,7 @@ Central School System - {{ $user->profile->full_name}}
                     <li class="nav-item small-text">
                         <a class="nav-link active" href="#lessons" data-toggle="tab">
                             <i class="fas fa-book-open nav-icon"></i>
-                            Lessons
+                            Lessons <sup class="text-green"> {{$lesson_count }} </sup>
                         </a>
                     </li>
                     <li class="nav-item small-text">
@@ -242,104 +242,20 @@ Central School System - {{ $user->profile->full_name}}
                   <!-- /.tab-pane -->
                   <div class="tab-pane active" id="lessons">
                     @include('partials.create_lesson')
-                    <div class="lessons-container">
-                    <div class="row">
-                        @php
-                            // Retrieve lessons associated with the authenticated user, ordered by creation date in descending order
-                            $lessons = auth()->user()->lessons()->orderBy('created_at', 'desc')->get();
-                        @endphp
-
-                        @foreach ($lessons as $lesson)
-                            <div class="col-md-4 position-relative">
-                                <div class="card lesson-card">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-clear dropdown-toggle" type="button" id="lessonActionsDropdown{{ $lesson->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-left" aria-labelledby="lessonActionsDropdown{{ $lesson->id }}">
-                                            <!-- Button to trigger Edit Lesson Modal -->
-                                            <a class="dropdown-item edit-lesson-btn" href="#" data-lesson-id="{{ $lesson->id }}">Edit</a>
-
-                                            @if ($lesson->user_id == auth()->id())
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#removelessonModal{{ $lesson->id }}">Remove lesson</a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <br>
-
-                                    <!-- Display lesson thumbnail if available -->
-                                    <div class="thumbnail-container">
-                                        <a href="{{ route('lessons.show', $lesson) }}">
-                                            @if ($lesson->thumbnail)
-                                                <!-- Display the lesson thumbnail with play icon overlay -->
-                                                <div class="thumbnail-with-play">
-                                                    <img src="{{ asset($lesson->thumbnail) }}" alt="{{ $lesson->title }}" class="img-fluid lesson-thumbnail">
-                                                    <div class="play-icon-overlay">
-                                                        <i class="fas fa-play"></i>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <!-- Display default thumbnail with play icon -->
-                                                <div class="no-thumbnail">
-                                                    <div class="video-icon">
-                                                        <i class="fas fa-video"></i>
-                                                    </div>
-                                                    <div class="overlay"></div>
-                                                    <img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">
-                                                </div>
-                                            @endif
-                                        </a>
-                                    </div>
-                                    <h5><small>{{ \Illuminate\Support\Str::limit($lesson->title, 15) }}</small></h5>
-
-                                    <p class="lesson-description">
-                                        <small>{{ \Illuminate\Support\Str::limit($lesson->description, 200) }}</small>
-                                        @if (strlen($lesson->description) > 200)
-                                            <a href="#" class="show-more small-text" data-lesson-id="{{ $lesson->id }}">Show more</a>
-                                        @endif
-                                    </p>
-
-                                    <!-- Full description overlay -->
-                                    <div class="full-description-overlay" id="fullDescription{{ $lesson->id }}">
-                                        <div class="full-description-content">
-                                            <h5 class="lesson-title">{{ $lesson->title }}</h5>
-                                            <p class="small-text">{{ $lesson->description }}</p>
-                                            <a href="#" class="show-less small-text" data-lesson-id="{{ $lesson->id }}">Show less</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Remove lesson Modal -->
-                            <div class="modal fade" id="removelessonModal{{ $lesson->id }}" tabindex="-1" role="dialog" aria-labelledby="removelessonModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="removelessonModalLabel">Remove lesson</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="alert alert-success lesson-message" style="display:none;"></div>
-                                        <div class="alert alert-danger" id="lesson-error" style="display:none;"></div>
-                                        <div class="modal-body">
-                                            Are you sure you want to Delete <b>{{ $lesson->title }}</b>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-danger" id="removeLessonBtn" onclick="removelesson({{ $lesson->id }})">Remove</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="lessons-container" >
+                        <div class="row">
+                            @foreach ($lessons_per_page as $lesson)
+                                @include('partials.lesson_card', ['lesson' => $lesson])
+                            @endforeach
+                        </div>
                     </div>
+                </div>
 
+                @foreach ($lessons_per_page as $lesson)
+                    @include('partials.remove_lesson_modal', ['lesson' => $lesson])
+                @endforeach
 
-                  </div>
-                  </div>
-                  <!-- /.tab-pane -->
+                                <!-- /.tab-pane -->
                   <div class="tab-pane" id="analytics">
                       <canvas id="lessonAnalyticsChart" style="height: 400px; width: 100%;"></canvas>
 
@@ -572,6 +488,127 @@ Central School System - {{ $user->profile->full_name}}
         });
     });
 </script>
+<script>
+ var canLoadMore = {
+    lessons: true,
+};
+var currentPageLessons = {
+    lessons: 0,
+};
+var displayedViewedLessonIds = [];
+var loadingLessons = false;
 
+function populateDisplayedIds() {
+    $('.viewed_lessons').each(function() {
+        var viewedLessonId = $(this).data('viewed_lesson-id');
+        if (viewedLessonId && !displayedViewedLessonIds.includes(viewedLessonId)) {
+            displayedViewedLessonIds.push(viewedLessonId);
+        }
+    });
+}
+
+$(document).ready(function() {
+    populateDisplayedIds();
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        var activeTabId = $(e.target).attr('href').substring(1);
+        loadMoreData(activeTabId);
+    });
+
+    $(window).on('scroll', function() {
+        if (isNearBottom()) {
+            var activeTabId = $('.tab-pane.active').attr('id');
+            loadMoreData(activeTabId);
+        }
+    });
+});
+
+function isNearBottom() {
+    return $(window).scrollTop() + $(window).height() >= $(document).height() - 100;
+}
+
+function createLessonHtml(lesson, tabId) {
+    var lessonClass = tabId === 'viewed_lessons' ? 'viewed_lessons' : 'fav_lessons';
+    var title = lesson.title || '';
+    var description = lesson.description || '';
+    var teacherName = lesson.teacher_name || '';
+
+    var lessonHtml = '<div class="col-md-4">';
+    lessonHtml += '<div class="card lesson-card">';
+    lessonHtml += '<div class="thumbnail-container position-relative">';
+    lessonHtml += '<a href="/lessons/' + lesson.id + '" class="' + lessonClass + '" data-' + lessonClass + '-id="' + lesson.id + '">';
+    if (lesson.thumbnail) {
+        lessonHtml += '<div class="thumbnail-with-play">';
+        lessonHtml += '<img src="' + lesson.thumbnail + '" alt="' + title + '" class="img-fluid lesson-thumbnail">';
+        lessonHtml += '<div class="play-icon-overlay"><i class="fas fa-play"></i></div>';
+        lessonHtml += '</div>';
+    } else {
+        lessonHtml += '<div class="no-thumbnail">';
+        lessonHtml += '<div class="video-icon"><i class="fas fa-video"></i></div>';
+        lessonHtml += '<div class="overlay"></div>';
+        lessonHtml += '<img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">';
+        lessonHtml += '</div>';
+    }
+    lessonHtml += '<p class="badge bg-primary" style="position:relative; z-index:99; float:left"><small><b>' + lesson.school_connects_required + ' SC</b></small></p>';
+    lessonHtml += '<p class="lesson-date small-text" style="float:right">' + lesson.created_at + '</p>';
+    lessonHtml += '</a>';
+    lessonHtml += '</div>';
+    lessonHtml += '<div class="lesson-details">';
+    lessonHtml += '<p><small><b>' + teacherName + '</b></small></p>';
+    lessonHtml += '<h5><small>' + title.substring(0, 15) + '</small></h5>';
+    lessonHtml += '<p><small>' + description.substring(0, 200) + '</small></p>';
+    lessonHtml += '</div>';
+    lessonHtml += '</div>';
+    lessonHtml += '</div>';
+    return lessonHtml;
+}
+
+function loadMoreData(activeTabId) {
+    if (!loadingLessons && canLoadMore[activeTabId]) {
+        loadingLessons = true;
+        var route, displayedIds;
+
+        if (activeTabId === 'lessons') {
+            route = "{{ route('load.more.viewedlessons') }}";
+            displayedIds = displayedViewedLessonIds;
+        }
+
+        $.ajax({
+            url: route,
+            type: "GET",
+            data: {
+                page: currentPageLessons[activeTabId],
+                displayedLessonIds: displayedIds
+            },
+            beforeSend: function() {
+                $('#loader').append('<div class="loader-container"><div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading Lessons...</div></div>');
+            },
+            success: function(response) {
+                if (response && response.lessons && response.lessons.length > 0) {
+                    currentPageLessons[activeTabId]++;
+                    $.each(response.lessons, function(index, item) {
+                        if (!displayedIds.includes(item.id)) {
+                            var newItem = createLessonHtml(item, activeTabId);
+                            $('#' + activeTabId + ' .lessons-container .row').append(newItem);
+                            displayedIds.push(item.id);
+                        }
+                    });
+                } else {
+                    canLoadMore[activeTabId] = false;
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+                console.log("AJAX Lessons Error:", error);
+            },
+            complete: function() {
+                loadingLessons = false;
+                $('.loader-container').remove();
+            }
+        });
+    }
+}
+
+</script>
 
 @endsection

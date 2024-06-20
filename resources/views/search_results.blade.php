@@ -56,10 +56,60 @@
     .detail-value {
         color: #fff; /* Text color for detail values */
     }
+    .people-card {
+    /* border: 1px solid #000; */
+    height:360px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.people-card:hover {
+    transform: scale(1.05);
+}
+
+.people-card img {
+    border: 2px solid #ddd;
+}
+
+.people-list .card-body {
+    padding: 1.5rem;
+}
+.school-logo {
+        max-width: 120px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+    }
+
+    .user-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.users-list .card {
+    height: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.users-list .card:hover {
+    transform: scale(1.05);
+}
+
+.users-list .card-body {
+    padding: 1.5rem;
+}
+
 </style>
 
 
 @endsection
+
 
 @section('content')
 <!-- Display User Results -->
@@ -78,165 +128,28 @@
                         <li class="nav-item">
                             <a class="nav-link{{ setActiveTab($results, 'users') }}" href="#people" data-toggle="tab">People</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link{{ setActiveTab($results, 'schools') }}" href="#schools" data-toggle="tab">Schools</a>
+                        </li>
                     </ul>
                 </div><!-- /.card-header -->
                 <div class="card-body">
                     <div class="tab-content">
                         <!-- Lessons Tab -->
                         <div class="tab-pane{{ setActiveTab($results, 'lessons') }}" id="lessons">
-                            @if ($results['lessons']->isNotEmpty())
-                                <h5>Lessons</h5>
-                                <div class="lessons-container">
-                                    <div class="row">
-                                        @foreach ($results['lessons'] as $lesson)
-                                            <div class="col-md-4 col-">
-                                                <div class="card lesson-card">
-                                                    @if ($lesson->user_id == auth()->id())
-                                                        <!-- Dropdown menu for actions (only visible to the lesson owner) -->
-                                                        <div class="dropdown">
-                                                            <button class="btn btn-sm btn-clear dropdown-toggle" type="button" id="lessonActionsDropdown{{ $lesson->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                <i class="fas fa-ellipsis-h"></i>
-                                                            </button>
-                                                            <div class="dropdown-menu dropdown-menu-left" aria-labelledby="lessonActionsDropdown{{ $lesson->id }}">
-                                                                <a class="dropdown-item edit-lesson-btn" href="#" data-lesson-id="{{ $lesson->id }}">Edit</a>
-                                                                <div class="dropdown-divider"></div>
-                                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#removelessonModal{{ $lesson->id }}">Remove lesson</a>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-
-                                                    <!-- Display lesson thumbnail -->
-                                                    <div class="thumbnail-container position-relative">
-                                                        <a href="#" class="lesson-link" data-lesson-id="{{ $lesson->id }}" data-lesson-title="{{ $lesson->title }}" data-school-connects-required="{{ $lesson->school_connects_required }}">
-                                                            @if ($lesson->enrolledUsers()->where('user_id', auth()->id())->exists())
-                                                                <span class="badge bg-purple" style="position:absolute; top:10px; right:10px; z-index:99;"><i class="fas fa-check"></i></span>
-                                                            @endif
-                                                            @if ($lesson->thumbnail)
-                                                                <div class="thumbnail-with-play">
-                                                                    <img src="{{ asset($lesson->thumbnail) }}" alt="{{ $lesson->title }}" class="img-fluid lesson-thumbnail">
-                                                                    <div class="play-icon-overlay">
-                                                                        <i class="fas fa-play"></i>
-                                                                    </div>
-                                                                </div>
-                                                            @else
-                                                                <div class="no-thumbnail">
-                                                                    <div class="video-icon">
-                                                                        <i class="fas fa-video"></i>
-                                                                    </div>
-                                                                    <div class="overlay"></div>
-                                                                    <img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">
-                                                                </div>
-                                                            @endif
-                                                        </a>
-                                                    </div>
-
-                                                    <!-- Additional lesson details -->
-                                                    <p><small><b>{{ $lesson->teacher->profile->full_name }}</b></small></p>
-                                                    <h5><small>{{ \Illuminate\Support\Str::limit($lesson->title, 15) }}</small></h5>
-                                                    <p><small>{{ \Illuminate\Support\Str::limit($lesson->description, 200) }}</small></p>
-                                                    <p class="badge bg-purple"><small><b>{{ $lesson->school_connects_required }} school connects</b></small></p>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @else
-                                <p>No lessons found for the search term <b>{{ $term }}</b>.</p>
-                            @endif
+                            @include('partials.search_partials.lessons', ['results' => $results['lessons'], 'term' => $term])
                         </div>
                         <!-- Events Tab -->
                         <div class="tab-pane{{ setActiveTab($results, 'events') }}" id="events">
-                            @if ($results['events']->isNotEmpty())
-                                <h5>Events</h5>
-                                <ul class="users-list event-list clearfix">
-                                    @foreach ($results['events'] as $event)
-                                        <li class="col-md-4 col-">
-                                            <!-- Display event card -->
-                                            <div class="card admin-card" data-event-id="{{ $event->id }}" data-event-title="{{ $event->title }}">
-                                                <!-- Event card details -->
-                                                <div class="card-body">
-                                                    <div class="user-profile shadow p-3 mb-5 bg-white">
-                                                        <h4><b><a class="users-list-name" href="#" data-event-title="{{ $event->title }}">{{ $event->title }}</a></b></h4>
-                                                        <!-- Display event banner or placeholder -->
-                                                        @if ($event->banner_picture || $school->logo)
-                                                            <a href="#" data-toggle="modal" data-target="#imageModal{{ $event->id }}">
-                                                                <img src="{{ $event->banner_picture ? asset('storage/' . $event->banner_picture) : ($school->logo ? asset('storage/' . $school->logo) : asset('path_to_camera_icon')) }}" alt="Event Banner" class="img-fluid mt-2">
-                                                            </a>
-                                                        @else
-                                                            <i class="fas fa-camera" style="font-size: 150px;"></i>
-                                                        @endif
-                                                        <!-- Event details -->
-                                                        <div class="modal fade" id="imageModal{{ $event->id }}" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel{{ $event->id }}" aria-hidden="true">
-                                                            <!-- Modal content -->
-                                                        </div>
-                                                        <!-- Event details section -->
-                                                        <div class="user-permissions">
-                                                            <h5 style="cursor:pointer;" class="details-heading bg-secondary p-2 toggle-details-btn" data-target="event-details-{{ $event->id }}">
-                                                                Details <i class="toggle-icon fas fa-chevron-down"></i>
-                                                            </h5>
-                                                            <div class="collapsed-details" id="event-details-{{ $event->id }}">
-                                                                <!-- Display event details -->
-                                                                <p><strong>Starting Date:</strong> {{ $event->start_date }}</p>
-                                                                <p><strong>End Date:</strong> {{ $event->end_date }}</p>
-                                                                <p><strong>Description:</strong> {{ $event->description }}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No events found for the search term <b>{{ $term }}</b>.</p>
-                            @endif
+                            @include('partials.search_partials.events', ['results' => $results['events'], 'term' => $term])
                         </div>
                         <!-- People Tab -->
                         <div class="tab-pane{{ setActiveTab($results, 'users') }}" id="people">
-                            @if ($results['users']->isNotEmpty())
-                                <h5>Users</h5>
-                                <ul class="users-list people-list clearfix">
-                                    @foreach ($results['users'] as $user)
-                                        <li class="col-md-4 col-">
-                                            <!-- Display user card -->
-                                            <div class="card people-card" data-people-id="{{ $user->id }}" data-admin-name="{{ $user->profile->full_name }}">
-                                                <!-- User card details -->
-                                                <div class="card-body">
-                                                    <div class="user-profile">
-                                                        <p class=""><b> {{$user->profile->full_name}}</b></p>
-                                                        @if ($user->profile->profile_picture)
-                                                            <img src="{{ asset('storage/' . $user->profile->profile_picture) }}" alt="User Image" width="150px">
-                                                        @else
-                                                            <img src="{{ asset('dist/img/avatar5.png') }}" alt="User Image" width="150px">
-                                                        @endif
-                                                        <a class="users-list-name" href="#" data-admin-name="{{ $user->profile->full_name }}">
-                                                            <!-- <br> -->
-                                                            <span class="badge p-1 badge-info">{{ $user->profile->role }}</span>
-                                                        </a>
-                                                    </div>
-                                                    <!-- User details -->
-                                                    <div class="user-permissions">
-                                                        <h5 style="cursor:pointer;" class="deti-heading btn btn-info toggle-details-btn" data-target="student-details-{{ $user->id }}">
-                                                            Details <i class="toggle-icon fas fa-chevron-down"></i>
-                                                        </h5>
-                                                        <div class="collapsed-details" id="student-details-{{ $user->id }}">
-                                                        <h5 style="cursor:pointer;" class="deti-heading toggle-details-btn btn btn-info" data-target="student-details-{{ $user->id }}">
-                                                            Details <i class="toggle-icon fas fa-chevron-down"></i>
-                                                        </h5>
-                                                            <p><strong>Email:</strong> {{ $user->email }}</p>
-                                                            <p><strong>Phone:</strong> {{ $user->profile->phone_number ?? 'N/A' }}</p>
-                                                            <p><strong>Gender:</strong> {{ $user->profile->gender }}</p>
-                                                            <p><strong>Date of Birth:</strong> {{ $user->profile->date_of_birth ?? 'N/A' }}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>No users found for the search term <b>{{ $term }}</b>.</p>
-                            @endif
+                            @include('partials.search_partials.users', ['results' => $results['users'], 'term' => $term])
+                        </div>
+                        <!-- Schools Tab -->
+                        <div class="tab-pane{{ setActiveTab($results, 'schools') }}" id="schools">
+                            @include('partials.search_partials.schools', ['results' => $results['schools'], 'term' => $term])
                         </div>
                     </div>
                     <!-- /.tab-content -->
@@ -247,125 +160,19 @@
     </div>
 </div>
 
-
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="successModalLabel">Success!</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="text-success" id="successMessage"></p>
-                <p class="text-success" id="errorSuucessMessage"></p>
-                <!-- <a href="" id="errorModalSuccessLink" class="btn btn-primary"></a> -->
-                <div class="successForm"  style="display:none">
-                <div class="form-group" >
-                    <label for="connectsAmountSuccess">Get More Study Connects:</label>
-                    <select class="form-control" id="connectsAmountSuccess" name ="connectsAmountSuccess">
-                    <option value="500">90 Connects - ₦500</option>
-                        <option value="1000">210 Connects - ₦1000</option>
-                        <option value="2000">450 Connects - ₦2000</option>
-                        <option value="3000">1000 Connects - ₦3000</option>
-                    </select>
-                </div>
-                <a href="#" id="confirmBuySucessConnectsBtn" class="btn btn-success">Buy Connects</a>
-
-                </div>
-                
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary closeBtn" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-purple text-white">
-                <h5 class="modal-title" id="errorModalLabel">Error!</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="text-danger errorMessage" id="errorMessage"></p>
-                <!-- <a href="" id="errorModalLink" class="btn btn-primary"></a> -->
-                <div id="buyConnectForm">
-                <label for="connectAmountError">Select Number of Connects:</label>
-                    <select class="form-control" id="connectAmountError">
-                        <option value="500">90 Connects - ₦500</option>
-                        <option value="1000">210 Connects - ₦1000</option>
-                        <option value="2000">450 Connects - ₦2000</option>
-                        <option value="3000">1000 Connects - ₦3000</option>
-                    </select>
-                <button id="confirmBuyConnectsErrorBtn" class="btn btn-success">Buy Connects</button>
-
-                </div>
-                <div class="form-group">
-                    
-                </div>
-
-            </div>
-            <!-- <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div> -->
-        </div>
-    </div>
-</div>
-
-
-
-<div class="modal fade" id="schoolConnectsModal" tabindex="-1" aria-labelledby="schoolConnectsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-purple text-white">
-                <h5 class="modal-title" id="schoolConnectsModalLabel">School Connects Required</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-success" id="connects-message" style="display:none;"></div>
-                <div class="alert alert-danger" id="connects-error" style="display:none;"></div>
-                <p>This lesson <b><span id="lessonName"></span></b> requires <span id="requiredConnects"></span> school connects to access.</p>
-                <div id="connectsForm"  style="display:none">
-                <div class="form-group">
-                    <label for="connectAmount">Select Number of Connects:</label>
-                    <select class="form-control" name="connectAmount" id="connectAmount">
-                        <option value="500">90 Connects - ₦500</option>
-                        <option value="1000">210 Connects - ₦1000</option>
-                        <option value="2000">450 Connects - ₦2000</option>
-                        <option value="3000">1000 Connects - ₦3000</option>
-                    </select>
-                </div>
-                <button id="confirmBuyConnectsBtn" class="btn btn-success">Buy Connects</button>
-
-                </div>
-            </div>
-            <div class="modal-footer" id="conect-modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="confirmPlayBtn">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
+@include('partials.search_partials.modals')
 @endsection
+
 @php
 function setActiveTab($results, $tabName) {
     // Get the count of each tab's results
     $lessonCount = $results['lessons']->count();
-    $peopleCount = $results['users']->count(); // Assuming 'users' is the people tab
+    $peopleCount = $results['users']->count();
     $eventCount = $results['events']->count();
+    $schoolCount = $results['schools']->count();
 
     // Determine the tab with the highest count by default
-    $maxCount = max($lessonCount, $peopleCount, $eventCount);
+    $maxCount = max($lessonCount, $peopleCount, $eventCount, $schoolCount);
 
     if ($maxCount === $lessonCount) {
         return ($tabName === 'lessons') ? ' active' : '';
@@ -373,26 +180,40 @@ function setActiveTab($results, $tabName) {
         return ($tabName === 'users') ? ' active' : '';
     } elseif ($maxCount === $eventCount) {
         return ($tabName === 'events') ? ' active' : '';
+    } elseif ($maxCount === $schoolCount) {
+        return ($tabName === 'schools') ? ' active' : '';
     }
 
     // If counts are equal, prioritize based on specific conditions
-    if ($lessonCount === $peopleCount && $lessonCount === $eventCount) {
-        // All counts are equal, prioritize lessons > people > events
+    if ($lessonCount === $peopleCount && $lessonCount === $eventCount && $lessonCount === $schoolCount) {
+        // All counts are equal, prioritize lessons > people > events > schools
         return ($tabName === 'lessons') ? ' active' : '';
+    } elseif ($lessonCount === $peopleCount && $lessonCount === $eventCount) {
+        return ($tabName === 'lessons') ? ' active' : '';
+    } elseif ($lessonCount === $peopleCount && $lessonCount === $schoolCount) {
+        return ($tabName === 'lessons') ? ' active' : '';
+    } elseif ($lessonCount === $eventCount && $lessonCount === $schoolCount) {
+        return ($tabName === 'lessons') ? ' active' : '';
+    } elseif ($peopleCount === $eventCount && $peopleCount === $schoolCount) {
+        return ($tabName === 'users') ? ' active' : '';
     } elseif ($lessonCount === $peopleCount) {
-        // Lessons and people counts are equal
         return ($tabName === 'lessons') ? ' active' : '';
     } elseif ($lessonCount === $eventCount) {
-        // Lessons and events counts are equal
+        return ($tabName === 'lessons') ? ' active' : '';
+    } elseif ($lessonCount === $schoolCount) {
         return ($tabName === 'lessons') ? ' active' : '';
     } elseif ($peopleCount === $eventCount) {
-        // People and events counts are equal
         return ($tabName === 'users') ? ' active' : '';
+    } elseif ($peopleCount === $schoolCount) {
+        return ($tabName === 'users') ? ' active' : '';
+    } elseif ($eventCount === $schoolCount) {
+        return ($tabName === 'events') ? ' active' : '';
     }
 
     return ''; // Default: No active tab
 }
 @endphp
+
 
 
 @section('scripts')

@@ -365,38 +365,37 @@ class LessonController extends Controller
         // Check if the user has enough school connects
         if ($userConnects >= $requiredConnects) {
             // Calculate lesson earnings based on connects purchased
-            $lessonEarnings = $requiredConnects * 9; // Each school_connect is worth 9 units
+            $lessonEarnings = $requiredConnects * 6; // Each school_connect is worth 6 units
 
             // Calculate school's earnings (20% of lesson earnings)
-            $schoolEarnings = $lessonEarnings * 0.20;
+            $schoolEarnings = $lessonEarnings * 0.20 / 3;
 
             // Calculate teacher's earnings (40% of lesson earnings)
-            $teacherEarnings = $lessonEarnings * 0.40;
-            // dd($lesson->user);
+            $teacherEarnings = $lessonEarnings * 0.40 / 3;
 
             // Update teacher's wallet if exists
             if ($lesson->teacher && $lesson->teacher->wallet) {
-                $lesson->teacher->wallet->increment('balance', $teacherEarnings);
+                $lesson->teacher->wallet->increment('balance', ceil($teacherEarnings));
 
                 // Record teacher's earnings Lessontransaction
                 $lessonTransaction = new LessonTransaction();
                 $lessonTransaction->lesson_id = $lessonId;
                 $lessonTransaction->user_id = $lesson->user_id;
                 $lessonTransaction->type = 'teacher_earnings';
-                $lessonTransaction->amount = $teacherEarnings;
+                $lessonTransaction->amount = ceil($teacherEarnings);
                 $lessonTransaction->save();
             }
 
             // Update school's wallet if exists
             if ($lesson->school && $lesson->school->wallet) {
-                $lesson->school->wallet->increment('balance', $schoolEarnings);
+                $lesson->school->wallet->increment('balance', ceil($schoolEarnings));
 
                 // Record school's earnings Lessontransaction
                 $lessonTransaction = new LessonTransaction();
                 $lessonTransaction->lesson_id = $lessonId;
                 $lessonTransaction->school_id = $lesson->school_id;
                 $lessonTransaction->type = 'school_earnings';
-                $lessonTransaction->amount = $schoolEarnings;
+                $lessonTransaction->amount = ceil($schoolEarnings);
                 $lessonTransaction->save();
             }
 
@@ -410,22 +409,18 @@ class LessonController extends Controller
                 ['role' => $userProfile->role]
             );
 
-
             // Update lesson's school_connects_required attribute
-            $baseSchoolConnectsRequired = $lesson->school_connects_required;
+            $baseSchoolConnectsRequired = $lesson->school_connects_required / 3;
             $enrolledUsersCount = $lesson->enrolledUsers()->count(); // Get the count of enrolled users
 
             $newSchoolConnectsRequired = ceil($baseSchoolConnectsRequired * log($enrolledUsersCount + 1, 2)); // Round up to nearest whole number
-            $lesson->school_connects_required = $newSchoolConnectsRequired;
-            $lesson->save();
+            $incrementedRequiredConnects = ceil($newSchoolConnectsRequired / 3);
 
-            // Update lesson's school_connects_required attribute
-            $lesson->school_connects_required = $newSchoolConnectsRequired;
-            $lesson->save();
+            $lesson->increment('school_connects_required', $incrementedRequiredConnects);
 
             return response()->json([
                 'has_enough_connects' => true,
-                'new_school_connects_required' => $newSchoolConnectsRequired,
+                'new_school_connects_required' => $incrementedRequiredConnects,
                 'lesson_earnings' => $lessonEarnings,
                 'school_earnings' => $schoolEarnings,
                 'teacher_earnings' => $teacherEarnings,
@@ -434,6 +429,7 @@ class LessonController extends Controller
             return response()->json(['has_enough_connects' => false]);
         }
     }
+
      /**
      * Store a newly created comment in storage.
      *
@@ -447,21 +443,24 @@ class LessonController extends Controller
         $request->validate([
             'comment_content' => 'required|string|max:255',
         ]);
-
+    
         // Find the lesson
         $lesson = Lesson::findOrFail($lessonId);
-
+    
         // Create a new comment
         $comment = new Comment();
         $comment->lesson_id = $lesson->id;
         $comment->user_id = Auth::id(); // Assuming you are using authentication
         $comment->content = $request->input('comment_content');
         $comment->save();
-
+        
+        // Update the comment count
+        $commentCount = $lesson->comments()->count();
+    
         // Return a JSON response indicating success
-        return response()->json(['message' => 'Comment posted successfully', 'comment' => $comment]);
+        return response()->json(['message' => 'Comment posted successfully', 'comment' => $comment, 'comment_count' => $commentCount]);
     }
-
+    
     /**
      * Store a newly created reply to a comment in storage.
      *

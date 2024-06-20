@@ -670,7 +670,8 @@ class SchoolController extends Controller
             return response()->json(['error' => 'Failed to retrieve terms.'], 500);
         }
     }
-    public function getGradeDistribution(Request $request, $courseCode){
+    public function getGradeDistribution(Request $request, $courseCode)
+    {
 
         $classId = $request->get('classId');
         $assessmentType = $request->get('assessmentType');
@@ -743,21 +744,21 @@ class SchoolController extends Controller
         $gradeDistribution = $gradeModel->calculateGradeDistribution($grades->pluck('score')->toArray(), $percentage);
 
          // Calculate grade distribution
-    $gradeDistributionInsightData = $grades->groupBy('grade')->map->count();
+        $gradeDistributionInsightData = $grades->groupBy('grade')->map->count();
 
-    // Calculate the total number of students who took the course
-    $totalStudents = $grades->pluck('user_id')->unique()->count();
+        // Calculate the total number of students who took the course
+        $totalStudents = $grades->pluck('user_id')->unique()->count();
 
-     // Labels for different grades
-     $gradeLabels = ['A+', 'A', 'B', 'C', 'D', 'E', 'F'];
+        // Labels for different grades
+        $gradeLabels = ['A+', 'A', 'B', 'C', 'D', 'E', 'F'];
 
-     // Calculate grade distribution counts for each grade label
-     $gradeCounts = [];
-     foreach ($gradeLabels as $glabel) {
-         $gradeCounts[$glabel] = isset($gradeDistribution[$glabel]) ? $gradeDistribution[$glabel] : 0;
-     }
+        // Calculate grade distribution counts for each grade label
+        $gradeCounts = [];
+        foreach ($gradeLabels as $glabel) {
+            $gradeCounts[$glabel] = isset($gradeDistribution[$glabel]) ? $gradeDistribution[$glabel] : 0;
+        }
 
-    // Construct insights string
+        // Construct insights string
         $insights = "Total Students: $totalStudents\n";
         foreach ($gradeCounts as $grade => $count) {
             $insights .= "$grade Count: $count\n";
@@ -775,6 +776,21 @@ class SchoolController extends Controller
             'insights' => $insights, // Include insights in the response
         ]);
 
+    }
+
+    public function schoolPage($schoolId, $schoolname)
+    {
+        $school = School::findOrFail($schoolId);
+       
+        if($school){
+            // Get the latest 6 lessons of the user
+            $lessons = $school->lessons()->latest()->take(6)->get();
+    
+            return view('school_page', compact('school', 'lessons'));
+        }
+    
+        // Handle case where full_name does not match
+        abort(404);
     }
     
 }

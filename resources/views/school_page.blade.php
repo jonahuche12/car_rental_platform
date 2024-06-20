@@ -1,47 +1,57 @@
-<!-- resources/views/home.blade.php -->
-
 @extends('layouts.app')
 
 @section('title')
-@if($school)
-CSS - {{$school->name}}
+@if(isset($school))
+CSS - {{$school->name}} - School Page
 @else
-Central School System
+Central School System - User Page
 @endif
 @endsection
 
-@section('breadcrumb3')
-    <a href="{{ route('home') }}">Home</a>
+@section('breadcrumb1')
+<a href="{{ route('home') }}">Home</a>
 @endsection
 
 @section('breadcrumb2')
-@if(auth()->user()->profile)
-<span>{{auth()->user()->profile->role}}</span>
+@if($school)
+<span>{{$school->name}}</span>
 @endif
 @endsection
-@section('breadcrumb1')
-@if(auth()->user()->profile)
-<p>{{auth()->user()->profile->full_name}}</p>
-@endif
-@endsection
+
+
+
 @section('sidebar')
-    @include('sidebar')
+@include('sidebar')
 @endsection
+
+
 @section('style')
 <style>
-    .user-logo {
+    .school-details-section {
+        margin-top: 20px;
+    }
+
+    .school-logo {
         max-width: 120px;
         border-radius: 50%;
         margin-bottom: 15px;
     }
 
-    .ranking-stars {
-        margin-top: 10px;
+    .school-header .card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .ranking-text {
-        margin-top: 10px;
+    .school-header .card-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .school-header .card-text {
         font-size: 1rem;
+        color: #6c757d;
     }
 
     .card h5.card-title {
@@ -64,7 +74,7 @@ Central School System
         text-decoration: underline;
     }
 
-    .user-contact {
+    .school-contact {
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
@@ -74,136 +84,16 @@ Central School System
         flex: 1;
         min-width: 200px;
     }
-
-    .card-body.text-center img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .card-body.text-center {
-        text-align: center;
-    }
-
-.school-connects-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 100;
-    background-color: #007bff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.views-badge {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.no-thumbnail .school-connects-badge,
-.no-thumbnail .views-badge {
-    position: absolute;
-    background-color: #007bff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.no-thumbnail .school-connects-badge {
-    top: 10px;
-    left: 10px;
-}
-
-.no-thumbnail .views-badge {
-    bottom: 10px;
-    right: 10px;
-}
+    
 </style>
-
 
 
 @endsection
 
 @section('content')
-<?php
-$homepage = "users_homepage/homepage";
-$userRole = auth()->user()->profile->role ?? null;
 
-if ($userRole == "school_owner") {
-    $homepage = "users_homepage/school_owner_homepage";
-}elseif ($userRole == "teacher") {
-    $homepage = "users_homepage/teacher_homepage";
-}elseif ($userRole == "student") {
-    $homepage = "users_homepage/student_homepage";
-}elseif ($userRole == "staff") {
-    $homepage = "users_homepage/staff_homepage";
-}elseif ($userRole == "guardian") {
-    $homepage = "users_homepage/guardian_homepage";
-}elseif ($userRole == "super_admin") {
-    $homepage = "users_homepage/super_admin_homepage";
-}elseif ($userRole == "admin") {
-    $homepage = "users_homepage/admin_homepage";
-}
 
-?>
-
-@include($homepage)
-<div class="modal fade" id="roleSelectionModal" tabindex="-1" aria-labelledby="roleSelectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="documentModalLabel">Select Your Role</h5>
-                <button type="button" onclick="hideModal()" class="btn-close btn-danger btn btn-sm" aria-label="Close"><i class="fa fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <form action="{{ route('profile.create') }}" method="post" class="needs-validation" novalidate>
-                    @csrf
-                    <div class="mb-3">
-                        <label for="role" class="form-label">What Best Describes Your Position?</label>
-
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="role" id="student" value="student">
-                            <label class="form-check-label" for="student">Student</label>
-                        </div>
-
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="role" id="teacher" value="teacher">
-                            <label class="form-check-label" for="teacher">Teacher</label>
-                        </div>
-
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="role" id="admin" value="admin">
-                            <label class="form-check-label" for="admin">Admin</label>
-                        </div>
-
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="role" id="guardian" value="guardian">
-                            <label class="form-check-label" for="guardian">Guardian</label>
-                        </div>
-
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="role" id="school_owner" value="school_owner">
-                            <label class="form-check-label" for="school_owner">School Owner</label><br>
-                            <span class="text-danger"><small><em>Select this if you own a school</em></small></span>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <button type="submit" id="continueButton" class="btn btn-primary btn-block" disabled>Continue</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+@include('school.schoolpage')
 
 <!-- Success Modal -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -314,7 +204,6 @@ if ($userRole == "school_owner") {
     </div>
 </div>
 @endsection
-
 @section('scripts')
 
 <script>
@@ -333,7 +222,6 @@ if ($userRole == "school_owner") {
 <script>
 
 
-var uniqueSubjectNames = {!! json_encode($uniqueSubjectNames) !!};
 
     document.addEventListener('DOMContentLoaded', function () {
         // AJAX request to check if the user has a profile
@@ -562,11 +450,10 @@ $(document).ready(function() {
     populateDisplayedIds();
 
     $(window).scroll(function() {
-        var searchInputValue = $('#lessonSearchInput').val().trim();
         if ($(window).scrollTop() + $(window).height() >= $(document).height() - 108) {
             console.log("Loading more data...");
-            if (canLoadMore && (searchInputValue === '' || searchInputValue.length < 3)) {
-                loadMoreData(); // Trigger loading more data when near the bottom and search input is empty or less than 3 characters
+            if (canLoadMore) {
+                loadMoreData(); // Trigger loading more data when near the bottom
             }
         }
     });
@@ -589,11 +476,15 @@ $(document).ready(function() {
     function loadMoreLessons(activeTabId) {
         loadingLessons = true;
 
+        var school_id = "{{$school->id}}"
+        console.log(school_id)
+
         $.ajax({
             url: "{{ route('load.more.lessons') }}",
             type: "GET",
             data: {
                 page: currentPageLessons,
+                school_id: school_id,
                 displayedLessonIds: displayedLessonIds
             },
             beforeSend: function() {
@@ -666,54 +557,57 @@ $(document).ready(function() {
     }
 
     function createLessonHtml(item) {
-        var truncatedDescription = item.description ? (item.description.length > 200 ? item.description.substring(0, 200) + '...' : item.description) : '';
-        var showMoreLink = item.description && item.description.length > 200 ? '<a href="#" class="show-more small-text" data-lesson-id="' + item.id + '">Show more</a>' : '';
-        var item_description = item.description ? item.description : '';
+        // console.log(item.description)
+        if(item.description != null){
+            var truncatedDescription = item.description.length > 200 ? item.description.substring(0, 200) + '...' : item.description;
+            var showMoreLink = item.description.length > 200 ? '<a href="#" class="show-more" data-lesson-id="' + item.id + '">Show more</a>' : '';
+            var item_description = item.description
+        }else{ 
+            var truncatedDescription = ""
+            var showMoreLink = ''
+            var item_description = ''
+        }
+        
 
         var html = '<div class="col-md-4 position-relative">';
         html += '<div class="card lesson-card">';
-        html += '<div class="thumbnail-container position-relative">';
-        html += '<a class="lesson-link" href="#" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
+        html += '<a href="#" class="lesson-link text-white" data-lesson-id="' + item.id + '" data-lesson-title="' + item.title + '" data-school-connects-required="' + item.school_connects_required + '">';
 
-        if (item.is_enrolled) {
-            html += '<span class="badge bg-primary" style="position:absolute; top:10px; right:10px; z-index:99;"><i class="fas fa-check"></i></span>';
+        if (item.is_enrolled == true) {
+            html += '<span class="badge bg-primary" style="position: absolute; top: 10px; left: 10px; z-index: 99;"><i class="fas fa-check"></i></span>';
         }
 
+        html += '<div class="thumbnail-container position-relative">';
         if (item.thumbnail) {
             html += '<div class="thumbnail-with-play">';
             html += '<img src="' + item.thumbnail + '" alt="' + item.title + '" class="img-fluid lesson-thumbnail">';
             html += '<div class="play-icon-overlay"><i class="fas fa-play"></i></div>';
-            html += '<span class="badge bg-primary school-connects-badge"><small><b>' + item.school_connects_required + ' SC</b></small></span>';
-            html += '<span class="views-badge"><small>' + item.enrolledUsers_count + ' <i class="fas fa-eye"></i></small></span>';
             html += '</div>';
         } else {
             html += '<div class="no-thumbnail">';
             html += '<div class="video-icon"><i class="fas fa-video"></i></div>';
             html += '<div class="overlay"></div>';
-            html += '<img src="/assets/img/default.jpeg" alt="Default Thumbnail" class="img-fluid">';
-            html += '<span class="badge bg-primary school-connects-badge"><small><b>' + item.school_connects_required + ' SC</b></small></span>';
-            html += '<span class="views-badge"><small>' + item.enrolledUsers_count + ' <i class="fas fa-eye"></i></small></span>';
+            html += '<img src="{{ asset('assets/img/default.jpeg') }}" alt="Default Thumbnail" class="img-fluid">';
             html += '</div>';
         }
+        html += '</div>';
 
+        html += '<p><small><b>' + item.teacher_name + '</b></small></p>';
+        html += '<h5><small>' + item.title + '</small></h5>';
+        html += '<p class="lesson-description"><small>' + truncatedDescription + '</small>' + showMoreLink + '</p>';
         html += '</a>';
         html += '</div>';
-        html += '<p class="small-text mb-0"><small>' + item.teacher_name + '</small></p>';
-        html += '<h5><small>' + item.title.substring(0, 15) + '</small></h5>';
-        html += '<p class="lesson-description"><small>' + truncatedDescription + '</small>' + showMoreLink + '</p>';
         html += '<div class="full-description-overlay" id="fullDescription' + item.id + '">';
         html += '<div class="full-description-content">';
         html += '<h5 class="lesson-title">' + item.title + '</h5>';
-        html += '<p class="small-text">' + item_description + '</p>';
-        html += '<a href="#" class="show-less small-text" data-lesson-id="' + item.id + '">Show less</a>';
-        html += '</div>';
+        html += '<p>' + item_description + '</p>';
+        html += '<a href="#" class="show-less" data-lesson-id="' + item.id + '">Show less</a>';
         html += '</div>';
         html += '</div>';
         html += '</div>';
 
         return html;
     }
-
 
     function createEventHtml(event) {
         var html = '<div class="timeline timeline-inverse">';
@@ -767,207 +661,5 @@ $(document).ready(function() {
     });
 });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let typingTimer;
-        const typingInterval = 1000;
-        const searchInput = document.getElementById('lessonSearchInput');
-        let query = '';
-        let isSearching = false;
-
-        var canLoadMoreSearch = true;
-        var currentPage = 0;
-        var displayedLessonIds = [];
-        var loading = false;
-
-        searchInput.addEventListener('keyup', function() {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(performSearch, typingInterval);
-        });
-
-        searchInput.addEventListener('keydown', function() {
-            clearTimeout(typingTimer);
-            canLoadMoreSearch = true;
-        });
-
-        function performSearch() {
-            query = searchInput.value.trim();
-            currentPage = 0;
-            displayedSearchLessonIds = [];
-            canLoadMoreSearch = true;
-            isSearching = true;
-
-            loadMoreSearchData(true);
-        }
-
-        function loadMoreSearchData(isNewSearch = false) {
-        if (loading || !canLoadMoreSearch) return;
-
-        if (isNewSearch) {
-            currentPage = 0;
-            displayedSearchLessonIds = [];
-            canLoadMoreSearch = true;
-        }
-        console.log(displayedSearchLessonIds)
-
-        loading = true;
-
-        $.ajax({
-            url: '/search-lessons',
-            method: 'GET',
-            data: { 
-                query: query,
-                // userId: userId,
-                page: currentPage,
-                displayedSearchLessonIds: displayedSearchLessonIds
-            },
-            beforeSend: function() {
-                $('#loader').append('<div class="loader-container"><div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading Lessons...</div></div>');
-            },
-            success: function(data) {
-                const lessonsContainer = document.getElementById('lessonsContainer');
-
-                if (!lessonsContainer) {
-                    console.error('Error: lessonsContainer element not found.');
-                    return;
-                }
-
-                if (currentPage === 0) {
-                    lessonsContainer.innerHTML = '<div class="row"></div>';
-                }
-
-                const rowElement = lessonsContainer.querySelector('.row');
-
-                if (data.length > 0) {
-                    data.forEach(lesson => {
-                        if (!displayedSearchLessonIds.includes(lesson.id)) {
-                            displayedSearchLessonIds.push(lesson.id);
-                            const lessonCard = createSearchLessonHtml(lesson);
-                            rowElement.insertAdjacentHTML('beforeend', lessonCard);
-                        }
-                    });
-                    currentPage++;
-                } else {
-                    if (currentPage === 0) {
-                        lessonsContainer.innerHTML = '<p>No lessons found.</p>';
-                    }
-                    canLoadMoreSearch = false;
-                }
-            },
-            error: function(xhr) {
-                console.error('Error:', xhr.responseText);
-            },
-            complete: function() {
-                loading = false;
-                $('.loader-container').remove();
-            }
-        });
-    }
-
-
-        $(window).scroll(function() {
-            if (isSearching && $(window).scrollTop() + $(window).height() >= $(document).height() - 108) {
-                loadMoreSearchData();
-            }
-        });
-
-        function createSearchLessonHtml(lesson) {
-            const truncatedDescription = lesson.description ? (lesson.description.length > 200 ? lesson.description.substring(0, 200) + '...' : lesson.description) : 'No description available';
-            const showMoreLink = lesson.description && lesson.description.length > 200 ? '<a href="#" class="show-more small-text" data-lesson-id="' + lesson.id + '">Show more</a>' : '';
-
-            return `
-                <div class="col-md-4 position-relative">
-                    <div class="card lesson-card">
-                        <div class="thumbnail-container position-relative">
-                            <a class="lesson-link" href="/lessons/${lesson.id}" data-lesson-id="${lesson.id}" data-lesson-title="${lesson.title}" data-school-connects-required="${lesson.school_connects_required}">
-                                ${lesson.is_enrolled ? '<span class="badge bg-primary" style="position:absolute; top:10px; right:10px; z-index:99;"><i class="fas fa-check"></i></span>' : ''}
-                                ${lesson.thumbnail ? `
-                                    <div class="thumbnail-with-play">
-                                        <img src="${lesson.thumbnail}" alt="${lesson.title}" class="img-fluid lesson-thumbnail">
-                                        <div class="play-icon-overlay">
-                                            <i class="fas fa-play"></i>
-                                        </div>
-                                        <span class="badge bg-primary school-connects-badge"><small><b>${lesson.school_connects_required} SC</b></small></span>
-                                        <span class="views-badge"><small>${lesson.enrolledUsers_count} <i class="fas fa-eye"></i></small></span>
-                                    </div>
-                                ` : `
-                                    <div class="no-thumbnail">
-                                        <div class="video-icon">
-                                            <i class="fas fa-video"></i>
-                                        </div>
-                                        <div class="overlay"></div>
-                                        <img src="/assets/img/default.jpeg" alt="Default Thumbnail" class="img-fluid">
-                                        <span class="badge bg-primary school-connects-badge"><small><b>${lesson.school_connects_required} SC</b></small></span>
-                                        <span class="views-badge"><small>${lesson.enrolledUsers_count} <i class="fas fa-eye"></i></small></span>
-                                    </div>
-                                `}
-                            </a>
-                        </div>
-                        <p class="small-text mb-0"><small>${lesson.teacher_name}</small></p>
-                        <h5><small>${lesson.title ? lesson.title.substring(0, 15) : 'Untitled'}</small></h5>
-                        <p class="lesson-description">
-                            <small>${truncatedDescription}</small>
-                            ${showMoreLink}
-                        </p>
-                        <div class="full-description-overlay" id="fullDescription${lesson.id}">
-                            <div class="full-description-content">
-                                <h5 class="lesson-title">${lesson.title}</h5>
-                                <p class="small-text">${lesson.description}</p>
-                                <a href="#" class="show-less small-text" data-lesson-id="${lesson.id}">Show less</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-
-        $(document).on('click', '.show-more', function(event) {
-            event.preventDefault();
-            var lessonId = $(this).data('lesson-id');
-            document.getElementById('fullDescription' + lessonId).style.display = 'block';
-        });
-
-        $(document).on('click', '.show-less', function(event) {
-            event.preventDefault();
-            var lessonId = $(this).data('lesson-id');
-            document.getElementById('fullDescription' + lessonId).style.display = 'none';
-        });
-
-        $(document).on('click', '.lesson-link', function(e) {
-            e.preventDefault();
-            const lessonId = $(this).data('lesson-id');
-            const lessonName = $(this).data('lesson-title');
-            const schoolConnectsRequired = $(this).data('school-connects-required');
-            checkLessonEnrollment(lessonId, lessonName, schoolConnectsRequired);
-        });
-
-        function checkLessonEnrollment(lessonId, lessonName, schoolConnectsRequired) {
-            $.ajax({
-                url: '/check-enrollment',
-                method: 'POST',
-                data: {
-                    lesson_id: lessonId
-                },
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.is_enrolled) {
-                        // User is already enrolled in the lesson, route to lesson page
-                        routeToLessonPage(lessonId);
-                    } else {
-                        // User is not enrolled, display modal with required school connects information
-                        displaySchoolConnectsModal(lessonName, schoolConnectsRequired, lessonId);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error checking enrollment:', error);
-                    alert('Error checking enrollment. Please try again.');
-                }
-            });
-        }
-    });
 </script>
-
 @endsection

@@ -115,6 +115,11 @@ class School extends Model
                         $query->where('role', 'teacher');
                     });
     }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
+    }
     
 
     public function confirmedStudents()
@@ -209,8 +214,53 @@ class School extends Model
     {
         return $this->hasMany(LessonTransaction::class);
     }
-
-
-  
+    public function getRanking()
+    {
+        // Get total likes for lessons in this school
+        $totalLikes = $this->lessons()
+            ->withCount('likedUsers')
+            ->get()
+            ->sum('liked_users_count');
+    
+        // Get total favorites for lessons in this school
+        $totalFavorites = $this->lessons()
+            ->whereHas('favoritedByUsers')
+            ->get()
+            ->count();
+    
+        // Get the average grade score for students in this school
+        $averageGrade = $this->students()
+            ->join('test_grades', 'users.id', '=', 'test_grades.user_id')
+            ->avg('test_grades.score');
+    
+        // Normalize likes and favorites by scaling them to a percentage of total possible likes and favorites
+        $maxLikes = $this->lessons()->count() * 100; // Max possible likes assuming each lesson can get 100 likes
+        $maxFavorites = $this->lessons()->count() * 100; // Max possible favorites assuming each lesson can be favorited 100 times
+    
+        $normalizedLikes = $totalLikes / $maxLikes;
+        $normalizedFavorites = $totalFavorites / $maxFavorites;
+    
+        // Combine metrics to calculate ranking
+        // Adjust weights as needed to ensure total weight is 100%
+        $likesWeight = 0.3; // 30% weight for likes
+        $favoritesWeight = 0.2; // 20% weight for favorites
+        $gradeWeight = 0.5; // 50% weight for grades
+    
+        $ranking = ($likesWeight * $normalizedLikes) + ($favoritesWeight * $normalizedFavorites) + ($gradeWeight * $averageGrade);
+    
+        // Normalize ranking to a 0-5 scale
+        $maxPossibleRanking = ($likesWeight + $favoritesWeight + $gradeWeight) * 100; // Max possible ranking
+        $normalizedRanking = ($ranking / $maxPossibleRanking) * 5; // Scale to 0-5
+    
+        // Ensure ranking does not exceed 5
+        $finalRanking = min($normalizedRanking, 5);
+    
+        // Round to 2 decimal places
+        $roundedRanking = round($finalRanking, 2);
+    
+        return $roundedRanking;
+    }
+    
+    
     
 }

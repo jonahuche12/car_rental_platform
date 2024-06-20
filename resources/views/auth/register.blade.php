@@ -144,6 +144,11 @@
                                    placeholder="Confirm Your Password">
                         </div>
 
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="agree_terms" name="agree_terms" required>
+                            <label class="form-check-label" for="agree_terms">By Clicking Register, You agree to the <a href="{{ route('terms_conditions') }}" target="_blank">Terms and Conditions</a></label>
+                        </div>
+
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary btn-block">
                                 {{ __('Register') }}

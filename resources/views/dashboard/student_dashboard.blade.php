@@ -22,11 +22,11 @@
 
   .expand-icon {
     cursor: pointer;
-}
+    }
 
-.expand-icon.rotate-down {
-    transform: rotate(180deg);
-}
+    .expand-icon.rotate-down {
+        transform: rotate(180deg);
+    }
 
 
 
@@ -85,11 +85,11 @@
     .lessons-container {
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
     scrollbar-width: none;  /* Firefox */
-}
+    }
 
-.lessons-container::-webkit-scrollbar {
-    display: none;  /* Safari and Chrome */
-}
+    .lessons-container::-webkit-scrollbar {
+        display: none;  /* Safari and Chrome */
+    }
 
 
 
@@ -158,13 +158,13 @@
                 <li class="nav-item small-text">
                     <a class="nav-link" href="#fav_lessons" data-toggle="tab">
                         <i class="fas fa-heart nav-icon"></i> <!-- Use "far fa-star" for the empty star icon -->
-                        Fav Lessons
+                        Fav Lessons <sup>{{$fav_lessons_count}}</sup>
                     </a>
                 </li>
                 <li class="nav-item small-text">
                     <a class="nav-link" href="#viewed_lessons" data-toggle="tab">
                         <i class="fas fa-eye nav-icon"></i> <!-- Use "far fa-eye" for the empty eye icon -->
-                        Viewed Lessons
+                        Viewed Lessons <sup>{{$viewed_lessons_count}}</sup>
                     </a>
                 </li>
                 <li class="nav-item small-text">
@@ -472,7 +472,7 @@
                   <!-- /.tab-pane -->
                   <div class="tab-pane" id="fav_lessons">
                     <div class="lessons-container" style="max-height: 500px; overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
-                        <div class="fav_lessons fav_lessons-inverse">
+                        
                             <div class="row">
                                 @foreach ($fav_lessons as $lesson)
                                     <div class="col-md-4">
@@ -494,7 +494,7 @@
 
                                             <!-- Display lesson thumbnail -->
                                             <div class="thumbnail-container position-relative">
-                                                <a href="{{ route('lessons.show', $lesson->id) }}" class="fav_lesson" data-fav_lesson-id="{{ $lesson->id }}" data-fav_lesson-title="{{ $lesson->title }}" data-school-connects-required="{{ $lesson->school_connects_required }}">
+                                                <a href="{{ route('lessons.show', $lesson->id) }}" class="fav_lessons" data-fav_lesson-id="{{ $lesson->id }}" data-fav_lesson-title="{{ $lesson->title }}" data-school-connects-required="{{ $lesson->school_connects_required }}">
                                                     <!-- Conditionally display enrollment badge -->
                                                   
 
@@ -529,7 +529,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
+                        
                     </div>
                   </div>
 
@@ -634,7 +634,7 @@
                         @endforeach
 
                         @if($academicSessions->isEmpty())
-                            <p>No Result Available for {{ auth()->user()->profile->namez }}</p>
+                            <p>No Result Available for {{ auth()->user()->profile->full_name }}</p>
                         @endif
                     </div>
                     <!-- /.your_results -->
@@ -751,7 +751,7 @@
 </script>
 
 <script>
-   var canLoadMore = {
+ var canLoadMore = {
     viewed_lessons: true,
     fav_lessons: true
 };
@@ -764,14 +764,14 @@ var displayedFavLessonIds = [];
 var loadingLessons = false;
 
 function populateDisplayedIds() {
-    $('.viewed_lesson').each(function() {
+    $('.viewed_lessons').each(function() {
         var viewedLessonId = $(this).data('viewed_lesson-id');
         if (viewedLessonId && !displayedViewedLessonIds.includes(viewedLessonId)) {
             displayedViewedLessonIds.push(viewedLessonId);
         }
     });
 
-    $('.fav_lesson').each(function() {
+    $('.fav_lessons').each(function() {
         var favLessonId = $(this).data('fav_lesson-id');
         if (favLessonId && !displayedFavLessonIds.includes(favLessonId)) {
             displayedFavLessonIds.push(favLessonId);
@@ -781,6 +781,7 @@ function populateDisplayedIds() {
 
 $(document).ready(function() {
     populateDisplayedIds();
+    console.log(displayedFavLessonIds)
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         var activeTabId = $(e.target).attr('href').substring(1);
@@ -799,16 +800,21 @@ function isNearBottom(element) {
     return element.scrollHeight - element.scrollTop <= element.clientHeight + 100;
 }
 
-function createLessonHtml(lesson) {
+function createLessonHtml(lesson, tabId) {
+    var lessonClass = tabId === 'viewed_lessons' ? 'viewed_lessons' : 'fav_lessons';
+    var title = lesson.title || '';
+    var description = lesson.description || '';
+    var teacherName = lesson.teacher_name || '';
+
     var lessonHtml = '<div class="col-md-4">';
     lessonHtml += '<div class="card lesson-card">';
     lessonHtml += '<div class="thumbnail-container position-relative">';
 
-    lessonHtml += '<a href="/lessons/' + lesson.id + '">';
+    lessonHtml += '<a href="/lessons/' + lesson.id + '" class="' + lessonClass + '" data-' + lessonClass + '-id="' + lesson.id + '">';
 
     if (lesson.thumbnail) {
         lessonHtml += '<div class="thumbnail-with-play">';
-        lessonHtml += '<img src="' + lesson.thumbnail + '" alt="' + lesson.title + '" class="img-fluid lesson-thumbnail">';
+        lessonHtml += '<img src="' + lesson.thumbnail + '" alt="' + title + '" class="img-fluid lesson-thumbnail">';
         lessonHtml += '<div class="play-icon-overlay"><i class="fas fa-play"></i></div>';
         lessonHtml += '</div>';
     } else {
@@ -825,9 +831,9 @@ function createLessonHtml(lesson) {
 
     lessonHtml += '</div>';
     lessonHtml += '<div class="lesson-details">';
-    lessonHtml += '<p><small><b>' + lesson.teacher_name + '</b></small></p>';
-    lessonHtml += '<h5><small>' + lesson.title.substring(0, 15) + '</small></h5>';
-    lessonHtml += '<p><small>' + lesson.description.substring(0, 200) + '</small></p>';
+    lessonHtml += '<p><small><b>' + teacherName + '</b></small></p>';
+    lessonHtml += '<h5><small>' + title.substring(0, 15) + '</small></h5>';
+    lessonHtml += '<p><small>' + description.substring(0, 200) + '</small></p>';
     lessonHtml += '</div>';
     lessonHtml += '</div>';
     lessonHtml += '</div>';
@@ -862,7 +868,7 @@ function loadMoreData(activeTabId) {
                     currentPageLessons[activeTabId]++;
                     $.each(response.lessons, function(index, item) {
                         if (!displayedIds.includes(item.id)) {
-                            var newItem = createLessonHtml(item);
+                            var newItem = createLessonHtml(item, activeTabId);
                             $('#' + activeTabId + ' .lessons-container .row').append(newItem);
                             displayedIds.push(item.id);
                         }
@@ -872,6 +878,7 @@ function loadMoreData(activeTabId) {
                 }
             },
             error: function(xhr, status, error) {
+                console.log(xhr.responseText)
                 console.log("AJAX Lessons Error:", error);
             },
             complete: function() {
@@ -881,6 +888,8 @@ function loadMoreData(activeTabId) {
         });
     }
 }
+
+</script>
 
 </script>
 

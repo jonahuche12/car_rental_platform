@@ -17,6 +17,7 @@ class Event extends Model
         'location',
         'banner_picture',
         'school_id',
+        'user_id',
         'academic_session_id',
         'term_id',
     ];

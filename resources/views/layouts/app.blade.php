@@ -97,8 +97,8 @@
         </section><!-- /.content -->
     </div><!-- /.content-wrapper -->
 
-    <!-- Main Footer -->
-    <footer class="main-footer bg-dark text-light py-4">
+   <!-- Main Footer -->
+<footer class="main-footer bg-dark text-light py-4">
     <div class="container">
         <div class="row">
             <div class="col-md-6 mb-3 mb-md-0">
@@ -107,7 +107,7 @@
             </div>
             <div class="col-md-6 text-md-right">
                 <p class="mb-2 mb-md-0">Contact us at: <a href="mailto:support@centralschoolsystem.com" class="text-light">support@centralschoolsystem.com</a></p>
-                <div class="social-icons">
+                <div class="social-icons mb-2">
                     <a href="https://www.facebook.com" target="_blank" class="text-light mr-3">
                         <i class="fab fa-facebook-f"></i>
                     </a>
@@ -121,10 +121,19 @@
                         <i class="fab fa-instagram"></i>
                     </a>
                 </div>
+                <div>
+                    <a href="{{ route('privacy_policy') }}" class="text-light mr-3">Privacy Policy</a>
+                    <a href="{{ route('terms_conditions') }}" class="text-light">Terms and Conditions</a>
+                </div>
             </div>
         </div>
     </div>
 </footer>
+
+<script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
 
 
 <!-- JavaScript to update the year -->

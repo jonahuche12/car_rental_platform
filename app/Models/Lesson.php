@@ -12,6 +12,24 @@ class Lesson extends Model
     protected $fillable = [
         'title', 'subject', 'description', 'thumbnail', 'video_url', 'school_connects_required', 'school_id', 'user_id'
     ];
+    public function likedUsers()
+    {
+        return $this->belongsToMany(User::class, 'lesson_likes', 'lesson_id', 'user_id');
+    }
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'lesson_favorite')
+                    ->withTimestamps(); // Include if you have timestamps in the pivot table
+    }
 
     public function playlists()
     {
@@ -28,10 +46,6 @@ class Lesson extends Model
         return $this->belongsToMany(User::class, 'lesson_user')->wherePivot('role', 'student');
     }
 
-    public function school()
-    {
-        return $this->belongsTo(School::class);
-    }
     public function enrolledUsers()
     {
         return $this->belongsToMany(User::class, 'lesson_user', 'lesson_id', 'user_id')
@@ -67,19 +81,8 @@ class Lesson extends Model
 
         return $history;
     }
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
-    public function favoritedByUsers()
-    {
-        return $this->belongsToMany(User::class, 'lesson_favorite')
-                    ->withTimestamps(); // Include if you have timestamps in the pivot table
-    }
-    public function likedUsers()
-    {
-        return $this->belongsToMany(User::class, 'lesson_likes', 'lesson_id', 'user_id');
-    }
+   
+  
     public function scopeSearch($query, $term)
     {
         return $query->where('title', 'like', "%$term%")

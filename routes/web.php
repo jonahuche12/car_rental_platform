@@ -27,6 +27,16 @@ Route::get('/', function () {
 })->name('/');
 
 
+Route::get('privacy_policy', function () {
+    return view('privacy_policy');
+})->name('privacy_policy');
+
+
+Route::get('terms_and_conditions', function () {
+    return view('terms_and_conditions');
+})->name('terms_conditions');
+
+
 // Registration page route
 Route::get('/register', [AuthController::class, 'showRegistrationForm']);
 // Login page route
@@ -211,6 +221,11 @@ Route::middleware('auth')->group(function () {
     Route::get('withdrawal/update-user-account/{token}', [WalletController::class, 'updateUserAccount'])->name('withdrawal.updateUserAccount');
 
     Route::post('/withdrawal/saveUserAccount', [WalletController::class, 'saveUserAccount'])->name('withdrawal.saveUserAccount');
+    Route::get('user_page/{userId}/{fullname}', [HomeController::class, 'userPage'])->name('user_page');
+
+    Route::get('school_page/{schoolId}/{schoolname}', [SchoolController::class, 'schoolPage'])->name('school_page');
+    Route::get('/search-lessons', [SearchController::class, 'searchLessons'])->name('lessons.search');
+
 
 
 

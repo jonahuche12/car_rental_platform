@@ -4,6 +4,9 @@
 
 @section('style')
 <style>
+  body {
+    
+  }
   
   .complete_profile{
     display: none;
@@ -234,7 +237,7 @@
                           
                           <br><span class="edit-field col-12" id="" style="display:none; vertical-align: middle;">
                           <input type="text" class="form-control" id="school_search" placeholder="Search for a School" data-type="school">
-                          <input type="text" class="form-control" id="school_input" style="display:none" name="school_input">
+                          <input type="text" class="form-control text-dark" id="school_input" style="display:none" name="school_input">
 
                               <button class="btn btn-small bg-primary gender-button" id="school-button" onclick="saveData('school')">Save</button>
                           </span>

@@ -92,7 +92,7 @@ class HomeController extends Controller
 
     /**
      * Show the application dashboard.
-     *
+     * 
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
@@ -172,26 +172,37 @@ class HomeController extends Controller
     {
         $user = auth()->user();
     
+        // Redirect to login if user is not authenticated
         if (!$user) {
             return redirect('login');
         }
     
         $profile = $user->profile;
     
+        // Redirect to home if user profile is not available
         if (!$profile) {
             return redirect('home');
         }
     
         // Initialize common data
         $viewed_lessons = $user->enrolledLessons()->latest()->take(6)->get();
+        $viewed_lessons_count = $user->enrolledLessons()->count();
+        $fav_lessons_count = $user->favoriteLessons()->count();
         $fav_lessons = $user->favoriteLessons()->latest()->take(2)->get();
         $school = $user->school;
         $uniqueSubjectNames = Course::getAllUniqueSubjects();
     
+        // Check if user has a school associated
+        if (!$school && in_array($profile->role, ['student', 'admin', 'teacher'])) {
+            return redirect()->route('profile')->with('error', 'Please update your details to include a school.');
+        }
+    
         $data = [
-            'user'=>$user,
+            'user' => $user,
             'school' => $school,
             'viewed_lessons' => $viewed_lessons,
+            'viewed_lessons_count' => $viewed_lessons_count,
+            'fav_lessons_count' => $fav_lessons_count,
             'fav_lessons' => $fav_lessons,
             'uniqueSubjectNames' => $uniqueSubjectNames,
             'wallet_balance' => $user->wallet ? $user->wallet->balance : 0, // Add wallet balance to data
@@ -218,12 +229,17 @@ class HomeController extends Controller
     
         if ($role === 'teacher' || $role === 'admin') {
             $lessons = $user->lessons()->withCount('enrolledUsers')->get();
+            $lesson_count = $lessons->count();
+            $lessons_per_page = auth()->user()->lessons()->orderBy('created_at', 'desc')->take(4)->get();
     
             $lessonAnalyticsData = $lessons->map(function ($lesson) use ($user) {
                 return $this->calculateLessonAnalytics($lesson, $user);
             });
     
             $data['lessonAnalyticsData'] = $lessonAnalyticsData;
+            $data['lesson_count'] = $lesson_count;
+            $data['lessons_per_page'] = $lessons_per_page;
+           
     
         } elseif ($role === 'school_owner') {
             $schools = $user->ownedSchools()->get();
@@ -237,6 +253,7 @@ class HomeController extends Controller
     
         return view($dashboardpage, $data);
     }
+    
     
     
 
@@ -271,7 +288,7 @@ class HomeController extends Controller
     private function calculateLessonRank($lesson, $school, $userRole, $user)
     {
         $rank = 0;
-        if($userRole !==  'super_admin' && $userRole !== 'school_owner'){
+        // if($userRole !==  'super_admin' && $userRole !== 'school_owner'){
 
         // Consider relevance to the user based on school, class level, and subjects
        if ($school) {
@@ -307,7 +324,7 @@ class HomeController extends Controller
             // Lesson's subject matches teacher's assigned subjects, give it a higher rank
             $rank += 40;
         }
-        }
+        // }
 
         return max($rank, 0); // Ensure rank is not negative
     }
@@ -318,7 +335,7 @@ class HomeController extends Controller
     {
         // dd($userRole);
         $rank = 0;
-        if($userRole !==  'super_admin' && $userRole !== 'school_owner'){
+        // if($userRole !==  'super_admin' && $userRole !== 'school_owner'){
     
         // Consider the event dates for ranking
         $current_date = now();
@@ -356,7 +373,7 @@ class HomeController extends Controller
         }
     
         
-        }
+        // }
     
         return $rank;
     }
@@ -365,6 +382,8 @@ class HomeController extends Controller
     {
         $page = $request->get('page');
         $class_level = $request->get('class_level');
+        $teacher_id = $request->get('teacher_id');
+        $school_id = $request->get('school_id');
         $term = $request->get('term');
         $course = $request->get('course');
         $perPage = 2; // Number of lessons to load per request
@@ -380,6 +399,12 @@ class HomeController extends Controller
         // Apply class_level filter if provided
         if (!empty($class_level)) {
             $query->where('class_level', $class_level);
+        }
+         if (!empty($teacher_id)) {
+            $query->where('user_id', $teacher_id);
+        }
+        if (!empty($school_id)) {
+            $query->where('school_id', $school_id);
         }
     
         // Apply course filter if provided
@@ -408,7 +433,7 @@ class HomeController extends Controller
         // Filter and transform lessons based on calculated rank
         $filteredLessons = $lessons->filter(function ($lesson) {
             $rank = $this->calculateLessonRank($lesson, $lesson->school, auth()->user()->profile->role, auth()->user());
-            return $rank >= 4; // Filter lessons with rank >= 4
+            return $rank; // Filter lessons with rank >= 4
         });
     
         // Transform lessons data to include teacher's name
@@ -421,6 +446,7 @@ class HomeController extends Controller
                 'description' => $lesson->description,
                 'teacher_name' => $lesson->teacher->profile->full_name, // Access teacher's full name 
                 'school_connects_required' => $lesson->school_connects_required,
+                'enrolledUsers_count' => $lesson->enrolledUsers()->count(),
                 // Include other necessary lesson attributes
             ];
         });
@@ -1259,7 +1285,24 @@ class HomeController extends Controller
         $userPackages = UserPackage::all();
         return view('user_package', compact('userPackages'));
     }
-   
+
+    public function userPage($userId, $fullname)
+    {
+        $user = User::findOrFail($userId);
+        // Make sure the full_name matches
+        $profile = $user->profile;
+        if($profile && $profile->full_name === $fullname){
+            // Get the latest 6 lessons of the user
+            $lessons = $user->lessons()->latest()->take(6)->get();
+            $all_lesson_count = $user->lessons->count();
+    
+            return view('user_page', compact('user', 'lessons', 'all_lesson_count'));
+        }
+    
+        // Handle case where full_name does not match
+        abort(404);
+    }
+    
 
 }
     

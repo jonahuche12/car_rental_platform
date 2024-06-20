@@ -465,6 +465,204 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->scholarshipCategories()->where('scholarship_category_id', $categoryId)->exists();
     }
+    public function testGrades()
+    {
+        return $this->hasMany(TestGrade::class);
+    }
+
+    public function rankUser()
+    {
+        switch ($this->profile->role) {
+            case 'student':
+                return $this->rankStudent();
+            case 'teacher':
+                return $this->rankTeacher();
+            case 'school_owner':
+                return $this->rankSchoolOwner();
+            case 'admin':
+            case 'staff':
+                return $this->rankAdminOrStaff();
+            default:
+                return $this->rankOther();
+        }
+    }
+
+/**
+ * Rank student based on test grades and interactions with lessons.
+ *
+ * @return float The ranking score, normalized to a 0-5 scale.
+ */
+private function rankStudent()
+{
+    // Get average grade score for the student
+    $averageGrade = $this->grades()->avg('score') / 100; // Normalize to 0-1 scale
+
+    // Get average test grade score for the student
+    $averageTestGrade = $this->testGrades()->avg('score') / 100; // Normalize to 0-1 scale
+
+    // Define weights for different metrics
+    $gradeWeight = 0.6; // 60% weight for grades
+    $testGradeWeight = 0.4; // 40% weight for test grades
+
+    // Combine metrics to calculate ranking
+    $ranking = ($gradeWeight * $averageGrade) + ($testGradeWeight * $averageTestGrade);
+
+    // Normalize ranking to a 0-5 scale
+    return round(min($ranking * 5, 5), 2);
+}
+
+/**
+ * Rank teacher based on lessons they have and their interactions.
+ *
+ * @return float The ranking score, normalized to a 0-5 scale.
+ */
+private function rankTeacher()
+{
+    $lessonCount = $this->lessons()->count();
+    if ($lessonCount == 0) {
+        return 0;
+    }
+
+    // Get total likes for lessons created by the teacher
+    $totalLikes = $this->lessons()->withCount('likedUsers')->get()->sum('liked_users_count');
+
+    // Get total favorites for lessons created by the teacher
+    $totalFavorites = $this->lessons()->withCount('favoritedByUsers')->get()->sum('favorited_by_users_count');
+
+    // Normalize likes and favorites by scaling them to a percentage of total possible interactions
+    $maxLikes = $lessonCount * 100; // Max possible likes assuming each lesson can get 100 likes
+    $maxFavorites = $lessonCount * 100; // Max possible favorites assuming each lesson can be favorited 100 times
+
+    $normalizedLikes = $maxLikes > 0 ? $totalLikes / $maxLikes : 0;
+    $normalizedFavorites = $maxFavorites > 0 ? $totalFavorites / $maxFavorites : 0;
+
+    // Define weights for different metrics
+    $likesWeight = 0.5; // 50% weight for likes
+    $favoritesWeight = 0.5; // 50% weight for favorites
+
+    // Combine metrics to calculate ranking
+    $ranking = ($likesWeight * $normalizedLikes) + ($favoritesWeight * $normalizedFavorites);
+
+    // Normalize ranking to a 0-5 scale
+    return round(min($ranking * 5, 5), 2);
+}
+
+private function rankAdminOrStaff()
+{
+    $lessonCount = $this->lessons()->count();
+    $activityCount = $this->events()->count();
+
+    if ($lessonCount == 0 && $activityCount == 0) {
+        return 0;
+    }
+
+    // Get total likes for lessons created by the admin or staff
+    $totalLikes = $this->lessons()->withCount('likedUsers')->get()->sum('liked_users_count');
+
+    // Get total favorites for lessons created by the admin or staff
+    $totalFavorites = $this->lessons()->withCount('favoritedByUsers')->get()->sum('favorited_by_users_count');
+
+    // Get total activities or engagements
+    $totalActivities = $activityCount;
+
+    // Normalize likes, favorites, and activities
+    $maxLikes = $lessonCount * 100; // Assuming max 100 likes per lesson
+    $maxFavorites = $lessonCount * 100; // Assuming max 100 favorites per lesson
+    $maxActivities = 100; // Assuming max 100 activities
+
+    $normalizedLikes = $maxLikes > 0 ? $totalLikes / $maxLikes : 0;
+    $normalizedFavorites = $maxFavorites > 0 ? $totalFavorites / $maxFavorites : 0;
+    $normalizedActivities = $maxActivities > 0 ? $totalActivities / $maxActivities : 0;
+
+    // Define weights for different metrics
+    $likesWeight = 0.3;
+    $favoritesWeight = 0.3;
+    $activitiesWeight = 0.4;
+
+    // Combine metrics to calculate ranking
+    $ranking = ($likesWeight * $normalizedLikes) + ($favoritesWeight * $normalizedFavorites) + ($activitiesWeight * $normalizedActivities);
+
+    // Normalize ranking to a 0-5 scale
+    return round(min($ranking * 5, 5), 2);
+}
+
+/**
+ * Rank users with other roles based on lessons and their interactions.
+ * Exclude users with 'guardian' role.
+ *
+ * @return float The ranking score, normalized to a 0-5 scale.
+ */
+private function rankOther()
+{
+    $lessonCount = $this->lessons()->count();
+    if ($lessonCount == 0) {
+        return 0;
+    }
+
+    // Get total likes for lessons created by the user
+    $totalLikes = $this->lessons()->withCount('likedUsers')->get()->sum('liked_users_count');
+
+    // Get total favorites for lessons created by the user
+    $totalFavorites = $this->lessons()->withCount('favoritedByUsers')->get()->sum('favorited_by_users_count');
+
+    // Normalize likes and favorites
+    $maxLikes = $lessonCount * 100;
+    $maxFavorites = $lessonCount * 100;
+
+    $normalizedLikes = $maxLikes > 0 ? $totalLikes / $maxLikes : 0;
+    $normalizedFavorites = $maxFavorites > 0 ? $totalFavorites / $maxFavorites : 0;
+
+    // Define weights for different metrics
+    $likesWeight = 0.5;
+    $favoritesWeight = 0.5;
+
+    // Combine metrics to calculate ranking
+    $ranking = ($likesWeight * $normalizedLikes) + ($favoritesWeight * $normalizedFavorites);
+
+    // Normalize ranking to a 0-5 scale
+    return round(min($ranking * 5, 5), 2);
+}
+
+    // private function rankSchoolOwner()
+    // {
+    //     // Get the average ranking of the teachers in the school
+    //     $averageTeacherRanking = $this->teachers()->get()->avg(function($teacher) {
+    //         return $teacher->rankUser();
+    //     }) / 5; // Normalize to 0-1 scale
+    //     $averageStudentsRanking = $this->students()->get()->avg(function($student) {
+    //         return $student->rankUser();
+    //     }) / 5; // Normalize to 0-1 scal
+
+        
+    //     // Define weights for different metrics
+    //     $teacherRankingWeight = 0.7; // 70% weight for teacher rankings
+    //     $schoolRankingWeight = 0.3; // 30% weight for school ranking
+
+    //     // Combine metrics to calculate ranking
+    //     $ranking = ($teacherRankingWeight * $averageTeacherRanking) + ($schoolRankingWeight * $schoolRanking);
+
+    //     // Normalize ranking to a 0-5 scale
+    //     return min($ranking * 5, 5);
+    // }
+
+    
+    /**
+     * Rank admin or staff based on lessons they have and their interactions.
+     *
+     * @return float The ranking score, normalized to a 0-5 scale.
+     */
+   
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+    
+    
+    public function favoritedLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_favorite', 'user_id', 'lesson_id')
+                    ->withTimestamps(); // Include if you have timestamps in the pivot table
+    }
 
   
 }

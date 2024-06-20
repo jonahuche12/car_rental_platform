@@ -89,6 +89,7 @@ class AdminController extends Controller
 
             // Find the school and ensure it exists
             $school = School::find($validatedData['school_id']);
+            $validatedData['user_id'] = auth()->id();
 
             // Check if the school exists
             if ($school) {
